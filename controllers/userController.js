@@ -1,6 +1,7 @@
 import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
+import Measurement from '../models/measurements.js';
 
 const signUp = async (req, res) => {
     let {firstName, lastName, email, password} = req.body;
@@ -178,4 +179,91 @@ const updateUserInfo = async (req, res) => {
     }
 };
 
-export { signUp, getUsers, deleteUsers, login, logout, isAuthenticated, removeUser, updateUserInfo };
+const addMeasurement = async (req, res) => {
+    const {Neck, Shoulder, Chest, NaturalWaist, Hip, KaftanLength, SuitLength, LongSleeve, ShortSleeve, MidSleeve, ShortSleeveWidth, TrouserLength, ThighWidth, KneeWidth, AnkleWidth} = req.body;
+    try {
+        const measurement = {Neck, Shoulder, Chest, NaturalWaist, Hip, KaftanLength, SuitLength, LongSleeve, ShortSleeve, MidSleeve, ShortSleeveWidth, TrouserLength, ThighWidth, KneeWidth, AnkleWidth};
+        const newMeasurement = await Measurement.create(measurement);
+        if (!newMeasurement) {
+            return res.status(404).json({
+                message: "Measurements not added"
+            });
+        }
+        res.json({
+            message: `Measurement added successfully`
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "An error occurred"
+        });
+    }
+}
+
+const displayMeasurement = async (req, res) => {
+    const measurements = await Measurement.find({}, {__v: 0, _id: 0});
+    if (!measurements) {
+        return res.status(404).json({
+            message: "No measurements found"
+        });
+    }
+    res.json(measurements);
+};
+
+const updateMeasurement = async (req, res) => {
+    const {Neck, Shoulder, Chest, NaturalWaist, Hip, KaftanLength, SuitLength, LongSleeve, ShortSleeve, MidSleeve, ShortSleeveWidth, TrouserLength, ThighWidth, KneeWidth, AnkleWidth} = req.body;
+    try {
+        const measurement = {Neck, Shoulder, Chest, NaturalWaist, Hip, KaftanLength, SuitLength, LongSleeve, ShortSleeve, MidSleeve, ShortSleeveWidth, TrouserLength, ThighWidth, KneeWidth, AnkleWidth};
+        const updatedMeasurement = await Measurement.findOneAndUpdate({}, measurement, {new: true});
+        if (!updatedMeasurement) {
+            return res.status(404).json({
+                message: "Measurement not found"
+            });
+        }
+        res.json({
+            message: `Measurement updated successfully`
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "An error occurred"
+        });
+    }
+};
+
+const removeMeasurement = async (req, res) => {
+    try {
+
+        const deletedMeasurement = await Measurement.findOneAndDelete({});
+        if (!deletedMeasurement) {
+            return res.status(404).json({
+                message: "Measurement not found"
+            });
+        }
+        res.json({
+            message: `Measurement deleted successfully`
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "An error occurred"
+        });
+    }
+};
+
+
+const users = {
+    signUp,
+    getUsers,
+    deleteUsers,
+    login,
+    logout,
+    isAuthenticated,
+    removeUser,
+    updateUserInfo,
+    addMeasurement,
+    displayMeasurement,
+    updateMeasurement,
+    removeMeasurement
+};
+export default users;
