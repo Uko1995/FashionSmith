@@ -2,6 +2,8 @@ import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
 import Measurement from '../models/measurements.js';
+import { garmentPrice, fabricPrice } from '../utils/price.js';
+import Order from '../models/order.js';
 
 const signUp = async (req, res) => {
     let {firstName, lastName, email, password} = req.body;
@@ -251,6 +253,148 @@ const removeMeasurement = async (req, res) => {
     }
 };
 
+const createOrder = async (req, res) => {
+    let { garment, quantity, fabric, colour, deliveryDate, deliveryAddress } = req.body;
+    if (!garment || !quantity || !fabric || !colour || !deliveryDate || !deliveryAddress) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+    console.log(req.body);
+
+    garment = garment.charAt(0).toUpperCase() + garment.slice(1).toLowerCase();
+    try {
+        let price;
+        let status = 'Pending';
+        const orderDate = new Date().toISOString();
+        const deliveryDateObj = new Date(deliveryDate);
+        if (isNaN(deliveryDateObj.getTime())) {
+            return res.status(400).json({ 
+                message: "Invalid delivery date" 
+            });
+        }
+        
+        const username = req.session.username;
+        if (!req.session.username) {
+            return res.status(401).json({
+                message: "User not authenticated"
+            });
+        }
+        if (fabric === 'Ankara' || garment === 'Waistcoat') {
+            price = garmentPrice[garment] + fabricPrice[fabric];
+        } else if (garment === 'Trouser' || garment === 'Shirt') {
+            price = garmentPrice[garment] + (fabricPrice[fabric] * 2);
+        } else if (garment === 'Agbada') {
+            price = garmentPrice[garment] + (fabricPrice[fabric] * 6);
+        } else {
+            price = garmentPrice[garment] + (fabricPrice[fabric] * 3.5);
+        }
+        const cost = price * quantity;
+        const order = {username, garment, quantity, price, cost, fabric, colour, orderDate, deliveryDate, deliveryAddress, status};
+        const newOrder = await Order.create(order);
+        if (!newOrder) {
+            return res.status(404).json({
+                message: "Order not created"
+            });
+        }
+        res.json({
+            message: `Order created successfully, your order ID is ${newOrder._id}...proceed to payment`
+        });
+    } catch (error) {
+        console.error('Order creation error:', {
+            message: error.message,
+            stack: error.stack,
+            body: req.body
+        });
+        return res.status(500).json({
+            message: "Order creation failed",
+            error: error.message
+        });
+    }
+};
+
+const updateOrder = async (req, res) => {
+    const {orderId, garment, quantity, fabric, colour, deliveryDate, deliveryAddress, status} = req.body;
+    if (!orderId) {
+        return res.status(400).json({ message: "Order ID is required" });
+    }
+    try {
+        let price;
+        const orderDate = new Date().toISOString();
+        const deliveryDateObj = new Date(deliveryDate);
+        if (isNaN(deliveryDateObj.getTime())) {
+            return res.status(400).json({ 
+                message: "Invalid delivery date" 
+            });
+        }
+        
+        const username = req.session.username;
+        if (!req.session.username) {
+            return res.status(401).json({
+                message: "User not authenticated"
+            });
+        }
+        if (fabric === 'Ankara' || garment === 'Waistcoat') {
+            price = garmentPrice[garment] + fabricPrice[fabric];
+        } else if (garment === 'Trouser' || garment === 'Shirt') {
+            price = garmentPrice[garment] + (fabricPrice[fabric] * 2);
+        } else if (garment === 'Agbada') {
+            price = garmentPrice[garment] + (fabricPrice[fabric] * 6);
+        } else {
+            price = garmentPrice[garment] + (fabricPrice[fabric] * 3.5);
+        }
+        const cost = price * quantity;
+        const order = {username, garment, quantity, price, cost, fabric, colour, orderDate, deliveryDate, deliveryAddress, status};
+        const updatedOrder = await Order.findOneAndUpdate({_id: orderId}, order, {new: true});
+        if (!updatedOrder) {
+            return res.status(404).json({
+                message: "Order not found"
+            });
+        }
+        res.json({
+            message: `Order updated successfully`
+        });
+    } catch (error) {
+        console.error('Order update error:', {
+            message: error.message,
+            stack: error.stack,
+            body: req.body
+        });
+        return res.status(500).json({
+            message: "Order update failed",
+            error: error.message
+        });
+    }
+};
+
+const showOrder = async (req, res) => {
+    const order = await Order.find({}, {__v: 0});
+    if (!order) {
+        return res.status(404).json({
+            message: "No order found"
+        });
+    }
+    res.json(order);
+};
+
+const removeOrder = async (req, res) => {
+    try {
+
+        const deletedOrder = await Order.findOne({}).deleteOne();
+        if (!deletedOrder) {
+            return res.status(404).json({
+                message: "Order not found"
+            });
+        }
+        res.json({
+            message: `Order deleted successfully`
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "An error occurred"
+        });
+    }
+};
+
 
 const users = {
     signUp,
@@ -264,6 +408,10 @@ const users = {
     addMeasurement,
     displayMeasurement,
     updateMeasurement,
-    removeMeasurement
+    removeMeasurement,
+    createOrder,
+    updateOrder,
+    showOrder,
+    removeOrder
 };
 export default users;
