@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import session from 'express-session';
 
 //database connection
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
 
 //routes
 app.use('/users', userRoutes);
+app.use('/admin', adminRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello to FashionSmith API');

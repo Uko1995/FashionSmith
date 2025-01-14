@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import User from './user.js';
 
 const Schema = mongoose.Schema;
 
@@ -25,7 +26,8 @@ const orderSchema = new Schema({
         enum: ['Pending', 'In Progress', 'Ready', 'Delivered', 'Cancelled and Refunded', 'Failed'],
         default: 'Pending'
     },
-    deliveryAddress: {type: String, required: true}
+    deliveryAddress: {type: String, required: true},
+    userId: {type: Schema.Types.ObjectId, ref: User, required: true}
 });
 
 

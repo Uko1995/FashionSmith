@@ -1,9 +1,14 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import User from '../models/user.js';
+import UserVerification from '../models/userVerification.js';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
 import Measurement from '../models/measurements.js';
 import { garmentPrice, fabricPrice } from '../utils/price.js';
 import Order from '../models/order.js';
+import { v4 as uuidv4 } from 'uuid';
+import nodemailer from 'nodemailer';
 
 const signUp = async (req, res) => {
     let {firstName, lastName, email, password} = req.body;
@@ -43,8 +48,10 @@ const signUp = async (req, res) => {
             password = hashedPassword;
             const createdAt = new Date().toUTCString();
             const username = `${firstName}_${lastName}`;
-            const user = {firstName, lastName, email, password, createdAt, username};
+            const role = "user";
+            const user = {firstName, lastName, email, password, createdAt, username, role};
             newUser = await User.create(user);
+            newUser.save();
         }
         return res.json({ message: `${newUser.username} registered successfully` });
     } catch (error) {
@@ -55,21 +62,6 @@ const signUp = async (req, res) => {
     }
 };
 
-const getUsers = async (req, res) => {
-    const users = await User.find({});
-    if (!users) {
-        return res.status(404).json({
-            message: "No Users found"
-        });
-    }
-    res.json(users.map(user => {
-        return {
-            email: user.email,
-            username: user.username
-        };
-    }));
-};
-
 const deleteUsers = async (req, res) => {
     const users = await User.deleteMany({});
     if (!users) {
@@ -78,6 +70,23 @@ const deleteUsers = async (req, res) => {
         });
     }
     res.send('All users deleted successfully')
+};
+
+const getUser = async (req, res) => {
+    try {
+        const user = await User.findOne({email: req.session.email});
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Error:', error.message, error.stack);
+        return res.status(500).json({
+            message: "An error occurred"
+        });
+    }
 };
 
 const login = async (req, res) => {
@@ -102,7 +111,9 @@ const login = async (req, res) => {
         }
         //store user in session
         req.session.userId = user._id;
+        req.session.email = user.email;
         req.session.username = user.username;
+        req.session.role = user.role;
         return res.json({
             message: `Welcome ${req.session.username}`
         });
@@ -162,14 +173,22 @@ const updateUserInfo = async (req, res) => {
     try {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const username = `${firstName}_${lastName}`;
-        const user = {firstName, lastName, email, password: hashedPassword, username};
-        const updatedUser = await User.findOneAndUpdate({_id: req.session.userId}, user, {new: true});
+
+        const user = {};
+        if (firstName) user.firstName = firstName;
+        if (lastName) user.lastName = lastName;
+        if (email) user.email = email;
+        if (password) user.password = hashedPassword;
+
+        const updatedUser = await User.findOneAndUpdate({_id: req.session.userId}, user, {new: true, runValidators: true});
         if (!updatedUser) {
             return res.status(404).json({
                 message: "User not found"
             });
         }
+        const username = `${updatedUser.firstName}_${updatedUser.lastName}`;
+        req.session.username = username;
+        await updatedUser.save();
         res.json({
             message: `${updatedUser.username} updated successfully`
         });
@@ -186,6 +205,7 @@ const addMeasurement = async (req, res) => {
     try {
         const measurement = {Neck, Shoulder, Chest, NaturalWaist, Hip, KaftanLength, SuitLength, LongSleeve, ShortSleeve, MidSleeve, ShortSleeveWidth, TrouserLength, ThighWidth, KneeWidth, AnkleWidth};
         const newMeasurement = await Measurement.create(measurement);
+        newMeasurement.save();
         if (!newMeasurement) {
             return res.status(404).json({
                 message: "Measurements not added"
@@ -288,15 +308,17 @@ const createOrder = async (req, res) => {
             price = garmentPrice[garment] + (fabricPrice[fabric] * 3.5);
         }
         const cost = price * quantity;
-        const order = {username, garment, quantity, price, cost, fabric, colour, orderDate, deliveryDate, deliveryAddress, status};
+        const userId = req.session.userId;
+        const order = {username, garment, quantity, price, cost, fabric, colour, orderDate, deliveryDate, deliveryAddress, status, userId};
         const newOrder = await Order.create(order);
+        newOrder.save();
         if (!newOrder) {
             return res.status(404).json({
                 message: "Order not created"
             });
         }
         res.json({
-            message: `Order created successfully, your order ID is ${newOrder._id}...proceed to payment`
+            message: `Order created successfully, your order ID is ${newOrder._id} ...proceed to payment`
         });
     } catch (error) {
         console.error('Order creation error:', {
@@ -376,9 +398,9 @@ const showOrder = async (req, res) => {
 };
 
 const removeOrder = async (req, res) => {
+    const { orderId } = req.params;
     try {
-
-        const deletedOrder = await Order.findOne({}).deleteOne();
+        const deletedOrder = await Order.findOneAndDelete({orderId});
         if (!deletedOrder) {
             return res.status(404).json({
                 message: "Order not found"
@@ -395,10 +417,161 @@ const removeOrder = async (req, res) => {
     }
 };
 
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const uniqueString = uuidv4();
+    const createdAt = new Date().toISOString();
+    const expiresAt = Date.now() + (1 * 60 * 60 * 1000); // 1 hour
+    const resetLink = `http://localhost:5000/users/resetPassword/${uniqueString}`;
+
+    const userVerify = await new UserVerification({ email: email, uniqueString, createdAt, expiresAt });
+    userVerify.save()
+        .then(() => {
+            console.log('User verification saved');
+            console.log(userVerify);
+        })
+        .catch((error) => {
+            console.error('Error saving user verification', error.message, error.stack);
+        });
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD  // Gmail App Password
+        }
+    });
+
+    transporter.verify((error, info) => {
+        if (error) {
+            console.error('Error verifying email', error.message, error.stack);
+        } else {
+            console.log('Email service is ready', info);
+        }
+    })
+    
+    const mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: 'Password Reset Link',
+        html: `<p>Click on this link to reset your password: <a href="${resetLink}">Click here</a></p>`
+    };
+
+    try {
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email', error.message, error.stack);
+                res.status(500).json({ message: 'Failed to send email' });
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.json({ message: 'Reset email sent' });
+            }
+        });
+    } catch (error) {
+        console.error('Error sending email', error.message, error.stack);
+        res.status(500).json({ message: 'Failed to send email' });
+    }
+  };
+
+const resetPassword = async (req, res) => {
+    const { uniqueString } = req.params;
+    try {
+        const userVerify = await UserVerification.findOne({ uniqueString });
+        if (!userVerify) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if (userVerify.expiresAt < Date.now()) {
+            return res.status(400).json({
+                message: "Token has expired, request a new one"
+            });
+        }
+        res.send(`<form action="/users/updatePassword" method="POST">
+            <input type="hidden" name="uniqueString" value="${uniqueString}">
+            <input type="password" name="newPassword" placeholder="Enter new password">
+            <input type="password" name="confirmPassword" placeholder="Confirm new password">
+            <button type="submit">Reset Password</button>
+            </form>`);
+
+        req.session.uniqueString = uniqueString;
+    } catch (error) {
+        console.error('Error resetting password', error.message, error.stack);
+        res.status(500).json({
+            message: "An error occurred"
+        });
+    }
+};
+
+
+const updatePassword = async (req, res) => {
+    const { newPassword, confirmPassword, uniqueString } = req.body;
+    const password = newPassword && confirmPassword;
+
+    if (!password) {
+        return res.status(400).json({
+            message: "All fields are required"
+        });
+    }
+
+
+    if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+    }
+    if (!/[0-9]/.test(password)) {
+        return res.status(400).json({ message: "Password must contain a number" });
+    } else if (!/[A-Z]/.test(password)) {
+        return res.status(400).json({ message: "Password must contain an uppercase letter" });
+    } else if (!/[a-z]/.test(password)) {
+        return res.status(400).json({ message: "Password must contain a lowercase letter" });
+    } else if (!/[!@#$%^&*]/.test(password)) {
+        return res.status(400).json({ message: "Password must contain a special character" });
+    } else {
+        console.log('Password is valid');
+    }
+
+    const userVerify = await UserVerification.findOne({ uniqueString: uniqueString });
+    console.log(userVerify);
+
+    try {
+        const user = await User.findOne({ email: userVerify.email });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({
+                message: "Passwords do not match"
+            });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        await user.save()
+            .then(() => {
+                res.json({
+                    message: "Password reset successful"
+                });
+            })
+            .catch((error) => {
+                console.error('Error saving new password', error.message, error.stack);
+                res.status(500).json({
+                    message: "An error occurred"
+                });
+            });
+    } catch (error) {
+        console.error('Error resetting password', error.message, error.stack);
+        res.status(500).json({
+            message: "An error occurred"
+        });
+    }
+};
 
 const users = {
     signUp,
-    getUsers,
     deleteUsers,
     login,
     logout,
@@ -412,6 +585,10 @@ const users = {
     createOrder,
     updateOrder,
     showOrder,
-    removeOrder
+    removeOrder,
+    getUser,
+    forgotPassword,
+    resetPassword,
+    updatePassword
 };
 export default users;
