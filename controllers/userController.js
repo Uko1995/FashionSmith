@@ -9,6 +9,7 @@ import { garmentPrice, fabricPrice } from '../utils/price.js';
 import Order from '../models/order.js';
 import { v4 as uuidv4 } from 'uuid';
 import nodemailer from 'nodemailer';
+import sendEmail from '../utils/email.js';
 
 const signUp = async (req, res) => {
     let {firstName, lastName, email, password} = req.body;
@@ -434,39 +435,11 @@ const forgotPassword = async (req, res) => {
             console.error('Error saving user verification', error.message, error.stack);
         });
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL,
-            pass: process.env.PASSWORD  // Gmail App Password
-        }
-    });
-
-    transporter.verify((error, info) => {
-        if (error) {
-            console.error('Error verifying email', error.message, error.stack);
-        } else {
-            console.log('Email service is ready', info);
-        }
-    })
-    
-    const mailOptions = {
-        from: process.env.EMAIL,
-        to: email,
-        subject: 'Password Reset Link',
-        html: `<p>Click on this link to reset your password: <a href="${resetLink}">Click here</a></p>`
-    };
-
     try {
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Error sending email', error.message, error.stack);
-                res.status(500).json({ message: 'Failed to send email' });
-            } else {
-                console.log('Email sent: ' + info.response);
-                res.json({ message: 'Reset email sent' });
-            }
-        });
+        const email = req.body.email;
+        const subject = 'Password Reset Link';
+        const html = `<p>Click on this link to reset your password: <a href="${resetLink}">Click here</a></p>`;
+        sendEmail(email, subject, html);
     } catch (error) {
         console.error('Error sending email', error.message, error.stack);
         res.status(500).json({ message: 'Failed to send email' });
