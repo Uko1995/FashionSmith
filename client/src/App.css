@@ -1,0 +1,85 @@
+@import url(https://fonts.googleapis.com/css?family=Playfair:300,regular,500,600,700,800,900,300italic,italic,500italic,600italic,700italic,800italic,900italic&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Cinzel+Decorative:regular,700,900&display=swap);
+@import url(https://fonts.googleapis.com/css?family=Merienda:300,regular,500,600,700,800,900&display=swap);
+@import "tailwindcss";
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  color: #e43d12;
+}
+
+.logo {
+  font-family: "Merienda", serif;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style-type: none;
+  font-size: 1rem;
+  padding: 10px;
+}
+
+.nav li {
+  margin: 0 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.nav li:hover {
+  border-bottom: 1px solid #e43d12;
+}
+
+.nav li:active {
+  border-bottom: 1px solid #e43d12;
+}
+
+.main {
+  background-image: url("../src/assets/Flux_Dev_a_hyper_realistic_photo_of_a_well_tailored_singlebrea_2.webp");
+  background-size: cover;
+  opacity: 0.9;
+  margin: 5px;
+  border-radius: 10px;
+  height: 450px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  text-align: center;
+  padding-bottom: 30px;
+  background-color: rgba(15, 15, 15, 0.4);
+}
+
+.hero h1 {
+  font-family: "Playfair", serif;
+  font-weight: 800;
+  font-size: 3rem;
+  color: #fd0a02;
+}
+
+.hero h2 {
+  font-family: "Playfair", serif;
+  font-size: 1.5rem;
+  color: #fd0a02;
+  font-style: italic;
+  font-weight: bold;
+}
+
+footer {
+  display: block;
+  margin: 0 auto;
+  height: fit-content;
+  font-size: 1rem;
+  border-top: 1px solid #e43d12;
+  padding: 10px;
+}
