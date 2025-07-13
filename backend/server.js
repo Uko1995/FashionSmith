@@ -1,10 +1,10 @@
-import app from "./app.js";
+import app from "./app";
 import dotenv from "dotenv";
 dotenv.config();
 
 app
   .listen(process.env.PORT, () => {
-    console.log(`Server Running on Port: http://localhost:${process.env.PORT}`);
+    console.log(`Server Running on: http://localhost:${process.env.PORT}`);
   })
   .on("error", (error) => {
     if (error === "EADDRINUSE") {

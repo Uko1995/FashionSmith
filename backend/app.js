@@ -8,16 +8,6 @@ import session from "express-session";
 import compression from "compression";
 import helmet from "helmet";
 
-//database connection
-mongoose
-  .connect("mongodb://localhost:27017/fashionSmith")
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.log("Error:", error);
-  });
-
 const app = express();
 dotenv.config();
 
@@ -58,7 +48,7 @@ app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello to FashionSmith API");
+  res.send("Welcome to FashionSmith API");
 });
 
 export default app;
