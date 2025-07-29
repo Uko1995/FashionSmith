@@ -2,12 +2,181 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+
+    <!-- Primary Meta Tags -->
+    <title>
+      FashionSmith - Premium Custom Tailoring & Bespoke Clothing in Nigeria
+    </title>
+    <meta
+      name="title"
+      content="FashionSmith - Premium Custom Tailoring & Bespoke Clothing in Nigeria"
+    />
+    <meta
+      name="description"
+      content="Expert custom tailoring services in Nigeria. Bespoke suits, traditional African wear (Agbada, Kaftan), shirts, and formal wear. Professional fittings and premium fabrics. Order your custom garments today."
+    />
+    <meta
+      name="keywords"
+      content="custom tailoring Nigeria, bespoke suits Lagos, Agbada tailoring, Kaftan custom, African traditional wear, made-to-measure clothing, premium tailoring services, fashion designer Nigeria"
+    />
+    <meta name="author" content="FashionSmith" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://fashionsmith.com/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://fashionsmith.com/" />
+    <meta
+      property="og:title"
+      content="FashionSmith - Premium Custom Tailoring & Bespoke Clothing"
+    />
+    <meta
+      property="og:description"
+      content="Expert custom tailoring services in Nigeria. Bespoke suits, traditional African wear, and premium custom garments. Professional fittings and quality craftsmanship."
+    />
+    <meta property="og:image" content="https://fashionsmith.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="FashionSmith" />
+    <meta property="og:locale" content="en_NG" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://fashionsmith.com/" />
+    <meta
+      property="twitter:title"
+      content="FashionSmith - Premium Custom Tailoring & Bespoke Clothing"
+    />
+    <meta
+      property="twitter:description"
+      content="Expert custom tailoring services in Nigeria. Bespoke suits, traditional African wear, and premium custom garments."
+    />
+    <meta
+      property="twitter:image"
+      content="https://fashionsmith.com/twitter-image.jpg"
+    />
+    <meta property="twitter:creator" content="@fashionsmith" />
+
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="msapplication-TileColor" content="#1f2937" />
+    <meta name="theme-color" content="#1f2937" />
+
+    <!-- Preconnect to External Domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="//images.unsplash.com" />
+
+    <!-- Critical CSS (inline small CSS for above-the-fold content) -->
+    <style>
+      /* Critical CSS - Loading states and basic layout */
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 50vh;
+      }
+      .loading::after {
+        content: "";
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "FashionSmith",
+        "description": "Premium custom tailoring and bespoke clothing services specializing in suits, traditional African wear, and made-to-measure garments",
+        "url": "https://fashionsmith.com",
+        "telephone": "+234-XXX-XXXX-XXX",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Your Street Address",
+          "addressLocality": "Lagos",
+          "addressRegion": "Lagos State",
+          "postalCode": "100001",
+          "addressCountry": "NG"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "6.5244",
+          "longitude": "3.3792"
+        },
+        "openingHours": ["Mo-Fr 09:00-18:00", "Sa 09:00-16:00"],
+        "priceRange": "₦₦₊₊",
+        "servedCuisine": [],
+        "services": [
+          "Custom Suit Tailoring",
+          "Bespoke Clothing",
+          "Traditional African Wear",
+          "Agbada Tailoring",
+          "Kaftan Design",
+          "Shirt Tailoring",
+          "Trouser Alterations",
+          "Professional Fittings"
+        ],
+        "sameAs": [
+          "https://www.facebook.com/fashionsmith",
+          "https://www.instagram.com/fashionsmith",
+          "https://twitter.com/fashionsmith"
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback content for no-JS users -->
+      <noscript>
+        <div
+          style="
+            text-align: center;
+            padding: 50px;
+            font-family: Arial, sans-serif;
+          "
+        >
+          <h1>FashionSmith - Premium Custom Tailoring</h1>
+          <p>Please enable JavaScript to experience our website.</p>
+          <p>
+            For inquiries, please contact us at: fashionsmith.bespoke@gmail.com
+          </p>
+        </div>
+      </noscript>
+
+      <!-- Loading placeholder -->
+      <div class="loading" id="initial-loader"></div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,17 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
-import HomePage from "../pages/HomePage";
-import About from "../pages/About";
-import Contact from "../pages/Contact";
-import FAQ from "../pages/FAQ";
-import Services from "../pages/Services";
 import ErrorElement from "../components/ErrorElement";
 import Home from "../components/Home"; // Importing the Home component
-import { Component } from "react";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: HomePage,
+    lazy: async () => ({
+      Component: (await import("../pages/HomePage")).default,
+    }),
     errorElement: <ErrorElement />,
     children: [
       { index: true, Component: Home, errorElement: <ErrorElement /> },
@@ -37,9 +33,9 @@ const router = createBrowserRouter([
         errorElement: <ErrorElement />,
       },
       {
-        path: "/services",
+        path: "/gallery",
         lazy: async () => ({
-          Component: (await import("../pages/Services")).default,
+          Component: (await import("../pages/Gallery")).default,
         }),
         errorElement: <ErrorElement />,
       },
