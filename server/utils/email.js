@@ -1,5 +1,5 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 dotenv.config();
 
 // Create transporter once and reuse
@@ -7,11 +7,11 @@ let transporter = null;
 
 const createTransporter = () => {
   if (!transporter) {
-    transporter = nodemailer.createTransporter({
-      service: 'gmail',
+    transporter = nodemailer.createTransport({
+      service: "gmail",
       auth: {
         user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD
+        pass: process.env.EMAIL_PASSWORD,
       },
       pool: true, // Use connection pooling
       maxConnections: 5,
@@ -21,48 +21,47 @@ const createTransporter = () => {
     // Verify transporter once
     transporter.verify((error, success) => {
       if (error) {
-        console.error('❌ Email service verification failed:', error.message);
+        console.error("❌ Email service verification failed:", error.message);
       } else {
-        console.log('✅ Email service is ready');
+        console.log("✅ Email service is ready");
       }
     });
   }
   return transporter;
 };
 
-const sendEmail = async (email = '', subject = '', html = '') => {
+const sendEmail = async (email = "", subject = "", html = "") => {
   try {
     if (!email || !subject || !html) {
-      throw new Error('Email, subject, and content are required');
+      throw new Error("Email, subject, and content are required");
     }
 
     const emailTransporter = createTransporter();
-    
+
     const mailOptions = {
       from: `"FashionSmith" <${process.env.EMAIL}>`,
       to: email,
       subject: subject,
       html: html,
       // Add text version for better deliverability
-      text: html.replace(/<[^>]*>/g, '') // Strip HTML tags for text version
+      text: html.replace(/<[^>]*>/g, ""), // Strip HTML tags for text version
     };
 
     const info = await emailTransporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully:', info.messageId);
-    
+    console.log("✅ Email sent successfully:", info.messageId);
+
     return {
       success: true,
       messageId: info.messageId,
-      message: 'Email sent successfully'
+      message: "Email sent successfully",
     };
-    
   } catch (error) {
-    console.error('❌ Error sending email:', error.message);
-    
+    console.error("❌ Error sending email:", error.message);
+
     return {
       success: false,
-      message: 'Failed to send email',
-      error: error.message
+      message: "Failed to send email",
+      error: error.message,
     };
   }
 };
@@ -77,18 +76,34 @@ export const emailTemplates = {
       <p>Best regards,<br>The FashionSmith Team</p>
     </div>
   `,
-  
+
   verificationEmail: (userName, verificationLink) => `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #333;">Verify Your Email Address</h2>
-      <p>Dear ${userName},</p>
-      <p>Please click the link below to verify your email address:</p>
-      <a href="${verificationLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Verify Email</a>
-      <p>If you didn't create an account with FashionSmith, please ignore this email.</p>
-      <p>Best regards,<br>The FashionSmith Team</p>
-    </div>
+              <h2 style="color: #333;">Welcome to FashionSmith!</h2>
+              <p>Hi ${userName},</p>
+              <p>Thank you for joining FashionSmith! To complete your registration, please verify your email address by clicking the button below:</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${verificationLink}" 
+                   style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                  Verify Email Address
+                </a>
+              </div>
+              
+              <p>If the button doesn't work, you can also copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #007bff;">${verificationLink}</p>
+              
+              <p style="color: #666; font-size: 14px;">
+                <strong>Note:</strong> This verification link will expire in 24 hours. You'll need to verify your email before you can log in to your account.
+              </p>
+              
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+              <p style="color: #999; font-size: 12px;">
+                This email was sent by FashionSmith. If you have any questions, please contact our support team.
+              </p>
+            </div>
   `,
-  
+
   passwordResetEmail: (userName, resetLink) => `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Reset Your Password</h2>
@@ -99,7 +114,7 @@ export const emailTemplates = {
       <p>If you didn't request this, please ignore this email.</p>
       <p>Best regards,<br>The FashionSmith Team</p>
     </div>
-  `
+  `,
 };
 
 export default sendEmail;

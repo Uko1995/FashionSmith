@@ -10,7 +10,6 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useSignUp from "../hooks/useSignUp";
-import toast from "react-hot-toast";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -76,16 +75,23 @@ export default function SignUp() {
   // Effect: Handle successful signup
   useEffect(() => {
     if (isSuccess && data) {
-      // Show success message
-      toast.success(
-        `Registration successful! Welcome, ${data.user?.firstName || "User"}!`
-      );
-
-      // Redirect to login or dashboard
+      // Redirect to verification page with user email
       if (data.redirectTo) {
-        navigate(data.redirectTo);
+        navigate(data.redirectTo, {
+          state: {
+            email: data.user?.email,
+            nextStep: data.nextStep,
+            fromSignup: true,
+          },
+        });
       } else {
-        navigate("/login");
+        navigate("/verify-email", {
+          state: {
+            email: data.user?.email,
+            nextStep: data.nextStep,
+            fromSignup: true,
+          },
+        });
       }
 
       // Reset the form after successful submission
@@ -280,6 +286,7 @@ export default function SignUp() {
                     onChange: handleInputChange, // Clear server errors on input
                   })}
                   type="email"
+                  autoComplete="off"
                   className={`input input-bordered w-full pl-10 input-sm ${
                     formErrors.email ? "input-error" : ""
                   }`}
@@ -328,6 +335,7 @@ export default function SignUp() {
                       onChange: handleInputChange, // Clear server errors on input
                     })}
                     type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     className={`input input-bordered w-full pl-10 pr-10 input-sm ${
                       formErrors.password ? "input-error" : ""
                     }`}
@@ -371,6 +379,7 @@ export default function SignUp() {
                       onChange: handleInputChange, // Clear server errors on input
                     })}
                     type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     className={`input input-bordered w-full pl-10 pr-10 input-sm ${
                       formErrors.confirmPassword ? "input-error" : ""
                     }`}

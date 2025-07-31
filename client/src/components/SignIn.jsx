@@ -16,7 +16,7 @@ export default function SignIn() {
   const {
     register,
     handleSubmit,
-    formState: { errors: formErrors, isValid },
+    formState: { errors: formErrors },
     setError,
     clearErrors,
     reset: resetForm,
@@ -47,10 +47,10 @@ export default function SignIn() {
   useEffect(() => {
     if (isSuccess && data) {
       // Redirect to dashboard or specified location
-      if (data.dashboardUrl) {
-        navigate(data.dashboardUrl);
+      if (data.redirectTo) {
+        navigate(data.redirectTo);
       } else {
-        navigate("/api/dashboard");
+        navigate("/dashboard");
       }
 
       // Reset the form after successful submission
@@ -62,20 +62,29 @@ export default function SignIn() {
   useEffect(() => {
     if (isError && error) {
       const errorMessage = error.response?.data?.message || error.message;
+      const errorCode = error.response?.data?.code;
+      const userEmail = error.response?.data?.email;
 
-      // Handle specific error types
+      // Handle email verification redirect
+      if (errorCode === "EMAIL_NOT_VERIFIED") {
+        navigate("/verify-email", {
+          state: {
+            email: userEmail,
+            fromLogin: true,
+          },
+        });
+        return;
+      }
+
+      // Handle other specific error types
       if (
         errorMessage?.includes("Invalid credentials") ||
-        errorMessage?.includes("User not found")
+        errorMessage?.includes("User not found") ||
+        errorMessage?.includes("incorrect password")
       ) {
         setError("root.serverError", {
           type: "server",
           message: "Invalid email or password",
-        });
-      } else if (errorMessage?.includes("Account not verified")) {
-        setError("root.serverError", {
-          type: "server",
-          message: "Please verify your email before logging in",
         });
       } else if (errorMessage?.includes("Account locked")) {
         setError("root.serverError", {
@@ -90,7 +99,7 @@ export default function SignIn() {
         });
       }
     }
-  }, [isError, error, setError]);
+  }, [isError, error, setError, navigate]);
 
   // Clear server errors when user starts typing
   const handleInputChange = () => {
@@ -142,7 +151,11 @@ export default function SignIn() {
           )}
 
           {/* Form with React Hook Form integration */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            autoComplete="off"
+            className="space-y-4"
+          >
             {/* Email with React Hook Form validation */}
             <div className="form-control">
               <label className="label py-1">
@@ -161,6 +174,7 @@ export default function SignIn() {
                     },
                   })}
                   type="email"
+                  autoComplete="off"
                   className={`input input-bordered input-sm w-full pl-10 ${
                     formErrors.email ? "input-error" : ""
                   }`}
@@ -199,6 +213,7 @@ export default function SignIn() {
                     },
                   })}
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   className={`input input-bordered input-sm w-full pl-10 pr-10 ${
                     formErrors.password ? "input-error" : ""
                   }`}
@@ -228,7 +243,7 @@ export default function SignIn() {
 
             <button
               type="submit"
-              disabled={isLoading || isValid}
+              disabled={isLoading}
               className="btn btn-primary w-full btn-lg"
             >
               {isLoading ? (

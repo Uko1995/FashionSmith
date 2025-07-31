@@ -22,7 +22,9 @@ export default function useSignUp() {
     onSuccess: (data) => {
       // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("Registered successfully");
+      
+      // Show success toast with verification message
+      toast.success("Registration successful! Please check your email to verify your account.");
       console.log("Sign up successful:", data);
     },
     onError: (error) => {

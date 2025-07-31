@@ -33,8 +33,11 @@ export default function useSignIn() {
 
       // Handle specific error messages
       const errorMessage = error.response?.data?.message || error.message;
+      const errorCode = error.response?.data?.code;
 
-      if (
+      if (errorCode === "EMAIL_NOT_VERIFIED") {
+        toast.error("Please verify your email address before logging in");
+      } else if (
         errorMessage?.includes("Invalid credentials") ||
         errorMessage?.includes("User not found")
       ) {

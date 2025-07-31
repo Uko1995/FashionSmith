@@ -44,12 +44,35 @@ const router = createBrowserRouter([
         lazy: async () => ({
           Component: (await import("../pages/Login")).default,
         }),
+        errorElement: <ErrorElement />,
       },
       {
         path: "register",
         lazy: async () => ({
           Component: (await import("../pages/Register")).default,
         }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "verify-email",
+        lazy: async () => ({
+          Component: (await import("../pages/VerifyEmail")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "verify-email/:uniqueString",
+        lazy: async () => ({
+          Component: (await import("../pages/VerifyEmail")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "dashboard",
+        lazy: async () => ({
+          Component: (await import("../pages/Dashboard")).default,
+        }),
+        errorElement: <ErrorElement />,
       },
     ],
   },

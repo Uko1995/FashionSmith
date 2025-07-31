@@ -14,7 +14,7 @@ import {
   prepareMeasurementData,
 } from "../models/measurements.js";
 import { validateOrder, prepareOrderData } from "../models/order.js";
-import sendEmail from "../utils/email.js";
+import sendEmail, { emailTemplates } from "../utils/email.js";
 import { client, collections } from "../config/db.js";
 import {
   generateAccessToken,
@@ -59,7 +59,7 @@ const signUp = async (req, res) => {
     });
     if (existingUser) {
       return res.status(400).json({
-        message: "User already exists",
+        message: "This user already exists",
       });
     } else {
       const salt = await bcrypt.genSalt(10);
@@ -96,10 +96,59 @@ const signUp = async (req, res) => {
           message: "User not found after registration",
         });
       }
+
+      // Create verification token for email verification
+      const uniqueString = uuidv4();
+      const createdAt = new Date();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      const verificationLink = `${process.env.API_URL}/api/users/verify-email/${uniqueString}`;
+
+      // Prepare verification data
+      const verificationData = {
+        email: insertedUser.email,
+        uniqueString,
+        createdAt,
+        expiresAt,
+        type: "email_verification",
+      };
+
+      // Validate and save verification record
+      const validation = validateUserVerification(verificationData);
+      if (!validation.isValid) {
+        // If verification creation fails, we still want to return success for user creation
+        console.error(
+          "Verification data validation failed:",
+          validation.errors
+        );
+      } else {
+        const preparedData = prepareUserVerificationData(verificationData);
+        const verificationResult = await userVerificationsCollection.insertOne(
+          preparedData
+        );
+
+        if (verificationResult.insertedId) {
+          // Send verification email
+          const subject = "Verify Your Email Address - FashionSmith";
+          const html = emailTemplates.verificationEmail(
+            insertedUser.username,
+            verificationLink
+          );
+          console.log("insertedUser.userName", insertedUser.username);
+          console.log("verificationLink", verificationLink);
+
+          try {
+            await sendEmail(insertedUser.email, subject, html);
+          } catch (emailError) {
+            console.error("Failed to send verification email:", emailError);
+            // Don't fail the registration if email sending fails
+          }
+        }
+      }
     }
+
     return res.status(201).json({
       success: true,
-      message: `${insertedUser.username} registered successfully`,
+      message: `${insertedUser.username} registered successfully! Please check your email to verify your account.`,
       user: {
         id: insertedUser._id,
         firstName: insertedUser.firstName,
@@ -107,9 +156,11 @@ const signUp = async (req, res) => {
         username: insertedUser.username,
         email: insertedUser.email,
         role: insertedUser.role,
+        verified: insertedUser.isVerified,
       },
-      redirectTo: "/login",
-      nextStep: "Please log in to access your dashboard",
+      redirectTo: "/verify-email",
+      nextStep:
+        "Please check your email and click the verification link to activate your account",
     });
   } catch (error) {
     console.error(error);
@@ -174,6 +225,23 @@ const login = async (req, res) => {
         message: "User not found",
       });
     }
+
+    if (user.isVerified === false) {
+      return res.status(403).json({
+        message: "Please verify your email address before logging in",
+        code: "EMAIL_NOT_VERIFIED",
+        email: user.email,
+        redirectTo: "/verify-email",
+        nextStep:
+          "Check your email for the verification link or request a new one",
+      });
+    }
+    if (user.refreshToken !== null) {
+      return res.status(400).json({
+        message: "User already logged in",
+      });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(400).json({
@@ -1185,68 +1253,151 @@ const resetPasswordPost = async (req, res) => {
 const emailVerification = async (req, res) => {
   const { uniqueString } = req.params;
 
+  // If no uniqueString, this is the manual verification page
   if (!uniqueString) {
-    return res.status(400).json({
-      message: "Verification token is required",
+    return res.json({
+      status: "info",
+      message: "Email verification page",
+      instructions:
+        "Please enter your email below to resend verification link or check your email for the verification link.",
+      canResendVerification: true,
     });
   }
 
   try {
     // Find the verification record
-    const userVerify = await userVerificationsCollection.findOne({
-      uniqueString: uniqueString,
+    const verification = await userVerificationsCollection.findOne({
+      uniqueString,
     });
 
-    if (!userVerify) {
-      return res.status(404).json({
-        message: "Invalid verification token",
-      });
+    if (!verification) {
+      // Redirect to frontend with error parameters
+      return res.redirect(
+        `${process.env.CLIENT_URL}/verify-email?status=error&message=invalid_link`
+      );
     }
 
-    // Check if token has expired
-    if (new Date(userVerify.expiresAt) < new Date()) {
-      return res.status(400).json({
-        message: "Token has expired, please request a new one",
-      });
+    // Check if token has expired (24 hours)
+    const now = new Date();
+    if (now > verification.expiresAt) {
+      // Clean up expired token
+      await userVerificationsCollection.deleteOne({ uniqueString });
+      return res.redirect(
+        `${process.env.CLIENT_URL}/verify-email?status=error&message=expired`
+      );
     }
 
-    // Find the user
-    const user = await userCollection.findOne({ email: userVerify.email });
+    // Find and update the user by email
+    const user = await userCollection.findOneAndUpdate(
+      { email: verification.email },
+      { $set: { isVerified: true } },
+      { returnDocument: "after" }
+    );
+
+    if (!user) {
+      return res.redirect(
+        `${process.env.CLIENT_URL}/verify-email?status=error&message=user_not_found`
+      );
+    }
+
+    // Clean up the verification record
+    await userVerificationsCollection.deleteOne({ uniqueString });
+
+    // Redirect to frontend with success
+    return res.redirect(
+      `${process.env.CLIENT_URL}/verify-email?status=success&message=verified&redirect=login`
+    );
+  } catch (error) {
+    console.error("Email verification error:", error);
+    return res.redirect(
+      `${process.env.CLIENT_URL}/verify-email?status=error&message=server_error`
+    );
+  }
+};
+
+const resendVerification = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email is required",
+    });
+  }
+
+  try {
+    // Check if user exists
+    const user = await userCollection.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({
+        status: "error",
         message: "User not found",
       });
     }
 
-    // Verify that the email matches
-    if (user.email !== userVerify.email) {
+    // Check if user is already verified
+    if (user.isVerified) {
       return res.status(400).json({
-        message: "Email does not match with account",
+        message: "Email is already verified",
       });
     }
 
-    // Update user verification status
-    const updateResult = await userCollection.updateOne(
-      { email: userVerify.email },
-      { $set: { isVerified: true } }
+    // Delete any existing verification tokens for this email
+    await userVerificationsCollection.deleteMany({
+      email: email.toLowerCase(),
+    });
+
+    // Create new verification token
+    const uniqueString = uuidv4();
+    const createdAt = new Date();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    const verificationLink = `${process.env.API_URL}/api/users/verify-email/${uniqueString}`;
+
+    // Prepare verification data
+    const verificationData = {
+      email: email.toLowerCase(),
+      uniqueString,
+      createdAt,
+      expiresAt,
+      type: "email_verification",
+    };
+
+    // Validate the data
+    const validation = validateUserVerification(verificationData);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        message: "Verification data validation failed",
+        errors: validation.errors,
+      });
+    }
+
+    // Save verification record
+    const preparedData = prepareUserVerificationData(verificationData);
+    const result = await userVerificationsCollection.insertOne(preparedData);
+
+    if (!result.insertedId) {
+      return res.status(500).json({
+        message: "Failed to create verification request",
+      });
+    }
+
+    // Send verification email
+    const subject = "Verify Your Email Address - FashionSmith";
+    const html = emailTemplates.verificationEmail(
+      user.firstName || user.username,
+      verificationLink
     );
 
-    if (updateResult.modifiedCount === 0) {
-      return res.status(500).json({
-        message: "Failed to verify email",
-      });
-    }
+    await sendEmail(email.toLowerCase(), subject, html);
 
-    // Delete the used verification token
-    await userVerificationsCollection.deleteOne({ uniqueString });
-
-    res.status(200).json({
-      message: "Email verified successfully",
+    res.json({
+      message: "Verification email sent successfully",
+      email: email.toLowerCase(),
     });
   } catch (error) {
-    console.error("Error verifying email:", error.message, error.stack);
+    console.error("Error resending verification:", error.message, error.stack);
     res.status(500).json({
-      message: "An error occurred while verifying email",
+      message: "Failed to resend verification email",
       error: error.message,
     });
   }
@@ -1273,5 +1424,6 @@ const users = {
   resetPasswordGet,
   resetPasswordPost,
   emailVerification,
+  resendVerification,
 };
 export default users;

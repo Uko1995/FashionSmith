@@ -13,7 +13,9 @@ const router = express.Router();
 
 //Public routes
 router.post("/signup", validateUserRegistration, users.signUp);
-router.get("/emailVerification/:uniqueString", users.emailVerification);
+router.get("/verify-email", users.emailVerification);
+router.get("/verify-email/:uniqueString", users.emailVerification);
+router.post("/resend-verification", users.resendVerification);
 router.post("/login", validateUserLogin, users.login);
 router.get("/refresh", users.refresh);
 router.post("/forgotPassword", validatePasswordReset, users.forgotPassword);
