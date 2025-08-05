@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   AddressBookIcon,
@@ -6,11 +6,15 @@ import {
   SealQuestionIcon,
   ListIcon,
   XIcon,
+  UserCircleIcon,
+  SignOutIcon,
 } from "@phosphor-icons/react";
 import UnderlineNavLink from "./UnderlineNavLink";
 import NavbarWishlistIcon from "./NavBarWishList";
 import NavbarCart from "./NavBarCart";
 import FashionSmithLogo from "./FashionSmithLogo";
+import { useUiStore } from "../store/uiStore";
+import useLogout from "../hooks/useLogout";
 
 export default function NavBar() {
   const location = useLocation();
@@ -18,6 +22,10 @@ export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const ref = useRef();
   const isHomePage = location.pathname === "/" || location.pathname === "/home";
+  const isLoggedIn = useUiStore((state) => state.isLoggedIn);
+  const user = useUiStore((state) => state.user);
+  const { logout } = useLogout();
+  const navigate = useNavigate();
 
   const links = [
     { to: "/", text: "HOME", icon: null },
@@ -32,6 +40,16 @@ export default function NavBar() {
   const mainLinks = links.slice(0, 3);
   const contactLinks = links.slice(3, 5);
   const authLinks = links.slice(5);
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   // Memoized scroll handler to prevent unnecessary re-renders
   const handleScroll = useCallback(() => {
@@ -141,20 +159,48 @@ export default function NavBar() {
 
           {/* Desktop Auth & Actions */}
           <div className="hidden lg:flex items-center space-x-4">
-            {authLinks.map((link) => (
-              <UnderlineNavLink key={link.to}>
-                <NavLink
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition-colors duration-200 hover:text-accent ${
-                      isActive ? "text-accent" : ""
-                    }`
-                  }
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-4">
+                <UnderlineNavLink>
+                  <NavLink
+                    to="/profile"
+                    aria-label="profile"
+                    className={({ isActive }) =>
+                      `text-sm font-medium transition-colors duration-200 hover:text-accent ${
+                        isActive ? "text-accent" : ""
+                      }`
+                    }
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <UserCircleIcon size={24} />
+                      {user ? user.name : ""}
+                    </div>
+                  </NavLink>
+                </UnderlineNavLink>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-md hover:text-accent transition-colors duration-200 cursor-pointer"
+                  aria-label="Logout"
                 >
-                  {link.text}
-                </NavLink>
-              </UnderlineNavLink>
-            ))}
+                  <SignOutIcon size={24} />
+                </button>
+              </div>
+            ) : (
+              authLinks.map((link) => (
+                <UnderlineNavLink key={link.to}>
+                  <NavLink
+                    to={link.to}
+                    className={({ isActive }) =>
+                      `text-sm font-medium transition-colors duration-200 hover:text-accent ${
+                        isActive ? "text-accent" : ""
+                      }`
+                    }
+                  >
+                    {link.text}
+                  </NavLink>
+                </UnderlineNavLink>
+              ))
+            )}
             <div className="flex items-center space-x-2 ml-2">
               <NavbarWishlistIcon />
               <NavbarCart />

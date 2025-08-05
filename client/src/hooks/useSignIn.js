@@ -1,9 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useUiStore } from "../store/uiStore";
 
 export default function useSignIn() {
   const queryClient = useQueryClient();
+  const { setIsLoggedIn, setUser } = useUiStore();
 
   const mutation = useMutation({
     mutationFn: async (loginData) => {
@@ -23,6 +25,11 @@ export default function useSignIn() {
       // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["auth"] });
+      // Update UI state
+      setIsLoggedIn(true);
+      setUser(data.user);
+
+      console.log("User data set in UI store:", data.user);
 
       // Show success toast
       toast.success(`Welcome back, ${data.user?.firstName || "User"}!`);

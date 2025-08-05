@@ -73,7 +73,7 @@ const signUp = async (req, res) => {
         email: email.trim().toLowerCase(),
         password: hashedPassword,
         username,
-        role: "user",
+        role: "admin",
         isVerified: false,
         refreshToken: null,
       };

@@ -23,7 +23,7 @@ router.get("/resetPassword/:uniqueString", users.resetPasswordGet);
 router.post("/resetPassword", validateNewPassword, users.resetPasswordPost);
 
 //Protected routes
-router.get("/logout", verifyJWT, users.logout);
+router.post("/logout", users.logout);
 router.delete("/deactivate", verifyJWT, users.removeUser);
 router.get("/profile", verifyJWT, users.getUser);
 router.patch(
