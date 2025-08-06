@@ -151,11 +151,7 @@ export default function SignIn() {
           )}
 
           {/* Form with React Hook Form integration */}
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            autoComplete="off"
-            className="space-y-4"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email with React Hook Form validation */}
             <div className="form-control">
               <label className="label py-1">
@@ -174,7 +170,6 @@ export default function SignIn() {
                     },
                   })}
                   type="email"
-                  autoComplete="off"
                   className={`input input-bordered input-sm w-full pl-10 ${
                     formErrors.email ? "input-error" : ""
                   }`}
@@ -213,7 +208,6 @@ export default function SignIn() {
                     },
                   })}
                   type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
                   className={`input input-bordered input-sm w-full pl-10 pr-10 ${
                     formErrors.password ? "input-error" : ""
                   }`}

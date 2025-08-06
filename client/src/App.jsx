@@ -6,11 +6,19 @@ import {
   usePerformanceMonitoring,
   useUserTracking,
 } from "./hooks/usePerformanceMonitoring.js";
+import { useTokenRefresh } from "./hooks/useTokenRefresh.js";
+import { useAuthInit } from "./hooks/useAuthInit.js";
 
 export default function App() {
   // Initialize performance monitoring and user tracking
   usePerformanceMonitoring();
   useUserTracking();
+  
+  // Initialize automatic token refresh
+  useTokenRefresh();
+  
+  // Initialize authentication state from server
+  useAuthInit();
 
   return (
     <>

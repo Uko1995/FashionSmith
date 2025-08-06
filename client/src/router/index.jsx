@@ -12,28 +12,28 @@ const router = createBrowserRouter([
     children: [
       { index: true, Component: Home, errorElement: <ErrorElement /> },
       {
-        path: "/about",
+        path: "about",
         lazy: async () => ({
           Component: (await import("../pages/About")).default,
         }),
         errorElement: <ErrorElement />,
       },
       {
-        path: "/contacts",
+        path: "contacts",
         lazy: async () => ({
           Component: (await import("../pages/Contact")).default,
         }),
         errorElement: <ErrorElement />,
       },
       {
-        path: "/faq",
+        path: "faq",
         lazy: async () => ({
           Component: (await import("../pages/FAQ")).default,
         }),
         errorElement: <ErrorElement />,
       },
       {
-        path: "/gallery",
+        path: "gallery",
         lazy: async () => ({
           Component: (await import("../pages/Gallery")).default,
         }),

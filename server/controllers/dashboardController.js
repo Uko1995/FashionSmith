@@ -112,7 +112,7 @@ export const getUserDashboard = async (req, res) => {
       })),
       measurements: measurements
         ? {
-            hasmeasurements: true,
+            hasMeasurements: true,
             lastUpdated: measurements.updatedAt || measurements.createdAt,
             // Don't send actual measurement values for privacy
             measurementCount: Object.keys(measurements).filter(
@@ -121,7 +121,7 @@ export const getUserDashboard = async (req, res) => {
             ).length,
           }
         : {
-            hasmeasurements: false,
+            hasMeasurements: false,
             measurementCount: 0,
           },
       recommendations: recommendedProducts.map((product) => ({
@@ -215,7 +215,7 @@ export const getUserOrders = async (req, res) => {
       id: order._id,
       garment: order.garment,
       quantity: order.quantity,
-      colour: order.colour,
+      color: order.color,
       fabric: order.fabric,
       price: order.Cost || order.price,
       status: order.Status,

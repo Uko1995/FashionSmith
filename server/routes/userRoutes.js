@@ -17,7 +17,7 @@ router.get("/verify-email", users.emailVerification);
 router.get("/verify-email/:uniqueString", users.emailVerification);
 router.post("/resend-verification", users.resendVerification);
 router.post("/login", validateUserLogin, users.login);
-router.get("/refresh", users.refresh);
+router.post("/refresh", users.refresh);
 router.post("/forgotPassword", validatePasswordReset, users.forgotPassword);
 router.get("/resetPassword/:uniqueString", users.resetPasswordGet);
 router.post("/resetPassword", validateNewPassword, users.resetPasswordPost);

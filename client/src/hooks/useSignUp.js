@@ -1,22 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import toast from "react-hot-toast";
+import apiClient from "../utils/axiosConfig";
 
 export default function useSignUp() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (userData) => {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/users/signup`,
-        userData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await apiClient.post('/api/users/signup', userData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     },
     onSuccess: (data) => {

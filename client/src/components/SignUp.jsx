@@ -286,7 +286,6 @@ export default function SignUp() {
                     onChange: handleInputChange, // Clear server errors on input
                   })}
                   type="email"
-                  autoComplete="off"
                   className={`input input-bordered w-full pl-10 input-sm ${
                     formErrors.email ? "input-error" : ""
                   }`}
@@ -335,7 +334,6 @@ export default function SignUp() {
                       onChange: handleInputChange, // Clear server errors on input
                     })}
                     type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
                     className={`input input-bordered w-full pl-10 pr-10 input-sm ${
                       formErrors.password ? "input-error" : ""
                     }`}
@@ -379,7 +377,6 @@ export default function SignUp() {
                       onChange: handleInputChange, // Clear server errors on input
                     })}
                     type={showConfirmPassword ? "text" : "password"}
-                    autoComplete="new-password"
                     className={`input input-bordered w-full pl-10 pr-10 input-sm ${
                       formErrors.confirmPassword ? "input-error" : ""
                     }`}

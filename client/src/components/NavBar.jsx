@@ -27,6 +27,11 @@ export default function NavBar() {
   const { logout } = useLogout();
   const navigate = useNavigate();
 
+  // Debug logging
+  useEffect(() => {
+    console.log("[NAVBAR] Auth state changed:", { isLoggedIn, user });
+  }, [isLoggedIn, user]);
+
   const links = [
     { to: "/", text: "HOME", icon: null },
     { to: "/gallery", text: "GALLERY", icon: null },
@@ -173,7 +178,7 @@ export default function NavBar() {
                   >
                     <div className="flex items-center justify-center gap-1">
                       <UserCircleIcon size={24} />
-                      {user ? user.name : ""}
+                      {user ? user.firstName : ""}
                     </div>
                   </NavLink>
                 </UnderlineNavLink>

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { useUiStore } from "../store/uiStore";
+import apiClient from "../utils/axiosConfig";
 
 export default function useLogout() {
   const queryClient = useQueryClient();
@@ -9,16 +9,11 @@ export default function useLogout() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/users/logout`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await apiClient.post('/api/users/logout', {}, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     },
     onSuccess: () => {

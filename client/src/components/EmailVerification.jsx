@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
+import apiClient from "../utils/axiosConfig";
 
 export default function EmailVerification() {
   const navigate = useNavigate();
@@ -83,8 +83,7 @@ export default function EmailVerification() {
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/users/resend-verification`,
+      const res = await apiClient.post('/api/users/resend-verification', 
         { email },
         { withCredentials: true }
       );

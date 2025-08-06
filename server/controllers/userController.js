@@ -260,14 +260,14 @@ const login = async (req, res) => {
     return res
       .cookie("accessToken", accessToken, {
         httpOnly: true,
-        sameSite: "None",
-        secure: "true",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        secure: process.env.NODE_ENV === "production",
         maxAge: 1000 * 60 * 15, // 15 minutes
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        sameSite: "None",
-        secure: "true",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        secure: process.env.NODE_ENV === "production",
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       })
       .json({
@@ -295,33 +295,52 @@ const login = async (req, res) => {
 
 export const refresh = async (req, res) => {
   const cookies = req.cookies;
-  if (!cookies?.refreshToken) return res.sendStatus(401);
+  console.log("[REFRESH] Cookies received:", cookies);
+  console.log("[REFRESH] Headers received:", req.headers);
+  if (!cookies?.refreshToken) {
+    console.log("[REFRESH] No refreshToken cookie found. Returning 401.");
+    return res.sendStatus(401);
+  }
 
   try {
     const user = await userCollection.findOne({
       refreshToken: cookies.refreshToken,
     });
-    if (!user) return res.sendStatus(403);
+    if (!user) {
+      console.log(
+        "[REFRESH] No user found with matching refreshToken. Returning 403."
+      );
+      return res.sendStatus(403);
+    }
 
     jwt.verify(
       cookies.refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
       (err, decoded) => {
-        if (err || decoded.id !== user._id.toString())
+        if (err) {
+          console.log("[REFRESH] JWT verification error:", err);
           return res.sendStatus(403);
+        }
+        if (decoded.id !== user._id.toString()) {
+          console.log(
+            "[REFRESH] Decoded token id does not match user id. Returning 403."
+          );
+          return res.sendStatus(403);
+        }
 
         const newAccessToken = generateAccessToken(user);
         res.cookie("accessToken", newAccessToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
           maxAge: 15 * 60 * 1000,
         });
+        console.log("[REFRESH] Access token refreshed for user:", user.email);
         res.json({ message: "Access token refreshed" });
       }
     );
   } catch (error) {
-    console.error("Error:", error.message, error.stack);
+    console.error("[REFRESH] Error:", error.message, error.stack);
     res.sendStatus(500);
   }
 };
