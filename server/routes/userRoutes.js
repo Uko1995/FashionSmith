@@ -22,6 +22,9 @@ router.post("/forgotPassword", validatePasswordReset, users.forgotPassword);
 router.get("/resetPassword/:uniqueString", users.resetPasswordGet);
 router.post("/resetPassword", validateNewPassword, users.resetPasswordPost);
 
+// Simple auth check endpoint - just verifies cookies
+router.get("/auth-check", users.authCheck);
+
 //Protected routes
 router.post("/logout", users.logout);
 router.delete("/deactivate", verifyJWT, users.removeUser);

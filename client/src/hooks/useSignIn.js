@@ -9,7 +9,7 @@ export default function useSignIn() {
 
   const mutation = useMutation({
     mutationFn: async (loginData) => {
-      const response = await apiClient.post('/api/users/login', loginData, {
+      const response = await apiClient.post("/api/users/login", loginData, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -20,9 +20,13 @@ export default function useSignIn() {
       // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["auth"] });
+
       // Update UI state
       setIsLoggedIn(true);
       setUser(data.user);
+
+      // Save user data to localStorage for persistence across page reloads
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       console.log("User data set in UI store:", data.user);
 

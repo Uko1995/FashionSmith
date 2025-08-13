@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUiStore } from "../store/uiStore";
 import toast from "react-hot-toast";
 import apiClient from "../utils/axiosConfig";
 
-export default function useLogout() {
+// This version of useLogout is for components inside Router context
+export default function useLogoutWithNav() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { resetAuthState } = useUiStore();
+  const navigate = useNavigate();
 
   const logout = async (forced = false) => {
     if (isLoggingOut) return;
@@ -41,10 +44,7 @@ export default function useLogout() {
       window.dispatchEvent(new CustomEvent("auth:logout"));
 
       setIsLoggingOut(false);
-
-      // Use window.location for navigation instead of useNavigate
-      // This avoids Router context dependency
-      window.location.href = "/login";
+      navigate("/login", { replace: true });
     }
   };
 

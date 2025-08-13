@@ -1,32 +1,13 @@
+import FashionSmithLogo from "./FashionSmithLogo";
+
 export default function Spinner() {
-  const colorClasses = [
-    "text-primary",
-    "text-secondary",
-    "text-accent",
-    "text-neutral",
-    "text-info",
-    "text-success",
-    "text-warning",
-    "text-error",
-  ];
-
-  const SpinnerRow = () => (
-    <div className="space-x-2">
-      {colorClasses.map((colorClass, index) => (
-        <span
-          key={index}
-          className={`loading w-10 loading-infinity ${colorClass} text-xl`}
-        />
-      ))}
-    </div>
-  );
-
   return (
-    <div className="grid h-screen place-items-center">
-      <div className="space-y-2">
-        <SpinnerRow />
-        <SpinnerRow />
-        <SpinnerRow />
+    <div className="grid h-screen place-items-center bg-base-100">
+      <div className="flex flex-col items-center space-y-4">
+        <FashionSmithLogo className="animate-pulse w-20 h-20 text-primary" />
+        <div className="text-sm text-base-content/60 animate-pulse">
+          Loading...
+        </div>
       </div>
     </div>
   );

@@ -161,6 +161,7 @@ export const getUserDashboard = async (req, res) => {
         },
       ],
     };
+    console.log(dashboardData);
 
     res.json({
       success: true,

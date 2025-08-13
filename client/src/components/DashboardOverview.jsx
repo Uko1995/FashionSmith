@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { dashboardAPI } from "../services/api";
 import {
   Package,
   Clock,
@@ -13,6 +12,9 @@ import {
   CalendarCheck,
   Star,
 } from "@phosphor-icons/react";
+
+import SVGFallBack from "../components/SVGFallBack";
+import { dashboardAPI } from "../services/api";
 
 export default function DashboardOverview() {
   const navigate = useNavigate();
@@ -28,11 +30,7 @@ export default function DashboardOverview() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="loading loading-spinner loading-lg text-primary"></div>
-      </div>
-    );
+    return <SVGFallBack />;
   }
 
   if (error) {
@@ -53,11 +51,11 @@ export default function DashboardOverview() {
     );
   }
 
-  const stats = dashboardData?.statistics || {};
-  const user = dashboardData?.user || {};
-  const recentOrders = dashboardData?.recentOrders || [];
-  const quickActions = dashboardData?.quickActions || [];
-  const recommendations = dashboardData?.recommendations || [];
+  const stats = dashboardData?.data?.data?.statistics || {};
+  const user = dashboardData?.data?.data?.user || {};
+  const recentOrders = dashboardData?.data?.data?.recentOrders || [];
+  const quickActions = dashboardData?.data?.data?.quickActions || [];
+  const recommendations = dashboardData?.data?.data?.recommendations || [];
 
   const statsCards = [
     {
@@ -114,7 +112,7 @@ export default function DashboardOverview() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold mb-2">
-              Welcome back, {user.firstName || user.username}! 👋
+              Welcome back, {user.username || "User"}! 👋
             </h1>
             <p className="opacity-90">
               {user.isVerified ? (
@@ -122,9 +120,7 @@ export default function DashboardOverview() {
               ) : (
                 <span className="flex items-center gap-2">
                   <span>Please verify your email to unlock all features</span>
-                  <button className="btn btn-sm btn-warning">
-                    Verify Now
-                  </button>
+                  <button className="btn btn-sm btn-warning">Verify Now</button>
                 </span>
               )}
             </p>
@@ -135,9 +131,13 @@ export default function DashboardOverview() {
                 <div className="stat-figure text-primary-content">
                   <CalendarCheck size={32} />
                 </div>
-                <div className="stat-title text-primary-content/70">Member Since</div>
+                <div className="stat-title text-primary-content/70">
+                  Member Since
+                </div>
                 <div className="stat-value text-primary-content text-lg">
-                  {user.memberSince ? new Date(user.memberSince).getFullYear() : "2024"}
+                  {user.memberSince
+                    ? new Date(user.memberSince).getFullYear()
+                    : "2024"}
                 </div>
               </div>
             </div>
@@ -150,11 +150,16 @@ export default function DashboardOverview() {
         {statsCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="card bg-base-100 shadow-sm border border-base-300">
+            <div
+              key={index}
+              className="card bg-base-100 shadow-sm border border-base-300"
+            >
               <div className="card-body p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-base-content/60 mb-1">{stat.title}</p>
+                    <p className="text-sm text-base-content/60 mb-1">
+                      {stat.title}
+                    </p>
                     <p className="text-2xl font-bold">{stat.value}</p>
                   </div>
                   <div className={`p-3 rounded-full ${stat.bgColor}`}>
@@ -189,9 +194,9 @@ export default function DashboardOverview() {
                         return Plus;
                     }
                   };
-                  
+
                   const Icon = getActionIcon(action.icon);
-                  
+
                   return (
                     <button
                       key={index}
@@ -230,10 +235,13 @@ export default function DashboardOverview() {
                   View All
                 </button>
               </div>
-              
+
               {recentOrders.length === 0 ? (
                 <div className="text-center py-8">
-                  <Package size={48} className="mx-auto text-base-content/30 mb-4" />
+                  <Package
+                    size={48}
+                    className="mx-auto text-base-content/30 mb-4"
+                  />
                   <p className="text-base-content/60 mb-4">No orders yet</p>
                   <button
                     onClick={() => navigate("/order/new")}
@@ -261,16 +269,22 @@ export default function DashboardOverview() {
                             {order.garment || "Custom Garment"}
                           </p>
                           <p className="text-xs text-base-content/60">
-                            {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : "Recently"}
+                            {order.orderDate
+                              ? new Date(order.orderDate).toLocaleDateString()
+                              : "Recently"}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className={`badge badge-sm ${getStatusColor(order.status)}`}>
+                        <div
+                          className={`badge badge-sm ${getStatusColor(
+                            order.status
+                          )}`}
+                        >
                           {order.status || "Pending"}
                         </div>
                         <p className="text-xs text-base-content/60 mt-1">
-                          ₦{(order.totalCost || 0).toLocaleString()}
+                          {(order.totalCost || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -298,7 +312,7 @@ export default function DashboardOverview() {
                 View All
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {recommendations.map((product, index) => (
                 <div
@@ -320,15 +334,17 @@ export default function DashboardOverview() {
                     )}
                   </figure>
                   <div className="card-body p-3">
-                    <h4 className="text-sm font-medium truncate">{product.name}</h4>
-                    <p className="text-xs text-base-content/60">{product.category}</p>
+                    <h4 className="text-sm font-medium truncate">
+                      {product.name}
+                    </h4>
+                    <p className="text-xs text-base-content/60">
+                      {product.category}
+                    </p>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm font-semibold">
-                        ₦{(product.price || 0).toLocaleString()}
+                        {(product.price || 0).toLocaleString()}
                       </span>
-                      <button className="btn btn-xs btn-primary">
-                        Order
-                      </button>
+                      <button className="btn btn-xs btn-primary">Order</button>
                     </div>
                   </div>
                 </div>

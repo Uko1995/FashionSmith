@@ -14,7 +14,7 @@ export default function Hero() {
 
   // Handle navigation with smooth transitions
   const handleGetStarted = useCallback(() => {
-    navigate("/services");
+    navigate("/dashboard");
   }, [navigate]);
 
   const handleViewServices = useCallback(() => {

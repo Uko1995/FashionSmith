@@ -8,12 +8,16 @@ const router = express.Router();
 router.use(verifyJWT);
 
 // Main dashboard endpoint
-router.get("/", dashboardController.getUserDashboard);
+router.get("/", verifyJWT, dashboardController.getUserDashboard);
 
 // User's order history with pagination and filtering
-router.get("/orders", dashboardController.getUserOrders);
+router.get("/orders", verifyJWT, dashboardController.getUserOrders);
 
 // User notifications/alerts
-router.get("/notifications", dashboardController.getUserNotifications);
+router.get(
+  "/notifications",
+  verifyJWT,
+  dashboardController.getUserNotifications
+);
 
 export default router;

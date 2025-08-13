@@ -14,7 +14,7 @@ import NavbarWishlistIcon from "./NavBarWishList";
 import NavbarCart from "./NavBarCart";
 import FashionSmithLogo from "./FashionSmithLogo";
 import { useUiStore } from "../store/uiStore";
-import useLogout from "../hooks/useLogout";
+import useLogoutWithNav from "../hooks/useLogoutWithNav";
 
 export default function NavBar() {
   const location = useLocation();
@@ -23,14 +23,19 @@ export default function NavBar() {
   const ref = useRef();
   const isHomePage = location.pathname === "/" || location.pathname === "/home";
   const isLoggedIn = useUiStore((state) => state.isLoggedIn);
+  const isAuthInitialized = useUiStore((state) => state.isAuthInitialized);
   const user = useUiStore((state) => state.user);
-  const { logout } = useLogout();
+  const { logout } = useLogoutWithNav();
   const navigate = useNavigate();
 
   // Debug logging
   useEffect(() => {
-    console.log("[NAVBAR] Auth state changed:", { isLoggedIn, user });
-  }, [isLoggedIn, user]);
+    console.log("[NAVBAR] Auth state changed:", {
+      isLoggedIn,
+      user: user?.email,
+      isAuthInitialized,
+    });
+  }, [isLoggedIn, user, isAuthInitialized]);
 
   const links = [
     { to: "/", text: "HOME", icon: null },
@@ -164,7 +169,13 @@ export default function NavBar() {
 
           {/* Desktop Auth & Actions */}
           <div className="hidden lg:flex items-center space-x-4">
-            {isLoggedIn ? (
+            {!isAuthInitialized ? (
+              // Show loading state while checking authentication
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-base-300 rounded-full animate-pulse"></div>
+                <div className="w-16 h-4 bg-base-300 rounded animate-pulse"></div>
+              </div>
+            ) : isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <UnderlineNavLink>
                   <NavLink
@@ -290,22 +301,57 @@ export default function NavBar() {
             {/* Mobile Auth & Actions */}
             <div className="border-t border-gray-200 pt-4">
               <div className="flex flex-col space-y-4">
-                {authLinks.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
-                    onClick={closeMobileMenu}
-                    className={({ isActive }) =>
-                      `py-2 text-lg font-medium transition-colors duration-200 ${
-                        isActive
-                          ? "text-primary"
-                          : "text-gray-700 hover:text-primary"
-                      }`
-                    }
-                  >
-                    {link.text}
-                  </NavLink>
-                ))}
+                {!isAuthInitialized ? (
+                  // Show loading state while checking authentication
+                  <div className="flex items-center gap-2 py-2">
+                    <div className="w-6 h-6 bg-base-300 rounded-full animate-pulse"></div>
+                    <div className="w-24 h-4 bg-base-300 rounded animate-pulse"></div>
+                  </div>
+                ) : isLoggedIn ? (
+                  <>
+                    <NavLink
+                      to="/profile"
+                      onClick={closeMobileMenu}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 py-2 text-lg font-medium transition-colors duration-200 ${
+                          isActive
+                            ? "text-primary"
+                            : "text-gray-700 hover:text-primary"
+                        }`
+                      }
+                    >
+                      <UserCircleIcon size={18} />
+                      Profile ({user ? user.firstName : "User"})
+                    </NavLink>
+                    <button
+                      onClick={(e) => {
+                        closeMobileMenu();
+                        handleLogout(e);
+                      }}
+                      className="flex items-center gap-3 py-2 text-lg font-medium text-error hover:text-error/80 transition-colors duration-200"
+                    >
+                      <SignOutIcon size={18} />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  authLinks.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      onClick={closeMobileMenu}
+                      className={({ isActive }) =>
+                        `py-2 text-lg font-medium transition-colors duration-200 ${
+                          isActive
+                            ? "text-primary"
+                            : "text-gray-700 hover:text-primary"
+                        }`
+                      }
+                    >
+                      {link.text}
+                    </NavLink>
+                  ))
+                )}
                 <div className="flex items-center justify-center space-x-6 pt-4">
                   <NavbarWishlistIcon />
                   <NavbarCart />

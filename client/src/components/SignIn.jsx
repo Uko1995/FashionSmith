@@ -5,12 +5,13 @@ import {
   LockIcon,
 } from "@phosphor-icons/react";
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useSignIn from "../hooks/useSignIn";
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Initialize React Hook Form with validation rules
   const {
@@ -46,17 +47,20 @@ export default function SignIn() {
   // Effect: Handle successful signin
   useEffect(() => {
     if (isSuccess && data) {
-      // Redirect to dashboard or specified location
+      // Get the intended destination from location state (set by ProtectedRoute)
+      const from = location.state?.from?.pathname || "/dashboard";
+      
+      // Redirect to intended destination or dashboard
       if (data.redirectTo) {
         navigate(data.redirectTo);
       } else {
-        navigate("/dashboard");
+        navigate(from, { replace: true });
       }
 
       // Reset the form after successful submission
       resetForm();
     }
-  }, [isSuccess, data, navigate, resetForm]);
+  }, [isSuccess, data, navigate, resetForm, location.state]);
 
   // Effect: Handle signin errors
   useEffect(() => {

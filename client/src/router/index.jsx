@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import ErrorElement from "../components/ErrorElement";
+import ProtectedRoute from "../components/ProtectedRoute";
 import Home from "../components/Home"; // Importing the Home component
 
 const router = createBrowserRouter([
@@ -67,10 +68,26 @@ const router = createBrowserRouter([
         }),
         errorElement: <ErrorElement />,
       },
+    ],
+  },
+  {
+    path: "dashboard",
+    lazy: async () => {
+      const Dashboard = (await import("../pages/Dashboard")).default;
+      return {
+        Component: () => (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      };
+    },
+    errorElement: <ErrorElement />,
+    children: [
       {
-        path: "dashboard",
+        index: true,
         lazy: async () => ({
-          Component: (await import("../pages/Dashboard")).default,
+          Component: (await import("../components/DashboardOverview")).default,
         }),
         errorElement: <ErrorElement />,
       },

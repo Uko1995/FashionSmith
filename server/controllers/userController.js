@@ -211,6 +211,87 @@ const getUser = async (req, res) => {
   }
 };
 
+// Simple auth check that only verifies if user has valid cookies
+const authCheck = async (req, res) => {
+  try {
+    console.log("[AUTH CHECK] Checking authentication cookies...");
+
+    const accessToken = req.cookies.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    console.log("[AUTH CHECK] Tokens present:", {
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+    });
+
+    if (!accessToken && !refreshToken) {
+      console.log("[AUTH CHECK] No tokens found");
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+      });
+    }
+
+    // If we have an access token, verify it
+    if (accessToken) {
+      try {
+        const decoded = jwt.verify(
+          accessToken,
+          process.env.ACCESS_TOKEN_SECRET
+        );
+        console.log("[AUTH CHECK] Access token valid for user:", decoded.id);
+        return res.status(200).json({
+          success: true,
+          message: "Authenticated",
+        });
+      } catch (err) {
+        console.log("[AUTH CHECK] Access token invalid:", err.message);
+      }
+    }
+
+    // If access token is invalid but we have refresh token, check it
+    if (refreshToken) {
+      try {
+        const decoded = jwt.verify(
+          refreshToken,
+          process.env.REFRESH_TOKEN_SECRET
+        );
+
+        // Check if user still exists with this refresh token
+        const user = await userCollection.findOne({
+          _id: new ObjectId(decoded.id),
+          refreshToken: refreshToken,
+        });
+
+        if (user) {
+          console.log("[AUTH CHECK] Refresh token valid for user:", decoded.id);
+          return res.status(200).json({
+            success: true,
+            message: "Authenticated",
+          });
+        } else {
+          console.log("[AUTH CHECK] Refresh token not found in database");
+        }
+      } catch (err) {
+        console.log("[AUTH CHECK] Refresh token invalid:", err.message);
+      }
+    }
+    
+
+    console.log("[AUTH CHECK] No valid tokens found");
+    return res.status(401).json({
+      success: false,
+      message: "Not authenticated",
+    });
+  } catch (error) {
+    console.error("[AUTH CHECK] Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -236,9 +317,23 @@ const login = async (req, res) => {
           "Check your email for the verification link or request a new one",
       });
     }
+
+    // NEW: Check if user has an existing refresh token
     if (user.refreshToken !== null) {
-      return res.status(400).json({
+      console.log(
+        "[LOGIN] User has existing refresh token, returning already logged in response"
+      );
+      return res.status(200).json({
         message: "User already logged in",
+        code: "ALREADY_LOGGED_IN",
+        redirectTo: "/dashboard",
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          isVerified: user.isVerified,
+        },
       });
     }
 
@@ -306,26 +401,55 @@ export const refresh = async (req, res) => {
     const user = await userCollection.findOne({
       refreshToken: cookies.refreshToken,
     });
+
     if (!user) {
       console.log(
-        "[REFRESH] No user found with matching refreshToken. Returning 403."
+        "[REFRESH] No user found with matching refreshToken. Clearing cookie and returning 403."
       );
-      return res.sendStatus(403);
+      // Clear the invalid refresh token cookie
+      return res
+        .clearCookie("refreshToken")
+        .clearCookie("accessToken")
+        .sendStatus(403);
     }
 
     jwt.verify(
       cookies.refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
-      (err, decoded) => {
+      async (err, decoded) => {
         if (err) {
           console.log("[REFRESH] JWT verification error:", err);
-          return res.sendStatus(403);
+          console.log(
+            "[REFRESH] Clearing invalid refresh token from database and cookies"
+          );
+
+          // Clear the invalid refresh token from database and cookies
+          await userCollection.updateOne(
+            { _id: user._id },
+            { $set: { refreshToken: null } }
+          );
+
+          return res
+            .clearCookie("refreshToken")
+            .clearCookie("accessToken")
+            .sendStatus(403);
         }
+
         if (decoded.id !== user._id.toString()) {
           console.log(
-            "[REFRESH] Decoded token id does not match user id. Returning 403."
+            "[REFRESH] Decoded token id does not match user id. Clearing tokens."
           );
-          return res.sendStatus(403);
+
+          // Clear mismatched tokens
+          await userCollection.updateOne(
+            { _id: user._id },
+            { $set: { refreshToken: null } }
+          );
+
+          return res
+            .clearCookie("refreshToken")
+            .clearCookie("accessToken")
+            .sendStatus(403);
         }
 
         const newAccessToken = generateAccessToken(user);
@@ -1439,6 +1563,7 @@ const users = {
   showOrder,
   removeOrder,
   getUser,
+  authCheck,
   forgotPassword,
   resetPasswordGet,
   resetPasswordPost,

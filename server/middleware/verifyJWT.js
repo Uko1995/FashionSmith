@@ -5,9 +5,7 @@ import { ObjectId } from "mongodb";
 const verifyJWT = async (req, res, next) => {
   try {
     const accessToken = req.cookies.accessToken;
-    console.log("[verifyJWT] Cookies:", req.cookies);
     if (!accessToken) {
-      console.log("[verifyJWT] No accessToken cookie found. Returning 401.");
       return res.status(401).json({
         success: false,
         message: "Access token required",
@@ -19,7 +17,6 @@ const verifyJWT = async (req, res, next) => {
     try {
       decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     } catch (err) {
-      console.log("[verifyJWT] JWT verification error:", err);
       throw err;
     }
 
@@ -28,7 +25,6 @@ const verifyJWT = async (req, res, next) => {
       _id: new ObjectId(decoded.id),
     });
     if (!user) {
-      console.log("[verifyJWT] No user found for decoded id. Returning 401.");
       return res.status(401).json({
         success: false,
         message: "User not found",
