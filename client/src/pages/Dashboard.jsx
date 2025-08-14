@@ -3,32 +3,33 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import {
-  House,
-  User,
-  Package,
-  Ruler,
-  ClockCounterClockwise,
-  CreditCard,
-  MapPin,
-  Gear,
-  List,
-  Bell,
+  HouseIcon,
+  UserIcon,
+  RulerIcon,
+  ClockCounterClockwiseIcon,
+  CreditCardIcon,
+  MapPinIcon,
+  GearIcon,
+  ListIcon,
+  BellIcon,
   // ChartBar,
   SignOut,
   // Menu,
-  X,
-  Plus,
-  Clock,
-  CheckCircle,
-  CurrencyDollar,
-  CalendarCheck,
+  XIcon,
+  PlusIcon,
+  CurrencyDollarIcon,
+  CalendarCheckIcon,
+  SignOutIcon,
+  UserGearIcon,
+  CheckCircleIcon,
+  PackageIcon,
+  ClockIcon,
   // Star,
 } from "@phosphor-icons/react";
 
 import { dashboardAPI } from "../services/api";
 import SVGFallback from "../components/SVGFallBack";
 import useLogoutWithNav from "../hooks/useLogoutWithNav";
-// import useUiStore from "../store/uiStore";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -49,55 +50,43 @@ export default function Dashboard() {
   const sidebarItems = [
     {
       title: "Overview",
-      icon: House,
+      icon: HouseIcon,
       path: "/dashboard",
       isActive: location.pathname === "/dashboard",
     },
     {
       title: "Profile",
-      icon: User,
+      icon: UserIcon,
       path: "/dashboard/profile",
       isActive: location.pathname === "/dashboard/profile",
     },
     {
       title: "My Orders",
-      icon: Package,
+      icon: PackageIcon,
       path: "/dashboard/orders",
       isActive: location.pathname === "/dashboard/orders",
     },
     {
       title: "Measurements",
-      icon: Ruler,
+      icon: RulerIcon,
       path: "/dashboard/measurements",
       isActive: location.pathname === "/dashboard/measurements",
     },
     {
-      title: "Order History",
-      icon: ClockCounterClockwise,
-      path: "/dashboard/history",
-      isActive: location.pathname === "/dashboard/history",
-    },
-    {
       title: "Payments",
-      icon: CreditCard,
+      icon: CreditCardIcon,
       path: "/dashboard/payments",
       isActive: location.pathname === "/dashboard/payments",
     },
     {
-      title: "Track Order",
-      icon: MapPin,
-      path: "/dashboard/track",
-      isActive: location.pathname === "/dashboard/track",
-    },
-    {
       title: "Notifications",
-      icon: Bell,
+      icon: BellIcon,
       path: "/dashboard/notifications",
       isActive: location.pathname === "/dashboard/notifications",
     },
     {
       title: "Settings",
-      icon: Gear,
+      icon: GearIcon,
       path: "/dashboard/settings",
       isActive: location.pathname === "/dashboard/settings",
     },
@@ -126,6 +115,7 @@ export default function Dashboard() {
         <p className="text-base-content/60 mb-4">
           {error.response?.data?.message || "Failed to load dashboard data"}
         </p>
+
         <button
           className="btn btn-primary"
           onClick={() => window.location.reload()}
@@ -154,28 +144,28 @@ export default function Dashboard() {
     {
       title: "Total Orders",
       value: stats.totalOrders || 0,
-      icon: Package,
+      icon: PackageIcon,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
       title: "Pending Orders",
       value: stats.pendingOrders || 0,
-      icon: Clock,
+      icon: ClockIcon,
       color: "text-warning",
       bgColor: "bg-warning/10",
     },
     {
       title: "Completed Orders",
       value: stats.completedOrders || 0,
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
       color: "text-success",
       bgColor: "bg-success/10",
     },
     {
       title: "Total Spent",
       value: `₦${(stats.totalSpent || 0).toLocaleString()}`,
-      icon: CurrencyDollar,
+      icon: CurrencyDollarIcon,
       color: "text-info",
       bgColor: "bg-info/10",
     },
@@ -217,7 +207,7 @@ export default function Dashboard() {
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden btn btn-ghost btn-sm"
           >
-            <X size={20} />
+            <XIcon size={20} />
           </button>
         </div>
 
@@ -275,16 +265,16 @@ export default function Dashboard() {
               onClick={handleLogout}
               className="flex items-center w-full px-3 py-1 text-sm text-error hover:bg-error/10 rounded-lg transition-colors"
             >
-              <SignOut size={18} className="mr-3" />
+              <SignOutIcon size={18} className="mr-3" />
               Logout
             </button>
             {/* Admin Button */}
             {userData.role === "admin" && (
               <button
                 onClick={handleLogout}
-                className="flex items-center w-full px-3 py-2 text-sm font-extrabold text-error hover:bg-error/10 rounded-lg transition-colors"
+                className="flex items-center w-full px-3 py-2 text-sm font-bold text-error hover:bg-error/10 rounded-lg transition-colors"
               >
-                <SignOut size={18} className="mr-3" />
+                <UserGearIcon size={18} className="mr-3" />
                 ADMIN
               </button>
             )}

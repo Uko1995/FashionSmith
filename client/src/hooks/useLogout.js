@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useUiStore } from "../store/uiStore";
 import toast from "react-hot-toast";
 import apiClient from "../utils/axiosConfig";
+import { shouldRedirectToLogin } from "../utils/routeUtils";
 
 export default function useLogout() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -42,9 +43,18 @@ export default function useLogout() {
 
       setIsLoggingOut(false);
 
-      // Use window.location for navigation instead of useNavigate
-      // This avoids Router context dependency
-      window.location.href = "/login";
+      // Only redirect to login if user is currently on a protected route
+      if (shouldRedirectToLogin()) {
+        console.log(
+          "[LOGOUT] User was on protected route, redirecting to login"
+        );
+        window.location.href = "/login";
+      } else {
+        console.log(
+          "[LOGOUT] User was on public route, staying on current page"
+        );
+        // Stay on current page - no redirect needed
+      }
     }
   };
 

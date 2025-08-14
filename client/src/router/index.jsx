@@ -91,6 +91,48 @@ const router = createBrowserRouter([
         }),
         errorElement: <ErrorElement />,
       },
+      {
+        path: "profile",
+        lazy: async () => ({
+          Component: (await import("../pages/Profile")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "orders",
+        lazy: async () => ({
+          Component: (await import("../pages/Orders")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "notifications",
+        lazy: async () => ({
+          Component: (await import("../pages/Notifications")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "settings",
+        lazy: async () => ({
+          Component: (await import("../pages/Settings")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "payment",
+        lazy: async () => ({
+          Component: (await import("../pages/Payment")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "measurements",
+        lazy: async () => ({
+          Component: (await import("../pages/Measurements")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
     ],
   },
 ]);

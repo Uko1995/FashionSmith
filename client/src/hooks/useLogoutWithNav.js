@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUiStore } from "../store/uiStore";
 import toast from "react-hot-toast";
 import apiClient from "../utils/axiosConfig";
+import { shouldRedirectToLogin } from "../utils/routeUtils";
 
 // This version of useLogout is for components inside Router context
 export default function useLogoutWithNav() {
@@ -44,7 +45,20 @@ export default function useLogoutWithNav() {
       window.dispatchEvent(new CustomEvent("auth:logout"));
 
       setIsLoggingOut(false);
-      navigate("/login", { replace: true });
+
+      // Only redirect to login if user is currently on a protected route
+      if (shouldRedirectToLogin()) {
+        console.log(
+          "[LOGOUT] User was on protected route, redirecting to login"
+        );
+        navigate("/login", { replace: true });
+      } else {
+        console.log(
+          "[LOGOUT] User was on public route, staying on current page"
+        );
+        // Stay on current page - no redirect needed
+        // The navbar will update automatically due to state change
+      }
     }
   };
 

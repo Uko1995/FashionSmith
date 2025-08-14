@@ -55,6 +55,28 @@ export const userSchema = {
           bsonType: ["string", "null"],
           description: "JWT refresh token",
         },
+        phoneNumber: {
+          bsonType: ["string", "null"],
+          description: "User's phone number",
+        },
+        address: {
+          bsonType: ["object", "null"],
+          properties: {
+            street: {
+              bsonType: ["string", "null"],
+              description: "Street address",
+            },
+            state: {
+              bsonType: ["string", "null"],
+              description: "State or Province",
+            },
+            country: {
+              bsonType: ["string", "null"],
+              description: "Country",
+            },
+          },
+          description: "User's address information",
+        },
       },
     },
   },
@@ -80,6 +102,12 @@ export const UserInterface = {
   createdAt: "Date",
   isVerified: "boolean",
   refreshToken: "string | null",
+  phoneNumber: "string | null",
+  address: {
+    street: "string | null",
+    state: "string | null",
+    country: "string | null",
+  },
 };
 
 // Default values
@@ -87,6 +115,8 @@ export const userDefaults = {
   role: "user",
   isVerified: false,
   refreshToken: null,
+  phoneNumber: null,
+  address: null,
   createdAt: () => new Date(),
 };
 
@@ -120,6 +150,33 @@ export const validateUser = (userData) => {
     errors.push("role must be either user or admin");
   }
 
+  // Validate phone number if provided
+  if (userData.phoneNumber && typeof userData.phoneNumber !== "string") {
+    errors.push("phoneNumber must be a string");
+  } else if (
+    userData.phoneNumber &&
+    !/^\+234\s?\d{3}\s?\d{3}\s?\d{4}$/.test(userData.phoneNumber.trim())
+  ) {
+    errors.push(
+      "phoneNumber must be a valid Nigerian phone number format (+234 123 456 7890)"
+    );
+  }
+
+  // Validate address if provided
+  if (userData.address && typeof userData.address !== "object") {
+    errors.push("address must be an object");
+  } else if (userData.address) {
+    const addressFields = ["street", "state", "country"];
+    addressFields.forEach((field) => {
+      if (
+        userData.address[field] &&
+        typeof userData.address[field] !== "string"
+      ) {
+        errors.push(`address.${field} must be a string`);
+      }
+    });
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -128,7 +185,7 @@ export const validateUser = (userData) => {
 
 // Helper function to prepare user data for insertion
 export const prepareUserData = (userData) => {
-  return {
+  const prepared = {
     ...userDefaults,
     ...userData,
     createdAt: userData.createdAt || new Date(),
@@ -136,4 +193,23 @@ export const prepareUserData = (userData) => {
     firstName: userData.firstName?.trim(),
     lastName: userData.lastName?.trim(),
   };
+
+  // Clean up phone number
+  if (prepared.phoneNumber) {
+    prepared.phoneNumber = prepared.phoneNumber.trim();
+  }
+
+  // Clean up address fields
+  if (prepared.address) {
+    const cleanAddress = {};
+    Object.keys(prepared.address).forEach((key) => {
+      if (prepared.address[key] && typeof prepared.address[key] === "string") {
+        cleanAddress[key] = prepared.address[key].trim();
+      }
+    });
+    prepared.address =
+      Object.keys(cleanAddress).length > 0 ? cleanAddress : null;
+  }
+
+  return prepared;
 };

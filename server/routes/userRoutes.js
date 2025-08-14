@@ -7,6 +7,7 @@ import {
   validateUserUpdate,
   validatePasswordReset,
   validateNewPassword,
+  validatePasswordChange,
 } from "../validators/userValidators.js";
 
 const router = express.Router();
@@ -34,6 +35,12 @@ router.patch(
   verifyJWT,
   validateUserUpdate,
   users.updateUserInfo
+);
+router.patch(
+  "/changePassword",
+  verifyJWT,
+  validatePasswordChange,
+  users.changePassword
 );
 
 //Measurement

@@ -13,12 +13,13 @@ export const authAPI = {
 // User API calls
 export const userAPI = {
   getProfile: () => apiClient.get("/api/users/profile"),
-  updateProfile: (data) => apiClient.put("/api/users/profile", data),
+  updateProfile: (data) => apiClient.patch("/api/users/updateProfile", data),
+  changePassword: (data) => apiClient.patch("/api/users/changePassword", data),
   deleteProfile: () => apiClient.delete("/api/users/profile"),
-  getMeasurements: () => apiClient.get("/api/users/measurements"),
-  addMeasurement: (data) => apiClient.post("/api/users/measurements", data),
-  updateMeasurement: (data) => apiClient.put("/api/users/measurements", data),
-  deleteMeasurement: () => apiClient.delete("/api/users/measurements"),
+  getMeasurements: () => apiClient.get("/api/users/getMeasurement"),
+  addMeasurement: (data) => apiClient.post("/api/users/addMeasurement", data),
+  updateMeasurement: (data) => apiClient.patch("/api/users/updateMeasurement", data),
+  deleteMeasurement: () => apiClient.delete("/api/users/removeMeasurement"),
 };
 
 // Order API calls

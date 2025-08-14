@@ -14,6 +14,7 @@ export const useAuthInit = () => {
         // Simple auth check endpoint that only verifies cookies
         const response = await apiClient.get("/api/users/auth-check");
 
+        
         if (
           response.status === 200 &&
           response.data.message === "Authenticated"

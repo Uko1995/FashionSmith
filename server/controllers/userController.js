@@ -192,7 +192,6 @@ const getUser = async (req, res) => {
           _id: 0,
           password: 0,
           refreshToken: 0,
-          createdAt: 0,
           __v: 0,
         },
       }
@@ -276,7 +275,6 @@ const authCheck = async (req, res) => {
         console.log("[AUTH CHECK] Refresh token invalid:", err.message);
       }
     }
-    
 
     console.log("[AUTH CHECK] No valid tokens found");
     return res.status(401).json({
@@ -516,12 +514,13 @@ const removeUser = async (req, res) => {
 };
 
 const updateUserInfo = async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, phoneNumber, address } =
+    req.body;
   try {
     const updates = {};
-    if (firstName) updates.firstName = firstName;
-    if (lastName) updates.lastName = lastName;
-    if (email) updates.email = email;
+    if (firstName) updates.firstName = firstName.trim();
+    if (lastName) updates.lastName = lastName.trim();
+    if (email) updates.email = email.toLowerCase().trim();
     if (password) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
@@ -531,6 +530,42 @@ const updateUserInfo = async (req, res) => {
       updates.username = `${updates.firstName || req.user.firstName} ${
         updates.lastName || req.user.lastName
       }`;
+    }
+
+    // Handle phone number update
+    if (phoneNumber !== undefined) {
+      if (phoneNumber === null || phoneNumber === "") {
+        updates.phoneNumber = null;
+      } else {
+        // Validate Nigerian phone number format
+        if (!/^\+234\s?\d{3}\s?\d{3}\s?\d{4}$/.test(phoneNumber.trim())) {
+          return res.status(400).json({
+            message:
+              "Invalid phone number format. Please use Nigerian format: +234 123 456 7890",
+          });
+        }
+        updates.phoneNumber = phoneNumber.trim();
+      }
+    }
+
+    // Handle address update
+    if (address !== undefined) {
+      if (address === null || Object.keys(address || {}).length === 0) {
+        updates.address = null;
+      } else {
+        // Validate and clean address fields
+        const cleanAddress = {};
+        const addressFields = ["street", "state", "country"];
+
+        addressFields.forEach((field) => {
+          if (address[field] && typeof address[field] === "string") {
+            cleanAddress[field] = address[field].trim();
+          }
+        });
+
+        updates.address =
+          Object.keys(cleanAddress).length > 0 ? cleanAddress : null;
+      }
     }
 
     const updatedUser = await userCollection.findOneAndUpdate(
@@ -553,12 +588,96 @@ const updateUserInfo = async (req, res) => {
         lastName: updatedUser.lastName,
         email: updatedUser.email,
         role: updatedUser.role,
+        phoneNumber: updatedUser.phoneNumber,
+        address: updatedUser.address,
       },
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "An error occurred: " + error.message,
+    });
+  }
+};
+
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      message: "Current password and new password are required",
+    });
+  }
+
+  // Password validation for new password
+  const errors = [];
+  if (newPassword.length < 8) errors.push("at least 8 characters");
+  if (!/[0-9]/.test(newPassword)) errors.push("a number");
+  if (!/[A-Z]/.test(newPassword)) errors.push("an uppercase letter");
+  if (!/[a-z]/.test(newPassword)) errors.push("a lowercase letter");
+  if (!/[!@#$%^&*]/.test(newPassword)) errors.push("a special character");
+
+  if (errors.length) {
+    return res.status(400).json({
+      message: "New password must contain: " + errors.join(", "),
+    });
+  }
+
+  try {
+    // Get the current user
+    const user = await userCollection.findOne({
+      _id: new ObjectId(req.user.id),
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Verify current password
+    const validCurrentPassword = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!validCurrentPassword) {
+      return res.status(400).json({
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Check if new password is different from current password
+    const samePassword = await bcrypt.compare(newPassword, user.password);
+    if (samePassword) {
+      return res.status(400).json({
+        message: "New password must be different from current password",
+      });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the password
+    const updateResult = await userCollection.updateOne(
+      { _id: new ObjectId(req.user.id) },
+      { $set: { password: hashedNewPassword } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(500).json({
+        message: "Failed to update password",
+      });
+    }
+
+    res.json({
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({
+      message: "An error occurred while changing password",
+      error: error.message,
     });
   }
 };
@@ -1554,6 +1673,7 @@ const users = {
   logout,
   removeUser,
   updateUserInfo,
+  changePassword,
   addMeasurement,
   displayMeasurement,
   updateMeasurement,
