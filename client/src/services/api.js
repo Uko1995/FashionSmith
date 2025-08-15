@@ -18,16 +18,24 @@ export const userAPI = {
   deleteProfile: () => apiClient.delete("/api/users/profile"),
   getMeasurements: () => apiClient.get("/api/users/getMeasurement"),
   addMeasurement: (data) => apiClient.post("/api/users/addMeasurement", data),
-  updateMeasurement: (data) => apiClient.patch("/api/users/updateMeasurement", data),
+  updateMeasurement: (data) =>
+    apiClient.patch("/api/users/updateMeasurement", data),
   deleteMeasurement: () => apiClient.delete("/api/users/removeMeasurement"),
+  // Order management
+  createOrder: (data) => apiClient.post("/api/users/newOrder", data),
+  getOrders: () => apiClient.get("/api/users/getOrder"),
+  updateOrder: (data) => apiClient.patch("/api/users/updateOrder", data),
+  deleteOrder: (orderId) =>
+    apiClient.delete(`/api/users/removeOrder/${orderId}`),
 };
 
-// Order API calls
+// Order API calls (legacy - keeping for compatibility)
 export const orderAPI = {
-  createOrder: (data) => apiClient.post("/api/orders", data),
-  getOrders: () => apiClient.get("/api/orders"),
-  updateOrder: (data) => apiClient.put("/api/orders", data),
-  deleteOrder: (orderId) => apiClient.delete(`/api/orders/${orderId}`),
+  createOrder: (data) => apiClient.post("/api/users/newOrder", data),
+  getOrders: () => apiClient.get("/api/users/getOrder"),
+  updateOrder: (data) => apiClient.patch("/api/users/updateOrder", data),
+  deleteOrder: (orderId) =>
+    apiClient.delete(`/api/users/removeOrder/${orderId}`),
 };
 
 // Product API calls

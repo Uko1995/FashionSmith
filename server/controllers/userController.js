@@ -646,7 +646,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Check if new password is different from current password
+    //Check if new password is different from current password
     const samePassword = await bcrypt.compare(newPassword, user.password);
     if (samePassword) {
       return res.status(400).json({
@@ -699,6 +699,9 @@ const addMeasurement = async (req, res) => {
     ThighWidth,
     KneeWidth,
     AnkleWidth,
+    ShirtLength,
+    SuitChest,
+    SuitWaist,
   } = req.body;
 
   try {
@@ -729,6 +732,9 @@ const addMeasurement = async (req, res) => {
       ThighWidth,
       KneeWidth,
       AnkleWidth,
+      ShirtLength,
+      SuitChest,
+      SuitWaist,
     };
 
     // Validate measurement data
@@ -836,6 +842,9 @@ const updateMeasurement = async (req, res) => {
     ThighWidth,
     KneeWidth,
     AnkleWidth,
+    ShirtLength,
+    SuitChest,
+    SuitWaist,
   } = req.body;
 
   try {
@@ -866,6 +875,9 @@ const updateMeasurement = async (req, res) => {
       ThighWidth,
       KneeWidth,
       AnkleWidth,
+      ShirtLength,
+      SuitChest,
+      SuitWaist,
     };
 
     // Validate measurement data

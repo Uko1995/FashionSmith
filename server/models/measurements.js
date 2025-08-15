@@ -104,6 +104,16 @@ export const measurementSchema = {
           minimum: 0,
           description: "Shirt length measurement in inches/cm",
         },
+        SuitChest: {
+          bsonType: "number",
+          minimum: 0,
+          description: "Suit chest measurement in inches/cm",
+        },
+        SuitWaist: {
+          bsonType: "number",
+          minimum: 0,
+          description: "Suit waist measurement in inches/cm",
+        },
       },
     },
   },
@@ -138,6 +148,9 @@ export const MeasurementInterface = {
   unit: "inches | cm",
   createdAt: "Date",
   updatedAt: "Date",
+  ShirtLength: "number",
+  SuitChest: "number",
+  SuitWaist: "number",
 };
 
 // Default values
@@ -176,6 +189,9 @@ export const validateMeasurement = (measurementData) => {
     "ThighWidth",
     "KneeWidth",
     "AnkleWidth",
+    "ShirtLength",
+    "SuitChest",
+    "SuitWaist",
   ];
 
   // Check required fields

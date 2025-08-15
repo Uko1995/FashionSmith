@@ -1,3 +1,5 @@
+import DashboardMeasurements from "@/components/DashboardMeasurements";
+
 export default function Measurements() {
-  return <div>Measurements</div>;
+  return <DashboardMeasurements />;
 }
