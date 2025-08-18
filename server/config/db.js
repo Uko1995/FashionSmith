@@ -25,6 +25,8 @@ export const collections = {
   orders: db.collection("orders"),
   measurements: db.collection("measurements"),
   userVerifications: db.collection("userVerifications"),
+  payments: db.collection("payments"),
+  notifications: db.collection("notifications"),
 };
 
 let isConnected = false;
@@ -73,6 +75,25 @@ async function createIndexes() {
     // Order indexes
     await collections.orders.createIndex({ userId: 1 });
     await collections.orders.createIndex({ orderDate: -1 });
+
+    // payment indexes
+    await collections.payments.createIndex({ userId: 1 });
+    await collections.payments.createIndex({ orderId: 1 });
+    await collections.payments.createIndex({ status: 1 });
+    await collections.payments.createIndex(
+      { transactionId: 1 },
+      { unique: true, sparse: true }
+    );
+    await collections.payments.createIndex({ createdAt: -1 });
+
+    // Notification indexes
+    await collections.notifications.createIndex({ userId: 1 });
+    await collections.notifications.createIndex({ read: 1 });
+    await collections.notifications.createIndex({ type: 1 });
+    await collections.notifications.createIndex({ priority: 1 });
+    await collections.notifications.createIndex({ createdAt: -1 });
+    await collections.notifications.createIndex({ userId: 1, read: 1 });
+    await collections.notifications.createIndex({ userId: 1, type: 1 });
 
     console.log("✅ Database indexes created successfully");
   } catch (error) {

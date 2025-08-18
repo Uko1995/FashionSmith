@@ -27,6 +27,57 @@ export const userAPI = {
   updateOrder: (data) => apiClient.patch("/api/users/updateOrder", data),
   deleteOrder: (orderId) =>
     apiClient.delete(`/api/users/removeOrder/${orderId}`),
+  // Payment management (Paystack)
+  initializePayment: (data) => apiClient.post("/api/payments/initialize", data),
+  verifyPayment: (reference) =>
+    apiClient.get(`/api/payments/verify/${reference}`),
+  getPaymentHistory: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value);
+      }
+    });
+    const queryString = queryParams.toString();
+    return apiClient.get(
+      `/api/payments/history${queryString ? `?${queryString}` : ""}`
+    );
+  },
+};
+
+// Notification API calls
+export const notificationAPI = {
+  // Get user notifications with pagination and filters
+  getNotifications: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value);
+      }
+    });
+    const queryString = queryParams.toString();
+    return apiClient.get(
+      `/api/notifications${queryString ? `?${queryString}` : ""}`
+    );
+  },
+
+  // Get unread notification count
+  getUnreadCount: () => apiClient.get("/api/notifications/unread-count"),
+
+  // Mark single notification as read
+  markAsRead: (notificationId) =>
+    apiClient.patch(`/api/notifications/${notificationId}/read`),
+
+  // Mark all notifications as read
+  markAllAsRead: () => apiClient.patch("/api/notifications/mark-all-read"),
+
+  // Delete single notification
+  deleteNotification: (notificationId) =>
+    apiClient.delete(`/api/notifications/${notificationId}`),
+
+  // Bulk operations (markAsRead, delete)
+  bulkAction: (action, notificationIds) =>
+    apiClient.post("/api/notifications/bulk", { action, notificationIds }),
 };
 
 // Order API calls (legacy - keeping for compatibility)
@@ -48,7 +99,49 @@ export const productAPI = {
 export const dashboardAPI = {
   getDashboard: () => apiClient.get("/api/dashboard"),
   getOverview: () => apiClient.get("/api/dashboard"),
-  getUserOrders: (params) => apiClient.get("/api/dashboard/orders", { params }),
+  getUserOrders: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value);
+      }
+    });
+    const queryString = queryParams.toString();
+    return apiClient.get(
+      `/api/dashboard/orders${queryString ? `?${queryString}` : ""}`
+    );
+  },
+};
+
+// Payment API calls (Paystack integration)
+export const paymentAPI = {
+  // Initialize payment with Paystack
+  initializePayment: (data) => apiClient.post("/api/payments/initialize", data),
+
+  // Verify payment after user completes payment
+  verifyPayment: (reference) =>
+    apiClient.get(`/api/payments/verify/${reference}`),
+
+  // Get payment history with pagination and filters
+  getPaymentHistory: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value);
+      }
+    });
+    const queryString = queryParams.toString();
+    return apiClient.get(
+      `/api/payments/history${queryString ? `?${queryString}` : ""}`
+    );
+  },
+
+  // Get specific payment details
+  getPaymentDetails: (paymentId) => apiClient.get(`/api/payments/${paymentId}`),
+
+  // Legacy endpoints for backward compatibility
+  processPayment: (data) => apiClient.post("/api/payments/initialize", data),
+  getPaymentStatus: (paymentId) => apiClient.get(`/api/payments/${paymentId}`),
 };
 
 export default apiClient;

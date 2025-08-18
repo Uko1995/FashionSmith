@@ -137,7 +137,7 @@ export const getUserDashboard = async (req, res) => {
           title: "New Order",
           description: "Create a new custom garment order",
           icon: "plus",
-          link: "/order/new",
+          link: "gallery",
         },
         {
           title: "My Measurements",
@@ -145,19 +145,19 @@ export const getUserDashboard = async (req, res) => {
             ? "Update your measurements"
             : "Add your measurements",
           icon: "ruler",
-          link: "/measurements",
+          link: "measurements",
         },
         {
           title: "Order History",
           description: "View all your previous orders",
           icon: "history",
-          link: "/orders",
+          link: "orders",
         },
         {
           title: "Profile Settings",
           description: "Update your profile information",
           icon: "settings",
-          link: "/profile",
+          link: "profile",
         },
       ],
     };
@@ -186,6 +186,7 @@ export const getUserOrders = async (req, res) => {
       page = 1,
       limit = 10,
       status,
+      paymentStatus,
       sortBy = "orderDate",
       sortOrder = "desc",
     } = req.query;
@@ -195,6 +196,11 @@ export const getUserOrders = async (req, res) => {
     // Add status filter if provided
     if (status && status !== "all") {
       query.Status = status;
+    }
+
+    // Add payment status filter if provided
+    if (paymentStatus && paymentStatus !== "all") {
+      query.paymentStatus = paymentStatus;
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);

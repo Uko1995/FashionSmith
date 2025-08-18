@@ -119,8 +119,9 @@ const router = createBrowserRouter([
         }),
         errorElement: <ErrorElement />,
       },
+
       {
-        path: "payment",
+        path: "payments",
         lazy: async () => ({
           Component: (await import("../pages/Payment")).default,
         }),

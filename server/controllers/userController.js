@@ -696,14 +696,17 @@ const addMeasurement = async (req, res) => {
     MidSleeve,
     ShortSleeveWidth,
     TrouserLength,
+    TrouserWaist,
     ThighWidth,
     KneeWidth,
     AnkleWidth,
     ShirtLength,
     SuitChest,
     SuitWaist,
+    unit,
+    agbadaLength,
+    waistCoatLength,
   } = req.body;
-
   try {
     // Validate user authentication
     if (!req.user) {
@@ -729,17 +732,22 @@ const addMeasurement = async (req, res) => {
       MidSleeve,
       ShortSleeveWidth,
       TrouserLength,
+      TrouserWaist,
       ThighWidth,
       KneeWidth,
       AnkleWidth,
       ShirtLength,
       SuitChest,
       SuitWaist,
+      unit,
+      agbadaLength,
+      waistCoatLength,
     };
 
     // Validate measurement data
     const validation = validateMeasurement(measurementData);
     if (!validation.isValid) {
+      console.log("validation errors:", validation.errors);
       return res.status(400).json({
         message: "Measurement validation failed",
         errors: validation.errors,
@@ -753,17 +761,35 @@ const addMeasurement = async (req, res) => {
 
     if (existingMeasurement) {
       // Update existing measurements
+      console.log("Updating existing measurements for userId:", userId);
+      console.log("Existing measurement:", existingMeasurement);
+
       const preparedData = prepareMeasurementData(measurementData);
+      console.log("Prepared data for update:", preparedData);
+
       const result = await measurementsCollection.updateOne(
         { userId },
         { $set: preparedData }
       );
 
+      console.log("Update result:", result);
+      console.log("Modified count:", result.modifiedCount);
+      console.log("Matched count:", result.matchedCount);
+
       if (result.modifiedCount === 0) {
+        console.log("Warning: No documents were modified during update");
+        // Let's also check what the document looks like after the attempted update
+        const afterUpdate = await measurementsCollection.findOne({ userId });
+        console.log("Document after update attempt:", afterUpdate);
+
         return res.status(500).json({
           message: "Failed to update measurements",
         });
       }
+
+      // Verify the update by fetching the document again
+      const updatedDocument = await measurementsCollection.findOne({ userId });
+      console.log("Document after successful update:", updatedDocument);
 
       return res.json({
         message: "Measurements updated successfully",
@@ -771,6 +797,12 @@ const addMeasurement = async (req, res) => {
     } else {
       // Create new measurements
       const preparedData = prepareMeasurementData(measurementData);
+
+      console.log(
+        "Prepared data for MongoDB:",
+        JSON.stringify(preparedData, null, 2)
+      );
+
       const result = await measurementsCollection.insertOne(preparedData);
 
       if (!result.insertedId) {
@@ -785,6 +817,20 @@ const addMeasurement = async (req, res) => {
     }
   } catch (error) {
     console.error("Error adding/updating measurement:", error);
+
+    // Enhanced error logging for validation failures
+    if (error.code === 121) {
+      // MongoDB validation error
+      console.error("MongoDB Validation Error Details:");
+      console.error("Error Info:", JSON.stringify(error.errInfo, null, 2));
+      if (error.errInfo && error.errInfo.details) {
+        console.error(
+          "Validation Details:",
+          JSON.stringify(error.errInfo.details, null, 2)
+        );
+      }
+    }
+
     return res.status(500).json({
       message: "An error occurred",
       error: error.message,
@@ -839,12 +885,16 @@ const updateMeasurement = async (req, res) => {
     MidSleeve,
     ShortSleeveWidth,
     TrouserLength,
+    TrouserWaist,
     ThighWidth,
     KneeWidth,
     AnkleWidth,
     ShirtLength,
     SuitChest,
     SuitWaist,
+    unit,
+    agbadaLength,
+    waistCoatLength,
   } = req.body;
 
   try {
@@ -872,12 +922,16 @@ const updateMeasurement = async (req, res) => {
       MidSleeve,
       ShortSleeveWidth,
       TrouserLength,
+      TrouserWaist,
       ThighWidth,
       KneeWidth,
       AnkleWidth,
       ShirtLength,
       SuitChest,
       SuitWaist,
+      unit,
+      agbadaLength,
+      waistCoatLength,
     };
 
     // Validate measurement data
@@ -1274,16 +1328,52 @@ const updateOrder = async (req, res) => {
 
 const showOrder = async (req, res) => {
   try {
-    const orders = await ordersCollection.find({}).toArray();
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({
-        message: "No orders found",
-      });
+    const userId = new ObjectId(req.user.id);
+    const { paymentStatus, status, page = 1, limit = 10 } = req.query;
+
+    // Build query filter
+    const query = { userId };
+
+    // Add payment status filter if provided
+    if (paymentStatus) {
+      query.paymentStatus = paymentStatus;
     }
-    res.json(orders);
+
+    // Add order status filter if provided
+    if (status) {
+      query.status = status;
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Fetch orders with filters and pagination
+    const orders = await ordersCollection
+      .find(query)
+      .sort({ createdAt: -1 }) // Most recent first
+      .skip(skip)
+      .limit(parseInt(limit))
+      .toArray();
+
+    // Get total count for pagination
+    const totalCount = await ordersCollection.countDocuments(query);
+
+    // Always return success with orders array (empty if no orders found)
+    res.json({
+      success: true,
+      data: orders || [],
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalCount / parseInt(limit)),
+        totalCount,
+        hasNext: skip + orders.length < totalCount,
+        hasPrev: parseInt(page) > 1,
+      },
+    });
   } catch (error) {
     console.error("Error fetching orders:", error);
     return res.status(500).json({
+      success: false,
       message: "Failed to fetch orders",
       error: error.message,
     });

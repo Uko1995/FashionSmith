@@ -13,6 +13,11 @@ import {
   userVerificationSchema,
   userVerificationIndexes,
 } from "./models/userVerification.js";
+import { paymentSchema, paymentIndexes } from "./models/paystackPayment.js";
+import {
+  notificationSchema,
+  notificationIndexes,
+} from "./models/notification.js";
 
 const db = client.db("fashionsmith");
 
@@ -38,6 +43,16 @@ export const initializeSchemas = async () => {
       "userverifications",
       userVerificationSchema,
       userVerificationIndexes
+    );
+    await createCollectionWithValidation(
+      "payments",
+      paymentSchema,
+      paymentIndexes
+    );
+    await createCollectionWithValidation(
+      "notifications",
+      notificationSchema,
+      notificationIndexes
     );
 
     console.log("✅ All schemas initialized successfully!");
@@ -67,18 +82,31 @@ const createCollectionWithValidation = async (
       .toArray();
 
     if (collections.length === 0) {
-      // Create collection with validation
+      // Create collection first without validation (Atlas requirement)
       console.log(`Creating collection: ${collectionName}`);
-      await db.createCollection(collectionName, schema);
+      await db.createCollection(collectionName);
+
+      // Then add validation using collMod
+      if (schema && (schema.validator || schema.$jsonSchema)) {
+        console.log(`Adding validation to: ${collectionName}`);
+        const validator = schema.validator || schema;
+        await db.command({
+          collMod: collectionName,
+          validator: validator,
+        });
+      }
     } else {
       // Update validation rules for existing collection
       console.log(
         `Updating validation for existing collection: ${collectionName}`
       );
-      await db.command({
-        collMod: collectionName,
-        validator: schema.validator,
-      });
+      if (schema && (schema.validator || schema.$jsonSchema)) {
+        const validator = schema.validator || schema;
+        await db.command({
+          collMod: collectionName,
+          validator: validator,
+        });
+      }
     }
 
     // Create indexes

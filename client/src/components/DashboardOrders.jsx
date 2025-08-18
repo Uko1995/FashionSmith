@@ -16,7 +16,7 @@ import {
   MapPinIcon,
   PackageIcon,
   SparkleIcon,
-  // ArrowPathIcon,
+  ArrowClockwiseIcon,
   FunnelIcon,
 } from "@phosphor-icons/react";
 import toast from "react-hot-toast";
@@ -351,7 +351,7 @@ export default function DashboardOrders() {
               onClick={() => refetchOrders()}
               className="btn btn-primary gap-2 mt-4"
             >
-              <ArrowPathIcon className="w-4 h-4" />
+              <ArrowClockwiseIcon className="w-4 h-4" />
               Try Again
             </button>
           </div>

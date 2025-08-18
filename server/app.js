@@ -5,6 +5,8 @@ import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import paystackRoutes from "./routes/paystackRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import compression from "compression";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -30,8 +32,8 @@ app.use(
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 1000, // limit each IP to 1000 requests per windowMs
+  windowMs: 10 * 60 * 1000, // 10 minute
+  max: 3000, // limit each IP to 3000 requests per windowMs
   message: {
     error: "Too many requests from this IP, please try again later.",
   },
@@ -41,7 +43,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 auth requests per windowMs
+  max: 100, // limit each IP to 100 auth requests per windowMs
   message: {
     error: "Too many authentication attempts, please try again later.",
   },
@@ -110,6 +112,8 @@ app.use("/api/users", authLimiter, userRoutes);
 app.use("/api/admin", authLimiter, adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/payments", paystackRoutes);
+app.use("/api/notifications", authLimiter, notificationRoutes);
 
 // Root API endpoint
 app.get("/api", (req, res) => {

@@ -46,6 +46,11 @@ export const measurementSchema = {
           minimum: 0,
           description: "Trouser length measurement in inches/cm",
         },
+        TrouserWaist: {
+          bsonType: "number",
+          minimum: 0,
+          description: "Trouser waist measurement in inches/cm",
+        },
         SuitLength: {
           bsonType: "number",
           minimum: 0,
@@ -114,6 +119,16 @@ export const measurementSchema = {
           minimum: 0,
           description: "Suit waist measurement in inches/cm",
         },
+        agbadaLength: {
+          bsonType: "number",
+          minimum: 0,
+          description: "Agbada length measurement in inches/cm",
+        },
+        waistCoatLength: {
+          bsonType: "number",
+          minimum: 0,
+          description: "waist coat length measurement in inches/cm",
+        },
       },
     },
   },
@@ -142,6 +157,7 @@ export const MeasurementInterface = {
   MidSleeve: "number",
   ShortSleeveWidth: "number",
   TrouserLength: "number",
+  TrouserWaist: "number",
   ThighWidth: "number",
   KneeWidth: "number",
   AnkleWidth: "number",
@@ -151,6 +167,8 @@ export const MeasurementInterface = {
   ShirtLength: "number",
   SuitChest: "number",
   SuitWaist: "number",
+  agbadaLength: "number",
+  waistCoatLength: "number",
 };
 
 // Default values
@@ -158,6 +176,23 @@ export const measurementDefaults = {
   unit: "inches",
   createdAt: () => new Date(),
   updatedAt: () => new Date(),
+  // Set default values for all measurement fields to avoid MongoDB validation errors
+  KaftanLength: 0,
+  TrouserLength: 0,
+  TrouserWaist: 0,
+  SuitLength: 0,
+  LongSleeve: 0,
+  ShortSleeve: 0,
+  MidSleeve: 0,
+  ShortSleeveWidth: 0,
+  ThighWidth: 0,
+  KneeWidth: 0,
+  AnkleWidth: 0,
+  ShirtLength: 0,
+  SuitChest: 0,
+  SuitWaist: 0,
+  agbadaLength: 0,
+  waistCoatLength: 0,
 };
 
 // Validation functions
@@ -171,7 +206,6 @@ export const validateMeasurement = (measurementData) => {
     "Chest",
     "NaturalWaist",
     "Hip",
-    "TrouserLength",
   ];
   const numericFields = [
     "Neck",
@@ -186,12 +220,15 @@ export const validateMeasurement = (measurementData) => {
     "MidSleeve",
     "ShortSleeveWidth",
     "TrouserLength",
+    "TrouserWaist",
     "ThighWidth",
     "KneeWidth",
     "AnkleWidth",
     "ShirtLength",
     "SuitChest",
     "SuitWaist",
+    "agbadaLength",
+    "waistCoatLength",
   ];
 
   // Check required fields
@@ -229,10 +266,19 @@ export const validateMeasurement = (measurementData) => {
 
 // Helper function to prepare measurement data for insertion
 export const prepareMeasurementData = (measurementData) => {
-  return {
+  // Filter out undefined values from measurementData to prevent overriding defaults
+  const cleanedData = Object.fromEntries(
+    Object.entries(measurementData).filter(
+      ([key, value]) => value !== undefined
+    )
+  );
+
+  const result = {
     ...measurementDefaults,
-    ...measurementData,
+    ...cleanedData,
     createdAt: measurementData.createdAt || new Date(),
     updatedAt: new Date(),
   };
+
+  return result;
 };

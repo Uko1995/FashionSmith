@@ -232,10 +232,10 @@ export default function Profile() {
                   {/* User Info */}
                   <div className="flex-1 text-center lg:text-left space-y-4">
                     <div>
-                      <h2 className="text-2xl lg:text-4xl xl:text-5xl font-bold mb-2 bg-gradient-to-r from-base-content to-base-content/80 bg-clip-text text-transparent">
+                      <h2 className="text-2xl lg:text-4xl xl:text-5xl font-bold mt-4 mb-2 bg-gradient-to-r from-base-content to-base-content/80 bg-clip-text text-transparent">
                         {userProfile?.firstName} {userProfile?.lastName}
                       </h2>
-                      <div className=" flex items-center  justify-center gap-2 space-y-2">
+                      <div className=" flex items-center  justify-center gap-5 space-y-2">
                         <p className="text-base-content/70 flex items-center justify-center lg:justify-start gap-1.5">
                           <EnvelopeIcon className="w-4 h-4" />
                           <span className="mb-1">{userProfile?.email}</span>

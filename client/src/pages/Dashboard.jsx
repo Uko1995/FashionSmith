@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { useNavigate, useLocation, Outlet, Link } from "react-router-dom";
 import {
   HouseIcon,
   UserIcon,
@@ -30,6 +30,7 @@ import {
 import { dashboardAPI } from "../services/api";
 import SVGFallback from "../components/SVGFallBack";
 import useLogoutWithNav from "../hooks/useLogoutWithNav";
+import FashionSmithLogo from "../components/FashionSmithLogo";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -197,12 +198,13 @@ export default function Dashboard() {
         } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-base-300">
-          <h2
-            onClick={() => navigate("/")}
-            className="text-xl font-bold text-primary cursor-pointer"
+          <Link
+            to="/"
+            className=" transition-all duration-200 scale-105 p-2 -m-2"
+            aria-label="FashionSmith Home"
           >
-            FashionSmith
-          </h2>
+            <FashionSmithLogo className="h-8 w-auto sm:h-10 md:h-12 lg:h-60 -ms-11 transition-all duration-200" />
+          </Link>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden btn btn-ghost btn-sm"
