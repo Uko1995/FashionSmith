@@ -37,23 +37,23 @@ export default function ProductAndService() {
       : products.filter((product) => product.category === selectedCategory);
 
   return (
-    <section className="py-8 md:py-16 lg:py-20 px-4 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden">
+    <section className="py-4 md:py-8 lg:py-12 px-4 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Enhanced Header */}
-        <div className="text-center mb-12 md:mb-16 lg:mb-20">
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-base-content mb-6 md:mb-8">
+        <div className="text-center mb-6 md:mb-8 lg:mb-10">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-base-content mb-3 md:mb-4">
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Exquisite
             </span>
-            <br />
+            {"    "}
             <span className="text-base-content">Products</span>
           </h2>
 
-          <p className="text-lg md:text-xl lg:text-2xl text-base-content/70 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg lg:text-xl text-base-content/70 max-w-3xl mx-auto leading-relaxed">
             Discover our handcrafted collection of bespoke garments, where
             <span className="text-primary font-semibold">
               {" "}
@@ -67,46 +67,37 @@ export default function ProductAndService() {
           </p>
 
           {/* Stats Section */}
-          <div className="flex flex-wrap justify-center gap-6 md:gap-8 mt-8 md:mt-12">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-4 md:mt-6">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-primary">
+              <div className="text-xl md:text-2xl font-bold text-primary">
                 {products.length}+
               </div>
-              <div className="text-sm text-base-content/60">
+              <div className="text-xs text-base-content/60">
                 Premium Products
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-secondary">
+              <div className="text-xl md:text-2xl font-bold text-secondary">
                 {categories.length - 1}+
               </div>
-              <div className="text-sm text-base-content/60">Categories</div>
+              <div className="text-xs text-base-content/60">Categories</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-accent">
+              <div className="text-xl md:text-2xl font-bold text-accent">
                 100%
               </div>
-              <div className="text-sm text-base-content/60">Handcrafted</div>
+              <div className="text-xs text-base-content/60">Handcrafted</div>
             </div>
           </div>
         </div>
         {/* Enhanced Category Filter */}
-        <div className="space-y-6 md:space-y-8">
-          <div className="text-center">
-            <h3 className="text-xl md:text-2xl font-bold text-base-content mb-2">
-              Browse by Category
-            </h3>
-            <p className="text-base-content/60 mb-6">
-              Find exactly what you're looking for
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+        <div className="space-y-4 md:space-y-6">
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {categories.map((category, index) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`group relative px-6 md:px-8 py-4 md:py-4 rounded-2xl font-semibold transition-all duration-500 text-sm md:text-base overflow-hidden ${
+                className={`group relative px-4 md:px-6 py-2 md:py-3 rounded-2xl font-semibold transition-all duration-500 text-sm md:text-base overflow-hidden ${
                   selectedCategory === category
                     ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl transform scale-105"
                     : "bg-base-100 text-base-content hover:bg-base-200 shadow-lg hover:shadow-xl hover:scale-105"
@@ -131,7 +122,7 @@ export default function ProductAndService() {
         </div>
 
         {/* Enhanced Products Grid */}
-        <div className="mt-12 md:mt-16">
+        <div className="mt-6 md:mt-8">
           {isLoading ? (
             <div className="flex flex-col justify-center items-center py-20">
               <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
@@ -176,7 +167,7 @@ export default function ProductAndService() {
                 </p>
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
                 {filteredProducts.map((product, index) => {
                   const mainImage =
                     product.images?.find((img) => img.isMain) ||
@@ -195,7 +186,7 @@ export default function ProductAndService() {
                       }}
                     >
                       {/* Image Container */}
-                      <div className="relative h-80 md:h-96 overflow-hidden">
+                      <div className="relative h-80 md:h-100 overflow-hidden">
                         <img
                           src={imageUrl}
                           alt={product.name}
@@ -208,31 +199,31 @@ export default function ProductAndService() {
                         {/* Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/60 transition-all duration-500"></div>
 
-                        {/* Floating Elements */}
-                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
-                          {/* Category Badge */}
-                          <span className="bg-white/90 backdrop-blur-md text-base-content px-3 py-1.5 rounded-full text-xs font-bold shadow-lg border border-white/30">
-                            {product.category}
-                          </span>
-
-                          {/* Featured Badge */}
-                          {product.featured && (
-                            <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-full shadow-lg">
-                              <StarIcon className="w-4 h-4 text-white" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Price Badge */}
-                        <div className="absolute top-4 right-4 z-10">
-                          <div className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-full font-bold shadow-xl text-sm backdrop-blur-md">
-                            ₦{product.basePrice?.toLocaleString() || "N/A"}
-                          </div>
-                        </div>
-
                         {/* Content Overlay */}
                         <div className="absolute bottom-0 left-0 right-0 p-3 text-white z-20">
                           <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-3 border border-white/20 shadow-2xl">
+                            {/* Badges Section */}
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex items-center gap-2">
+                                {/* Category Badge */}
+                                <span className="bg-white/90 backdrop-blur-md text-base-content px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-white/30">
+                                  {product.category}
+                                </span>
+
+                                {/* Featured Badge */}
+                                {product.featured && (
+                                  <div className="bg-gradient-to-r from-primary to-secondary p-1.5 rounded-full shadow-lg">
+                                    <StarIcon className="w-3 h-3 text-white" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Price Badge */}
+                              <div className="bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full font-bold shadow-xl text-base backdrop-blur-md">
+                                ₦{product.basePrice?.toLocaleString() || "N/A"}
+                              </div>
+                            </div>
+
                             <h3 className="text-lg md:text-xl font-bold mb-2 group-hover:text-primary-content transition-colors duration-300">
                               {product.name}
                             </h3>
@@ -262,8 +253,8 @@ export default function ProductAndService() {
         </div>
 
         {/* Enhanced Call to Action */}
-        <div className="mt-16 md:mt-24 text-center relative">
-          <div className="bg-gradient-to-r from-primary via-secondary to-primary p-8 md:p-12 lg:p-16 rounded-3xl text-white shadow-2xl relative overflow-hidden">
+        <div className="mt-8 md:mt-12 text-center relative">
+          <div className="bg-gradient-to-r from-primary via-secondary to-primary p-6 md:p-8 lg:p-10 rounded-3xl text-white shadow-2xl relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 left-0 w-40 h-40 border border-white/30 rounded-full"></div>
@@ -272,17 +263,16 @@ export default function ProductAndService() {
             </div>
 
             <div className="relative z-10">
-              <SparkleIcon className="w-12 h-12 mx-auto mb-4 animate-pulse" />
-              <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">
                 Ready to Elevate Your Style?
               </h3>
-              <p className="text-lg md:text-xl lg:text-2xl mb-8 md:mb-10 opacity-90 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl mb-6 md:mb-8 opacity-90 max-w-2xl mx-auto leading-relaxed">
                 Experience the perfect blend of traditional craftsmanship and
                 modern design. Let FashionSmith create something extraordinary
                 for you.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center max-w-md mx-auto">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center max-w-md mx-auto">
                 <button className="btn btn-outline btn-lg text-white border-white/70 hover:bg-white hover:text-primary hover:border-white transition-all duration-300 shadow-xl backdrop-blur-md">
                   Schedule Consultation
                 </button>
