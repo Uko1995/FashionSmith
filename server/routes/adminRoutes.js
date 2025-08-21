@@ -8,6 +8,7 @@ const router = express.Router();
 router.get("/stats", verifyJWT, admin.isAdmin, admin.getDashboardStats);
 router.get("/orders", verifyJWT, admin.isAdmin, admin.getAllOrders);
 router.get("/users", verifyJWT, admin.isAdmin, admin.getUsers);
+router.get("/users/:userId", verifyJWT, admin.isAdmin, admin.getUserDetails);
 router.get("/products", verifyJWT, admin.isAdmin, admin.getProducts);
 router.post("/products", verifyJWT, admin.isAdmin, admin.createProduct);
 

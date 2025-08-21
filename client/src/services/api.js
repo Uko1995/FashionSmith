@@ -144,4 +144,45 @@ export const paymentAPI = {
   getPaymentStatus: (paymentId) => apiClient.get(`/api/payments/${paymentId}`),
 };
 
+// Admin API calls
+export const adminAPI = {
+  // Dashboard stats
+  getDashboardStats: () => apiClient.get("/api/admin/stats"),
+
+  // User management
+  getUsers: () => apiClient.get("/api/admin/users"),
+  getUserDetails: (userId) => apiClient.get(`/api/admin/users/${userId}`),
+
+  // Order management
+  getAllOrders: () => apiClient.get("/api/admin/orders"),
+
+  // Product management
+  getProducts: () => apiClient.get("/api/admin/products"),
+  createProduct: (data) => apiClient.post("/api/admin/products", data),
+  updateProduct: (productId, data) => apiClient.put(`/api/products/${productId}`, data),
+  deleteProduct: (productId) => apiClient.delete(`/api/products/${productId}`),
+  uploadProductImages: (productId, formData) => {
+    return apiClient.post(`/api/products/${productId}/images`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  uploadFlexibleImages: (productId, formData) => {
+    return apiClient.post(
+      `/api/products/${productId}/upload-images`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
+  deleteProductImage: (productId, imagePublicId) =>
+    apiClient.delete(`/api/products/${productId}/images/${imagePublicId}`),
+  setMainImage: (productId, imagePublicId) =>
+    apiClient.patch(`/api/products/${productId}/images/${imagePublicId}/main`),
+};
+
 export default apiClient;

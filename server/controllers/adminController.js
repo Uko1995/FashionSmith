@@ -5,12 +5,6 @@ import bcrypt from "bcrypt";
 const getUsers = async (req, res) => {
   try {
     const users = await collections.users.find({}).toArray();
-    if (!users || users.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No Users found",
-      });
-    }
 
     const sanitizedUsers = users.map((user) => ({
       id: user._id,
@@ -89,13 +83,7 @@ const getAllOrders = async (req, res) => {
       ])
       .toArray();
 
-    if (orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No Orders found",
-      });
-    }
-
+    // Always return success with the orders array (empty or populated)
     const formattedOrders = orders.map((order) => ({
       orderId: order._id,
       garment: order.garment,
@@ -180,12 +168,7 @@ const getDashboardStats = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const products = await collections.products.find({}).toArray();
-    if (!products || products.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No Products added yet",
-      });
-    }
+
     res.json({
       success: true,
       data: products,
@@ -219,21 +202,162 @@ const createProduct = async (req, res) => {
       description,
       category,
       basePrice,
+      price: `From ₦${basePrice.toLocaleString()}`, // Generate display price
+      type: req.body.type || name, // Use provided type or default to product name
       featured: featured || false,
+      available: true, // Default to available
+      isActive: req.body.isActive !== undefined ? req.body.isActive : true,
       status: "active",
       makingTime: req.body.makingTime || "2-3 weeks", // Default making time
       orderCount: 0, // Initialize order count
       createdAt: new Date(),
-      image: req.body.image || "", // Optional image field
+      image: req.body.image || "", // Optional image field (legacy)
+      images: req.body.images || [], // New images array
     };
 
     const result = await collections.products.insertOne(newProduct);
     res.status(201).json({
       success: true,
-      data: result.ops[0],
+      data: result,
     });
   } catch (error) {
     console.error("Error creating product:", error.message, error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Operation failed",
+      error: error.message,
+    });
+  }
+};
+
+const getUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID format",
+      });
+    }
+
+    const userObjectId = new ObjectId(userId);
+
+    // Get user basic info
+    const user = await collections.users.findOne({ _id: userObjectId });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Get user's orders
+    const orders = await collections.orders
+      .find({ userId: userObjectId })
+      .toArray();
+
+    // Get user's measurements
+    const measurements = await collections.measurements
+      .find({ userId: userObjectId })
+      .toArray();
+
+    // Get user's payments
+    const payments = await collections.payments
+      .find({ userId: userObjectId })
+      .toArray();
+
+    // Get user's notifications
+    const notifications = await collections.notifications
+      .find({ userId: userObjectId })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
+
+    // Calculate statistics
+    const totalOrders = orders.length;
+    const completedOrders = orders.filter(
+      (order) => order.status === "completed"
+    ).length;
+    const totalSpent = orders.reduce(
+      (sum, order) => sum + (order.totalAmount || 0),
+      0
+    );
+    const avgOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
+
+    // Sanitize user data
+    const sanitizedUser = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastLogin: user.lastLogin,
+      profileImage: user.profileImage || null,
+    };
+
+    // Sanitize orders
+    const sanitizedOrders = orders.map((order) => ({
+      id: order._id,
+      productName: order.productName,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      createdAt: order.createdAt,
+      deliveryDate: order.deliveryDate,
+      customizations: order.customizations,
+    }));
+
+    // Sanitize measurements
+    const sanitizedMeasurements = measurements.map((measurement) => ({
+      id: measurement._id,
+      Neck: measurement.Neck,
+      Shoulder: measurement.Shoulder,
+      Chest: measurement.Chest,
+      NaturalWaist: measurement.NaturalWaist,
+      Hip: measurement.Hip,
+      KaftanLength: measurement.KaftanLength,
+      TrouserLength: measurement.TrouserLength,
+      TrouserWaist: measurement.TrouserWaist,
+      SuitLength: measurement.SuitLength,
+      LongSleeve: measurement.LongSleeve,
+      ShortSleeve: measurement.ShortSleeve,
+      MidSleeve: measurement.MidSleeve,
+      ShortSleeveWidth: measurement.ShortSleeveWidth,
+      ThighWidth: measurement.ThighWidth,
+      KneeWidth: measurement.KneeWidth,
+      AnkleWidth: measurement.AnkleWidth,
+      ShirtLength: measurement.ShirtLength,
+      SuitChest: measurement.SuitChest,
+      SuitWaist: measurement.SuitWaist,
+      agbadaLength: measurement.agbadaLength,
+      waistCoatLength: measurement.waistCoatLength,
+      unit: measurement.unit,
+      createdAt: measurement.createdAt,
+      updatedAt: measurement.updatedAt,
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        user: sanitizedUser,
+        orders: sanitizedOrders,
+        measurements: sanitizedMeasurements,
+        payments: payments,
+        notifications: notifications,
+        statistics: {
+          totalOrders,
+          completedOrders,
+          totalSpent,
+          avgOrderValue,
+          completionRate:
+            totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error.message, error.stack);
     res.status(500).json({
       success: false,
       message: "Operation failed",
@@ -249,6 +373,7 @@ const admin = {
   getDashboardStats,
   getProducts,
   createProduct,
+  getUserDetails,
 };
 
 export default admin;

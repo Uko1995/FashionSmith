@@ -5,14 +5,7 @@ export const productSchema = {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: [
-        "name",
-        "description",
-        "price",
-        "basePrice",
-        "category",
-        "type",
-      ],
+      required: ["name", "description", "price", "basePrice", "category"],
       properties: {
         name: {
           bsonType: "string",
@@ -35,13 +28,21 @@ export const productSchema = {
         },
         category: {
           bsonType: "string",
-          enum: ["Traditional", "Formal", "Casual", "Corporate", "Accessories"],
+          enum: [
+            "Traditional Wear",
+            "Formal Wear",
+            "Casual Wear",
+            "Suits",
+            "Shirts",
+            "Accessories",
+            "Traditional",
+            "Formal",
+            "Casual",
+            "Corporate",
+          ],
           description: "Product category",
         },
-        type: {
-          bsonType: "string",
-          description: "Product type (e.g., Agbada, Suit, Shirt)",
-        },
+
         featured: {
           bsonType: "bool",
           description: "Whether product is featured",
@@ -52,7 +53,37 @@ export const productSchema = {
         },
         image: {
           bsonType: "string",
-          description: "Product image URL/path",
+          description: "Product image URL/path (legacy field)",
+        },
+        images: {
+          bsonType: "array",
+          items: {
+            bsonType: "object",
+            properties: {
+              public_id: {
+                bsonType: "string",
+                description: "Cloudinary public ID",
+              },
+              url: {
+                bsonType: "string",
+                description: "Image URL",
+              },
+              width: {
+                bsonType: "number",
+                description: "Image width in pixels",
+              },
+              height: {
+                bsonType: "number",
+                description: "Image height in pixels",
+              },
+              isMain: {
+                bsonType: "bool",
+                description: "Whether this is the main product image",
+              },
+            },
+            required: ["public_id", "url"],
+          },
+          description: "Product images array with metadata",
         },
         fabrics: {
           bsonType: "array",
@@ -153,7 +184,6 @@ export const productSchema = {
 export const productIndexes = [
   { key: { name: 1 } },
   { key: { category: 1 } },
-  { key: { type: 1 } },
   { key: { featured: 1 } },
   { key: { available: 1 } },
   { key: { basePrice: 1 } },
@@ -171,7 +201,6 @@ export const ProductInterface = {
   price: "string",
   basePrice: "number",
   category: "Traditional | Formal | Casual | Corporate | Accessories",
-  type: "string",
   featured: "boolean",
   available: "boolean",
   image: "string",
@@ -211,7 +240,7 @@ export const productDefaults = {
       description: "Traditional African print",
     },
     {
-      name: "Senator",
+      name: "Cashmere",
       price: 8000,
       available: true,
       description: "Luxury senator material",
@@ -263,26 +292,13 @@ export const productDefaults = {
 };
 
 // Categories and types
-export const productCategories = [
-  "Traditional",
-  "Formal",
-  "Casual",
-  "Corporate",
-  "Accessories",
-];
+export const productCategories = ["Traditional", "Formal", "Casual"];
 
 export const traditionalTypes = ["Agbada", "Kaftan", "Dashiki", "Babariga"];
 
 export const formalTypes = ["Suit", "Tuxedo", "Blazer", "Waistcoat"];
 
 export const casualTypes = ["Shirt", "Polo", "T-Shirt", "Shorts"];
-
-export const corporateTypes = [
-  "Business Suit",
-  "Dress Shirt",
-  "Trouser",
-  "Tie",
-];
 
 // Validation functions
 export const validateProduct = (productData) => {
@@ -309,10 +325,6 @@ export const validateProduct = (productData) => {
     !productCategories.includes(productData.category)
   ) {
     errors.push(`category must be one of: ${productCategories.join(", ")}`);
-  }
-
-  if (!productData.type || typeof productData.type !== "string") {
-    errors.push("type is required and must be a string");
   }
 
   return {

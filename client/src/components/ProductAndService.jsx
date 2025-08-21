@@ -1,152 +1,35 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { productAPI } from "../services/api";
 import {
-  ShirtFoldedIcon,
   StarIcon,
-  ArrowRightIcon,
-  CheckCircleIcon,
-  WrenchIcon,
-  ScissorsIcon,
-  RulerIcon,
-  SparkleIcon,
-  CrownIcon,
-  SuitcaseIcon,
   ShoppingCartIcon,
+  ImageIcon,
+  SparkleIcon,
+  HeartIcon,
+  TrendUpIcon,
 } from "@phosphor-icons/react";
 
-const products = [
-  {
-    id: 1,
-    name: "Kaftans",
-    image: "/kaftans.webp",
-    price: "From ₦60,000",
-    category: "Traditional",
-    icon: <CrownIcon size={24} />,
-    color: "from-amber-500 to-orange-500",
-  },
-  {
-    id: 2,
-    name: "Tailored Suits",
-    image: "suit.jpg",
-    price: "From ₦90,000",
-    category: "Formal",
-    icon: <SuitcaseIcon size={24} />,
-    color: "from-slate-600 to-gray-800",
-  },
-  {
-    id: 4,
-    name: "Custom Shirts",
-    image: "shirt.jpeg",
-    price: "From ₦20,000",
-    category: "Formal",
-    icon: <ShirtFoldedIcon size={24} />,
-    color: "from-emerald-500 to-teal-600",
-  },
-  {
-    id: 6,
-    name: "Casual Shirts",
-    image:
-      "https://images.unsplash.com/photo-1564257577633-15999cec5fff?w=400&h=500&fit=crop",
-    price: "From ₦20,000",
-    category: "Casual",
-    icon: <ShirtFoldedIcon size={24} />,
-    color: "from-emerald-500 to-teal-600",
-  },
-  {
-    id: 7,
-    name: "Tailored Trousers",
-    image:
-      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=500&fit=crop",
-    price: "From ₦20,000",
-    category: "Formal",
-    icon: <RulerIcon size={24} />,
-    color: "from-purple-600 to-violet-700",
-  },
-  {
-    id: 9,
-    name: "Tailored Trousers",
-    image:
-      "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=500&fit=crop",
-    price: "From ₦20,000",
-    category: "Casual",
-    icon: <RulerIcon size={24} />,
-    color: "from-purple-600 to-violet-700",
-  },
-  {
-    id: 10,
-    name: "Waistcoats",
-    image:
-      "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=500&fit=crop",
-    price: "From ₦11,000",
-    category: "Formal",
-    icon: <SparkleIcon size={24} />,
-    color: "from-rose-500 to-pink-600",
-  },
-  {
-    id: 11,
-    name: "Royal Agbadas",
-    image: "agbada.jpg",
-    price: "From ₦90,000",
-    category: "Traditional",
-    icon: <CrownIcon size={24} />,
-    color: "from-yellow-500 to-amber-600",
-  },
-];
-
-const services = [
-  {
-    id: 1,
-    name: "Professional Fittings",
-    description:
-      "Expert measurement sessions to ensure your garments fit like a glove",
-    icon: <RulerIcon size={32} />,
-    features: [
-      "Comprehensive body measurements",
-      "Posture and fit analysis",
-      "Style consultation",
-      "Follow-up adjustments",
-    ],
-    price: "₦15,000",
-    duration: "45 minutes",
-    color: "bg-primary",
-  },
-  {
-    id: 2,
-    name: "Amendments & Alterations",
-    description:
-      "Modify existing garments to achieve the perfect fit and style",
-    icon: <ScissorsIcon size={32} />,
-    features: [
-      "Size adjustments",
-      "Style modifications",
-      "Fabric updates",
-      "Quality restoration",
-    ],
-    price: "From ₦8,000",
-    duration: "1-3 days",
-    color: "bg-secondary",
-  },
-  {
-    id: 3,
-    name: "Garment Repairs",
-    description: "Restore your favorite pieces to their original glory",
-    icon: <WrenchIcon size={32} />,
-    features: [
-      "Seam repairs",
-      "Button replacement",
-      "Zipper fixes",
-      "Fabric patching",
-    ],
-    price: "From ₦5,000",
-    duration: "1-2 days",
-    color: "bg-accent",
-  },
-];
-
 export default function ProductAndService() {
-  const [activeTab, setActiveTab] = useState("products");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const categories = ["All", "Traditional", "Formal", "Casual"];
+  // Fetch products from API
+  const {
+    data: productsData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: productAPI.getProducts,
+  });
+
+  const products = productsData?.data?.data || [];
+
+  // Extract unique categories from products
+  const uniqueCategories = [
+    ...new Set(products.map((product) => product.category)),
+  ];
+  const categories = ["All", ...uniqueCategories];
 
   const filteredProducts =
     selectedCategory === "All"
@@ -154,245 +37,257 @@ export default function ProductAndService() {
       : products.filter((product) => product.category === selectedCategory);
 
   return (
-    <section className="py-6 md:py-12 lg:py-16 px-4 bg-gradient-to-br from-base-100 via-base-200 to-base-100">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-12 lg:mb-16">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-base-content mb-4 md:mb-6">
-            Products & Services
+    <section className="py-8 md:py-16 lg:py-20 px-4 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Enhanced Header */}
+        <div className="text-center mb-12 md:mb-16 lg:mb-20">
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-base-content mb-6 md:mb-8">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Exquisite
+            </span>
+            <br />
+            <span className="text-base-content">Products</span>
           </h2>
-          <p className="text-lg md:text-xl text-base-content/70 max-w-3xl mx-auto leading-relaxed">
-            Discover our exquisite collection of bespoke garments and
-            professional services, crafted with precision and passion to elevate
-            your style.
+
+          <p className="text-lg md:text-xl lg:text-2xl text-base-content/70 max-w-4xl mx-auto leading-relaxed">
+            Discover our handcrafted collection of bespoke garments, where
+            <span className="text-primary font-semibold">
+              {" "}
+              traditional artistry{" "}
+            </span>
+            meets
+            <span className="text-secondary font-semibold">
+              {" "}
+              contemporary elegance
+            </span>
           </p>
-        </div>
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-8 md:mb-12">
-          <div className="bg-base-100 p-1.5 md:p-2 rounded-2xl shadow-lg border border-base-300">
-            <div className="flex gap-1.5 md:gap-2">
-              <button
-                onClick={() => setActiveTab("products")}
-                className={`px-6 md:px-8 py-4 md:py-4 rounded-xl font-semibold transition-all duration-300 text-base md:text-base min-h-12 md:min-h-auto ${
-                  activeTab === "products"
-                    ? "bg-primary text-primary-content shadow-lg transform scale-105"
-                    : "text-base-content hover:bg-base-200"
-                }`}
-              >
-                Our Products
-              </button>
-              <button
-                onClick={() => setActiveTab("services")}
-                className={`px-6 md:px-8 py-4 md:py-4 rounded-xl font-semibold transition-all duration-300 text-base md:text-base min-h-12 md:min-h-auto ${
-                  activeTab === "services"
-                    ? "bg-primary text-primary-content shadow-lg transform scale-105"
-                    : "text-base-content hover:bg-base-200"
-                }`}
-              >
-                Our Services
-              </button>
+          {/* Stats Section */}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8 mt-8 md:mt-12">
+            <div className="text-center">
+              <div className="text-2xl md:text-3xl font-bold text-primary">
+                {products.length}+
+              </div>
+              <div className="text-sm text-base-content/60">
+                Premium Products
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl md:text-3xl font-bold text-secondary">
+                {categories.length - 1}+
+              </div>
+              <div className="text-sm text-base-content/60">Categories</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl md:text-3xl font-bold text-accent">
+                100%
+              </div>
+              <div className="text-sm text-base-content/60">Handcrafted</div>
             </div>
           </div>
         </div>
+        {/* Enhanced Category Filter */}
+        <div className="space-y-6 md:space-y-8">
+          <div className="text-center">
+            <h3 className="text-xl md:text-2xl font-bold text-base-content mb-2">
+              Browse by Category
+            </h3>
+            <p className="text-base-content/60 mb-6">
+              Find exactly what you're looking for
+            </p>
+          </div>
 
-        {/* Products Section */}
-        {activeTab === "products" && (
-          <div className="space-y-8 md:space-y-12">
-            {/* Category Filter */}
-            <div className="flex flex-wrap justify-center gap-2 md:gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-6 md:px-6 py-3 md:py-3 rounded-full font-medium transition-all duration-300 text-base md:text-base min-h-12 md:min-h-10 ${
-                    selectedCategory === category
-                      ? "bg-primary text-primary-content shadow-lg transform scale-105"
-                      : "bg-base-100 text-base-content hover:bg-base-200 shadow-md"
-                  }`}
-                >
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+            {categories.map((category, index) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`group relative px-6 md:px-8 py-4 md:py-4 rounded-2xl font-semibold transition-all duration-500 text-sm md:text-base overflow-hidden ${
+                  selectedCategory === category
+                    ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl transform scale-105"
+                    : "bg-base-100 text-base-content hover:bg-base-200 shadow-lg hover:shadow-xl hover:scale-105"
+                }`}
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                }}
+              >
+                {selectedCategory === category && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse"></div>
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  {category === "All" && <TrendUpIcon className="w-4 h-4" />}
                   {category}
-                </button>
-              ))}
-            </div>
-
-            {/* Products Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="group relative rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2 h-80 md:h-96 lg:h-[400px]"
-                >
-                  {/* Full Height Image */}
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/90 transition-all duration-500"></div>
-
-                  {/* Category Badge */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="glass bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg border border-white/30">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  {/* Icon */}
-                  <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="glass bg-white/20 backdrop-blur-md text-white p-2 rounded-full border border-white/30">
-                      {product.icon}
-                    </div>
-                  </div>
-
-                  {/* Glass Card Content - Floating at Bottom */}
-                  <div className="absolute bottom-3 md:bottom-5 left-3 md:left-5 right-3 md:right-5 z-20">
-                    <div className="glass bg-white/10 rounded-xl backdrop-blur-3xl border-t border-white/20 p-3 md:p-4 lg:p-6 text-white">
-                      {/* Price Badge */}
-                      <div className="absolute -top-2 md:-top-3 right-2 md:right-4">
-                        <span className="bg-primary text-primary-content px-2 md:px-4 py-1 md:py-2 rounded-full font-bold shadow-lg text-xs md:text-sm">
-                          {product.price}
-                        </span>
-                      </div>
-
-                      <h3 className="text-base md:text-lg lg:text-xl font-bold mb-2 md:mb-3 group-hover:text-primary-content transition-colors duration-300">
-                        {product.name}
-                      </h3>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-1.5 md:gap-2">
-                        <button className="btn btn-primary btn-sm md:btn-sm flex-1 text-sm md:text-xs min-h-10 md:min-h-8">
-                          Order Now
-                        </button>
-                        <button className="btn btn-outline btn-primary btn-sm md:btn-sm px-3 md:px-3 text-white border-white hover:bg-white hover:text-primary min-h-10 md:min-h-8">
-                          <ShoppingCartIcon size={16} className="md:hidden" />
-                          <ShoppingCartIcon
-                            size={14}
-                            className="hidden md:block"
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  {selectedCategory === category && (
+                    <HeartIcon className="w-4 h-4 animate-bounce" />
+                  )}
+                </span>
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Services Section */}
-        {activeTab === "services" && (
-          <div className="space-y-8 md:space-y-12">
-            <div className="text-center mb-8 md:mb-12">
-              <h3 className="text-2xl md:text-3xl font-bold text-base-content mb-4">
-                Professional Tailoring Services
-              </h3>
-              <p className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto">
-                Expert craftsmanship and attention to detail in every service we
-                provide
+        {/* Enhanced Products Grid */}
+        <div className="mt-12 md:mt-16">
+          {isLoading ? (
+            <div className="flex flex-col justify-center items-center py-20">
+              <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+              <p className="text-base-content/60">
+                Loading our beautiful products...
               </p>
             </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="alert alert-error max-w-md mx-auto shadow-xl">
+                <span>Failed to load products. Please try again later.</span>
+              </div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="bg-base-100 rounded-3xl shadow-xl p-12 max-w-md mx-auto">
+                <ImageIcon className="w-20 h-20 mx-auto text-base-content/40 mb-6" />
+                <h3 className="text-xl font-bold text-base-content mb-2">
+                  {selectedCategory === "All"
+                    ? "No Products Available"
+                    : "Category Empty"}
+                </h3>
+                <p className="text-base-content/60">
+                  {selectedCategory === "All"
+                    ? "Our collection is being updated. Check back soon!"
+                    : `No products found in "${selectedCategory}" category. Try another category.`}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Products Count */}
+              <div className="text-center mb-8">
+                <p className="text-base-content/60">
+                  Showing{" "}
+                  <span className="font-semibold text-primary">
+                    {filteredProducts.length}
+                  </span>
+                  {selectedCategory === "All"
+                    ? " products"
+                    : ` products in "${selectedCategory}"`}
+                </p>
+              </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {services.map((service) => (
-                <div
-                  key={service.id}
-                  className="bg-base-100 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:-translate-y-2"
-                >
-                  {/* Header */}
-                  <div
-                    className={`${service.color} text-white p-4 md:p-6 lg:p-8 relative overflow-hidden`}
-                  >
-                    <div className="absolute top-0 right-0 opacity-10 transform rotate-12 translate-x-4 -translate-y-4">
-                      <div className="text-6xl md:text-8xl">{service.icon}</div>
-                    </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                {filteredProducts.map((product, index) => {
+                  const mainImage =
+                    product.images?.find((img) => img.isMain) ||
+                    product.images?.[0];
+                  const imageUrl =
+                    mainImage?.url ||
+                    product.image ||
+                    "/placeholder-product.jpg";
 
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
-                        <div className="bg-white/20 backdrop-blur-sm p-2 md:p-3 rounded-full">
-                          {service.icon}
+                  return (
+                    <div
+                      key={product._id}
+                      className="group relative rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-700 overflow-hidden hover:-translate-y-3 bg-base-100"
+                      style={{
+                        animationDelay: `${index * 150}ms`,
+                      }}
+                    >
+                      {/* Image Container */}
+                      <div className="relative h-80 md:h-96 overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            e.target.src = "/placeholder-product.jpg";
+                          }}
+                        />
+
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/60 transition-all duration-500"></div>
+
+                        {/* Floating Elements */}
+                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+                          {/* Category Badge */}
+                          <span className="bg-white/90 backdrop-blur-md text-base-content px-3 py-1.5 rounded-full text-xs font-bold shadow-lg border border-white/30">
+                            {product.category}
+                          </span>
+
+                          {/* Featured Badge */}
+                          {product.featured && (
+                            <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-full shadow-lg">
+                              <StarIcon className="w-4 h-4 text-white" />
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <h3 className="text-lg md:text-xl lg:text-2xl font-bold">
-                            {service.name}
-                          </h3>
-                          <div className="flex items-center gap-2 md:gap-4 text-white/80 text-xs md:text-sm mt-1">
-                            <span>💰 {service.price}</span>
-                            <span>⏰ {service.duration}</span>
+
+                        {/* Price Badge */}
+                        <div className="absolute top-4 right-4 z-10">
+                          <div className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-full font-bold shadow-xl text-sm backdrop-blur-md">
+                            ₦{product.basePrice?.toLocaleString() || "N/A"}
+                          </div>
+                        </div>
+
+                        {/* Content Overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white z-20">
+                          <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-3 border border-white/20 shadow-2xl">
+                            <h3 className="text-lg md:text-xl font-bold mb-2 group-hover:text-primary-content transition-colors duration-300">
+                              {product.name}
+                            </h3>
+
+                            <p className="text-sm text-white/90 mb-3 line-clamp-2 leading-relaxed">
+                              {product.description}
+                            </p>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2">
+                              <button className="btn btn-primary flex-1 btn-sm hover:btn-secondary transition-all duration-300 shadow-lg">
+                                Order Now
+                              </button>
+                              <button className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300">
+                                <ShoppingCartIcon className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-
-                      <p className="text-white/90 leading-relaxed text-sm md:text-base">
-                        {service.description}
-                      </p>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
 
-                  {/* Content */}
-                  <div className="p-4 md:p-6 lg:p-8">
-                    <h4 className="font-semibold text-base-content mb-3 md:mb-4 flex items-center gap-2 text-sm md:text-base">
-                      <StarIcon
-                        size={16}
-                        className="md:hidden text-yellow-500"
-                      />
-                      <StarIcon
-                        size={18}
-                        className="hidden md:block text-yellow-500"
-                      />
-                      What's Included:
-                    </h4>
-
-                    <div className="space-y-2 md:space-y-3 mb-6 md:mb-8">
-                      {service.features.map((feature, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-start gap-2 md:gap-3"
-                        >
-                          <CheckCircleIcon
-                            size={16}
-                            className="text-success flex-shrink-0 mt-0.5 md:hidden"
-                          />
-                          <CheckCircleIcon
-                            size={18}
-                            className="text-success flex-shrink-0 mt-0.5 hidden md:block"
-                          />
-                          <span className="text-base-content/70 text-sm md:text-base">
-                            {feature}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Action Button */}
-                    <button className="btn btn-primary w-full btn-md md:btn-md group-hover:shadow-lg transition-shadow duration-300 min-h-12">
-                      Book Service
-                    </button>
-                  </div>
-                </div>
-              ))}
+        {/* Enhanced Call to Action */}
+        <div className="mt-16 md:mt-24 text-center relative">
+          <div className="bg-gradient-to-r from-primary via-secondary to-primary p-8 md:p-12 lg:p-16 rounded-3xl text-white shadow-2xl relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-40 h-40 border border-white/30 rounded-full"></div>
+              <div className="absolute bottom-0 right-0 w-60 h-60 border border-white/20 rounded-full"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border border-white/10 rounded-full"></div>
             </div>
-          </div>
-        )}
 
-        {/* Call to Action */}
-        <div className="mt-12 md:mt-16 lg:mt-20 text-center bg-gradient-to-r from-primary to-secondary p-6 md:p-8 lg:p-12 rounded-3xl text-white shadow-2xl">
-          <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
-            Ready to Elevate Your Style?
-          </h3>
-          <p className="text-lg md:text-xl mb-6 md:mb-8 opacity-90 max-w-2xl mx-auto">
-            Experience the perfect blend of traditional craftsmanship and modern
-            design. Let FashionSmith create something extraordinary for you.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-            <button className="btn btn-outline btn-lg md:btn-lg text-white border-white hover:bg-white hover:text-primary min-h-12">
-              Schedule Consultation
-            </button>
-            <button className="btn btn-lg md:btn-lg bg-white text-primary hover:bg-base-200 min-h-12">
-              View Gallery
-            </button>
+            <div className="relative z-10">
+              <SparkleIcon className="w-12 h-12 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
+                Ready to Elevate Your Style?
+              </h3>
+              <p className="text-lg md:text-xl lg:text-2xl mb-8 md:mb-10 opacity-90 max-w-3xl mx-auto leading-relaxed">
+                Experience the perfect blend of traditional craftsmanship and
+                modern design. Let FashionSmith create something extraordinary
+                for you.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center max-w-md mx-auto">
+                <button className="btn btn-outline btn-lg text-white border-white/70 hover:bg-white hover:text-primary hover:border-white transition-all duration-300 shadow-xl backdrop-blur-md">
+                  Schedule Consultation
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

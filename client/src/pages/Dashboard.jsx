@@ -262,7 +262,7 @@ export default function Dashboard() {
           </nav>
 
           {/* Logout Button */}
-          <div className="p-4 border-t border-base-300">
+          <div className="p-4 border-t mt-28 border-base-300">
             <button
               onClick={handleLogout}
               className="flex items-center w-full px-3 py-1 text-sm text-error hover:bg-error/10 rounded-lg transition-colors"
@@ -273,7 +273,7 @@ export default function Dashboard() {
             {/* Admin Button */}
             {userData.role === "admin" && (
               <button
-                onClick={handleLogout}
+                onClick={() => navigate("/admin")}
                 className="flex items-center w-full px-3 py-2 text-sm font-bold text-error hover:bg-error/10 rounded-lg transition-colors"
               >
                 <UserGearIcon size={18} className="mr-3" />

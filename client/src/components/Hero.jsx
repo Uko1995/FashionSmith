@@ -14,7 +14,7 @@ export default function Hero() {
 
   // Handle navigation with smooth transitions
   const handleGetStarted = useCallback(() => {
-    navigate("/dashboard");
+    navigate("/gallery");
   }, [navigate]);
 
   const handleViewServices = useCallback(() => {
@@ -29,7 +29,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative -mt-16 w-full h-screen overflow-hidden">
+    <section className="relative  w-full h-screen overflow-hidden">
       {/* Background Image with Overlay */}
       <div
         className={`absolute inset-0 bg-cover md:bg-contain bg-black bg-center bg-no-repeat transition-opacity duration-1000 ${

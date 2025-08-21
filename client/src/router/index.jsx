@@ -136,6 +136,57 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "admin",
+    lazy: async () => {
+      const Admin = (await import("../pages/Admin")).default;
+      return {
+        Component: () => (
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        ),
+      };
+    },
+    errorElement: <ErrorElement />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import("../components/AdminDashboard")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "users",
+        lazy: async () => ({
+          Component: (await import("../components/AdminUsers")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "orders",
+        lazy: async () => ({
+          Component: (await import("../components/AdminOrders")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "products",
+        lazy: async () => ({
+          Component: (await import("../components/AdminProducts")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "settings",
+        lazy: async () => ({
+          Component: (await import("../components/AdminSettings")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+    ],
+  },
 ]);
 
 export default router;

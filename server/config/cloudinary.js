@@ -30,11 +30,28 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Configure multer
+// Configure multer for single image upload
 export const uploadProductImage = multer({
   storage: storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check file type
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed!"), false);
+    }
+  },
+});
+
+// Configure multer for multiple images upload
+export const uploadMultipleImages = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB per file
+    files: 10, // Maximum 10 files at once
   },
   fileFilter: (req, file, cb) => {
     // Check file type

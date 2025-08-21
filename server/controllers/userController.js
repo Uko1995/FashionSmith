@@ -73,7 +73,7 @@ const signUp = async (req, res) => {
         email: email.trim().toLowerCase(),
         password: hashedPassword,
         username,
-        role: "admin",
+        role: "user", // Default role should be "user", not "admin"
         isVerified: false,
         refreshToken: null,
       };
@@ -330,6 +330,7 @@ const login = async (req, res) => {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
+          role: user.role,
           isVerified: user.isVerified,
         },
       });

@@ -47,33 +47,15 @@ export default function DashboardSettings() {
 
   // Update preferences when measurements unit changes
   useEffect(() => {
-    setPreferences(prev => ({
+    setPreferences((prev) => ({
       ...prev,
-      measurementUnit: measurementsUnit
+      measurementUnit: measurementsUnit,
     }));
   }, [measurementsUnit]);
 
   // update measurements
   const updateMeasurementUnit = useMutation({
-    mutationFn: (unit) => {
-      // If measurements exist, include all existing data with the new unit
-      if (userMeasurements?.data) {
-        const existingMeasurements = { ...userMeasurements.data };
-        // Remove metadata fields
-        delete existingMeasurements._id;
-        delete existingMeasurements.userId;
-        delete existingMeasurements.createdAt;
-        delete existingMeasurements.updatedAt;
-        
-        return userAPI.updateMeasurement({ 
-          ...existingMeasurements,
-          unit 
-        });
-      } else {
-        // If no measurements exist, just try to update the unit
-        return userAPI.updateMeasurement({ unit });
-      }
-    },
+    mutationFn: (unit) => userAPI.updateMeasurement({ unit }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userMeasurements"] });
       toast.success("Unit of measurement updated successfully");
@@ -105,7 +87,7 @@ export default function DashboardSettings() {
       // Update measurement unit in the measurements collection only
       updateMeasurementUnit.mutate(value);
       // Update local state for immediate UI feedback
-      setPreferences(prev => ({ ...prev, [key]: value }));
+      setPreferences((prev) => ({ ...prev, [key]: value }));
     } else {
       // For other preferences, update user profile
       const newPreferences = { ...preferences, [key]: value };

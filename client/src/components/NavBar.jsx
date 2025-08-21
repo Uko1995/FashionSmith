@@ -178,7 +178,7 @@ export default function NavBar() {
               <div className="flex items-center space-x-4">
                 <UnderlineNavLink>
                   <NavLink
-                    to="/profile"
+                    to="/dashboard/profile"
                     aria-label="profile"
                     className={({ isActive }) =>
                       `text-sm font-medium transition-colors duration-200 hover:text-accent ${

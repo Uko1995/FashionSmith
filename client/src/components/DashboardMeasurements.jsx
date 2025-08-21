@@ -104,6 +104,20 @@ export default function DashboardMeasurements() {
     },
   });
 
+  // Update unit mutation
+  const updateUnitMutation = useMutation({
+    mutationFn: (newUnit) => userAPI.updateMeasurement({ unit: newUnit }),
+    onSuccess: () => {
+      toast.success("Measurement unit updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["userMeasurements"] });
+    },
+    onError: (error) => {
+      toast.error(
+        error.response?.data?.message || "Failed to update measurement unit"
+      );
+    },
+  });
+
   // Set form values when measurements data loads
   useEffect(() => {
     if (measurements) {
@@ -736,7 +750,7 @@ export default function DashboardMeasurements() {
                   <ClipboardIcon className="w-6 h-6 text-primary" />
                   Measurements
                 </h2>
-                <div className="bg-primary/15 rounded-lg p-2">
+                <div className="badge badge-primary badge-lg">
                   {measurements.unit || "inches"}
                 </div>
               </div>
@@ -985,10 +999,20 @@ export default function DashboardMeasurements() {
 
                   <div className="flex items-center gap-4">
                     {/* Unit Toggle */}
-                    <div className="bg-primary/15 p-3 rounded-lg">
-                      <span className="text-base text-primary">
-                        {currentUnit}
-                      </span>
+                    <div className="form-control">
+                      <label className="label cursor-pointer gap-2">
+                        <span className="label-text">Inches</span>
+                        <input
+                          type="checkbox"
+                          className="toggle toggle-primary"
+                          checked={currentUnit === "cm"}
+                          onChange={(e) => {
+                            const newUnit = e.target.checked ? "cm" : "inches";
+                            updateUnitMutation.mutate(newUnit);
+                          }}
+                        />
+                        <span className="label-text">CM</span>
+                      </label>
                     </div>
 
                     {/* Action Buttons */}
