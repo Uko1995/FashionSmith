@@ -14,11 +14,11 @@ export default function Hero() {
 
   // Handle navigation with smooth transitions
   const handleGetStarted = useCallback(() => {
-    navigate("/gallery");
+    navigate("/register");
   }, [navigate]);
 
-  const handleViewServices = useCallback(() => {
-    navigate("/services");
+  const handleViewGallery = useCallback(() => {
+    navigate("/gallery");
   }, [navigate]);
 
   // Handle image loading
@@ -82,10 +82,10 @@ export default function Hero() {
                 </button>
 
                 <button
-                  onClick={handleViewServices}
+                  onClick={handleViewGallery}
                   className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-gray-900 font-bold transition-all duration-300"
                 >
-                  View Our Services
+                  View Our Gallery
                 </button>
               </div>
             </div>

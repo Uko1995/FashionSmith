@@ -9,8 +9,10 @@ import {
   HeartIcon,
   TrendUpIcon,
 } from "@phosphor-icons/react";
+import { useCart } from "@/hooks/useCart";
 
 export default function ProductAndService() {
+  const { addToCart } = useCart();
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Fetch products from API
@@ -24,6 +26,22 @@ export default function ProductAndService() {
   });
 
   const products = productsData?.data?.data || [];
+
+  // Handle adding product to cart
+  const handleAddToCart = (product) => {
+    const mainImage =
+      product.images?.find((img) => img.isMain) || product.images?.[0];
+    const imageUrl =
+      mainImage?.url || product.image || "/placeholder-product.jpg";
+
+    addToCart({
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      image: imageUrl,
+      category: product.category,
+    });
+  };
 
   // Extract unique categories from products
   const uniqueCategories = [
@@ -237,7 +255,7 @@ export default function ProductAndService() {
                               <button className="btn btn-primary flex-1 btn-sm hover:btn-secondary transition-all duration-300 shadow-lg">
                                 Order Now
                               </button>
-                              <button className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300">
+                              <button onClick={handleAddToCart} className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300">
                                 <ShoppingCartIcon className="w-4 h-4" />
                               </button>
                             </div>

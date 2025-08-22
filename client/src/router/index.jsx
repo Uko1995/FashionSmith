@@ -68,6 +68,13 @@ const router = createBrowserRouter([
         }),
         errorElement: <ErrorElement />,
       },
+      {
+        path: "cart",
+        lazy: async () => ({
+          Component: (await import("../pages/CartPage")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
     ],
   },
   {

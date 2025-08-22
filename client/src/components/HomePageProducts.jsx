@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { productAPI } from "../services/api";
 import {
   StarIcon,
   ShoppingCartIcon,
@@ -9,7 +8,14 @@ import {
   TrendUpIcon,
 } from "@phosphor-icons/react";
 
+import { productAPI } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
+
 export default function HomePageProducts() {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
   // Fetch products from API
   const {
     data: productsData,
@@ -21,6 +27,22 @@ export default function HomePageProducts() {
   });
 
   const products = productsData?.data?.data || [];
+
+  // Handle adding product to cart
+  const handleAddToCart = (product) => {
+    const mainImage =
+      product.images?.find((img) => img.isMain) || product.images?.[0];
+    const imageUrl =
+      mainImage?.url || product.image || "/placeholder-product.jpg";
+
+    addToCart({
+      id: product._id,
+      name: product.name,
+      price: product.price,
+      image: imageUrl,
+      category: product.category,
+    });
+  };
 
   // Filter for specific products (suit, kaftan, agbada)
   const featuredProducts = products
@@ -159,7 +181,10 @@ export default function HomePageProducts() {
                         Order Now
                         <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                       </button>
-                      <button className="btn btn-outline btn-md px-6 group">
+                      <button
+                        className="btn btn-outline btn-md px-6 group"
+                        onClick={() => handleAddToCart(product)}
+                      >
                         <ShoppingCartIcon className="w-4 h-4 mr-2" />
                         Add to Cart
                       </button>
@@ -234,7 +259,10 @@ export default function HomePageProducts() {
                 Discover hundreds of unique designs crafted with passion and
                 precision
               </p>
-              <button className="btn btn-outline btn-md text-white border-white hover:bg-white hover:text-primary">
+              <button
+                onClick={() => navigate("/gallery")}
+                className="btn btn-outline btn-md text-white border-white hover:bg-white hover:text-primary"
+              >
                 View All Products
                 <ArrowRightIcon className="w-4 h-4 ml-2" />
               </button>

@@ -9,7 +9,9 @@ import {
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+
 import useSignUp from "../hooks/useSignUp";
+import RedAsterix from "./RedAsterix";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -200,6 +202,7 @@ export default function SignUp() {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text text-sm">First Name</span>
+                  <RedAsterix />
                 </label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
@@ -236,6 +239,7 @@ export default function SignUp() {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text text-sm">Last Name</span>
+                  <RedAsterix />
                 </label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
@@ -273,6 +277,7 @@ export default function SignUp() {
             <div className="form-control">
               <label className="label">
                 <span className="label-text text-sm">Email Address</span>
+                <RedAsterix />
               </label>
               <div className="relative">
                 <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
@@ -307,6 +312,7 @@ export default function SignUp() {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text text-sm">Password</span>
+                  <RedAsterix />
                 </label>
                 <div className="relative">
                   <LockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
@@ -364,6 +370,7 @@ export default function SignUp() {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text text-sm">Confirm Password</span>
+                  <RedAsterix />
                 </label>
                 <div className="relative">
                   <LockIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />

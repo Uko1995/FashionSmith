@@ -9,6 +9,7 @@ import {
   CheckCircleIcon,
   WhatsappLogoIcon,
 } from "@phosphor-icons/react";
+import RedAsterix from "./RedAsterix";
 
 export default function Contacts() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -160,7 +161,8 @@ export default function Contacts() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">First Name *</span>
+                    <span className="label-text font-medium">First Name </span>
+                    <RedAsterix />
                   </label>
                   <input
                     type="text"
@@ -187,7 +189,8 @@ export default function Contacts() {
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Last Name *</span>
+                    <span className="label-text font-medium">Last Name </span>
+                    <RedAsterix />
                   </label>
                   <input
                     type="text"
@@ -216,9 +219,8 @@ export default function Contacts() {
               {/* Email */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">
-                    Email Address *
-                  </span>
+                  <span className="label-text font-medium">Email Address</span>
+                  <RedAsterix />
                 </label>
                 <input
                   type="email"
@@ -243,37 +245,11 @@ export default function Contacts() {
                 )}
               </div>
 
-              {/* Phone */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Phone Number</span>
-                </label>
-                <input
-                  type="tel"
-                  className={`input input-bordered w-full ${
-                    errors.phone ? "input-error" : ""
-                  }`}
-                  placeholder="+234 809 123 4567"
-                  {...register("phone", {
-                    pattern: {
-                      value: /^[+]?[0-9\s\-()]{10,}$/,
-                      message: "Invalid phone number",
-                    },
-                  })}
-                />
-                {errors.phone && (
-                  <label className="label">
-                    <span className="label-text-alt text-error">
-                      {errors.phone.message}
-                    </span>
-                  </label>
-                )}
-              </div>
-
               {/* Subject */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Subject *</span>
+                  <span className="label-text font-medium">Subject</span>
+                  <RedAsterix />
                 </label>
                 <select
                   className={`select select-bordered w-full ${
@@ -301,12 +277,13 @@ export default function Contacts() {
               </div>
 
               {/* Message */}
-              <div className="form-control">
+              <div className="form-control flex flex-col">
                 <label className="label">
-                  <span className="label-text font-medium">Message *</span>
+                  <span className="label-text font-medium">Message </span>
+                  <RedAsterix />
                 </label>
                 <textarea
-                  className={`textarea textarea-bordered h-32 resize-none ${
+                  className={`textarea textarea-bordered h-32 w-full resize-none ${
                     errors.message ? "textarea-error" : ""
                   }`}
                   placeholder="Tell us more about your inquiry..."

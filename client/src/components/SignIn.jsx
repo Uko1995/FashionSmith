@@ -6,8 +6,10 @@ import {
 } from "@phosphor-icons/react";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+
 import { useForm } from "react-hook-form";
 import useSignIn from "../hooks/useSignIn";
+import RedAsterix from "./RedAsterix";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export default function SignIn() {
     if (isSuccess && data) {
       // Get the intended destination from location state (set by ProtectedRoute)
       const from = location.state?.from?.pathname || "/dashboard";
-      
+
       // Redirect to intended destination or dashboard
       if (data.redirectTo) {
         navigate(data.redirectTo);
@@ -162,6 +164,7 @@ export default function SignIn() {
                 <span className="label-text text-sm font-medium">
                   Email Address
                 </span>
+                <RedAsterix />
               </label>
               <div className="relative">
                 <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
@@ -194,6 +197,7 @@ export default function SignIn() {
             <div className="form-control">
               <label className="label py-1">
                 <span className="label-text text-sm font-medium">Password</span>
+                <RedAsterix />
                 <Link
                   to="/forgot-password"
                   className="label-text-alt link link-primary text-xs"
