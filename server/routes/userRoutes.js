@@ -1,6 +1,7 @@
 import express from "express";
 import users from "../controllers/userController.js";
 import { verifyJWT } from "../middleware/verifyJWT.js";
+import { uploadProfileImage } from "../middleware/profileImageUpload.js";
 import {
   validateUserRegistration,
   validateUserLogin,
@@ -33,6 +34,7 @@ router.get("/profile", verifyJWT, users.getUser);
 router.patch(
   "/updateProfile",
   verifyJWT,
+  uploadProfileImage.single("profileImage"),
   validateUserUpdate,
   users.updateUserInfo
 );

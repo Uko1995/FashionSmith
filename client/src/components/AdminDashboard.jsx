@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { adminAPI } from "../services/api";
+import { getProfileImageUrl, getUserInitials } from "../utils/imageUtils";
 import {
   UsersIcon,
   ShoppingBagIcon,
@@ -101,7 +102,7 @@ const AdminDashboard = () => {
             Welcome back! Here's what's happening with your business today.
           </p>
         </div>
-        
+
         <button
           onClick={() => navigate("/")}
           className="btn btn-outline btn-primary gap-2 self-start sm:self-auto"
@@ -195,11 +196,29 @@ const AdminDashboard = () => {
                     className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
                   >
                     <div className="flex items-center">
-                      <div className="avatar placeholder">
-                        <div className="bg-neutral text-neutral-content rounded-full w-10">
-                          <span className="text-sm">
-                            {user.username?.charAt(0).toUpperCase()}
-                          </span>
+                      <div className="avatar">
+                        <div className="w-10 h-10 rounded-full overflow-hidden">
+                          {user?.profileImage ? (
+                            <img
+                              src={getProfileImageUrl(user.profileImage)}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.log('Dashboard image failed to load:', user.profileImage);
+                                // Hide the img and show fallback
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center"
+                            style={{ display: user?.profileImage ? 'none' : 'flex' }}
+                          >
+                            <span className="text-sm">
+                              {getUserInitials(user)}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div className="ml-3">

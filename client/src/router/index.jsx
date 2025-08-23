@@ -75,73 +75,53 @@ const router = createBrowserRouter([
         }),
         errorElement: <ErrorElement />,
       },
+      // Add direct profile and settings routes
+      {
+        path: "profile",
+        lazy: async () => {
+          const ProfilePage = (await import("../pages/ProfilePage")).default;
+          return {
+            Component: () => (
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            ),
+          };
+        },
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "settings",
+        lazy: async () => {
+          const Settings = (await import("../pages/Settings")).default;
+          return {
+            Component: () => (
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            ),
+          };
+        },
+        errorElement: <ErrorElement />,
+      },
     ],
   },
+  // Keep legacy dashboard routes for backward compatibility but redirect to profile
   {
-    path: "dashboard",
+    path: "dashboard/*",
     lazy: async () => {
-      const Dashboard = (await import("../pages/Dashboard")).default;
+      const DashboardRedirect = (
+        await import("../components/DashboardRedirect")
+      ).default;
       return {
         Component: () => (
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardRedirect />
           </ProtectedRoute>
         ),
       };
     },
     errorElement: <ErrorElement />,
-    children: [
-      {
-        index: true,
-        lazy: async () => ({
-          Component: (await import("../components/DashboardOverview")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-      {
-        path: "profile",
-        lazy: async () => ({
-          Component: (await import("../pages/Profile")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-      {
-        path: "orders",
-        lazy: async () => ({
-          Component: (await import("../pages/Orders")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-      {
-        path: "notifications",
-        lazy: async () => ({
-          Component: (await import("../pages/Notifications")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-      {
-        path: "settings",
-        lazy: async () => ({
-          Component: (await import("../pages/Settings")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-
-      {
-        path: "payments",
-        lazy: async () => ({
-          Component: (await import("../pages/Payment")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-      {
-        path: "measurements",
-        lazy: async () => ({
-          Component: (await import("../pages/Measurements")).default,
-        }),
-        errorElement: <ErrorElement />,
-      },
-    ],
   },
   {
     path: "admin",

@@ -20,6 +20,10 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/tokenGenerator.js";
+import {
+  deleteProfileImage,
+  extractPublicIdFromUrl,
+} from "../middleware/profileImageUpload.js";
 
 dotenv.config();
 
@@ -332,6 +336,7 @@ const login = async (req, res) => {
           email: user.email,
           role: user.role,
           isVerified: user.isVerified,
+          profileImage: user.profileImage,
         },
       });
     }
@@ -375,6 +380,7 @@ const login = async (req, res) => {
           email: user.email,
           role: user.role,
           isVerified: user.isVerified,
+          profileImage: user.profileImage,
         },
         redirectTo: "/dashboard",
         dashboardUrl: "/api/dashboard",
@@ -515,10 +521,38 @@ const removeUser = async (req, res) => {
 };
 
 const updateUserInfo = async (req, res) => {
-  const { firstName, lastName, email, password, phoneNumber, address } =
-    req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phoneNumber,
+    address,
+    preferences,
+  } = req.body;
   try {
     const updates = {};
+
+    // Handle profile image upload
+    if (req.file) {
+      // If user has an existing profile image, delete it from Cloudinary
+      if (req.user.profileImage) {
+        try {
+          const publicId = extractPublicIdFromUrl(req.user.profileImage);
+          if (publicId) {
+            await deleteProfileImage(publicId);
+          }
+        } catch (deleteError) {
+          console.warn(
+            "Failed to delete old profile image:",
+            deleteError.message
+          );
+          // Continue with the update even if deletion fails
+        }
+      }
+      updates.profileImage = req.file.path; // Cloudinary URL
+    }
+
     if (firstName) updates.firstName = firstName.trim();
     if (lastName) updates.lastName = lastName.trim();
     if (email) updates.email = email.toLowerCase().trim();
@@ -569,6 +603,50 @@ const updateUserInfo = async (req, res) => {
       }
     }
 
+    // Handle preferences update
+    if (preferences !== undefined) {
+      if (preferences === null) {
+        updates.preferences = null;
+      } else {
+        // Validate and clean preferences
+        const cleanPreferences = {};
+        const booleanFields = [
+          "orderUpdates",
+          "paymentNotifications",
+          "autoSaveReceipts",
+          "emailNotifications",
+          "smsNotifications",
+          "marketingEmails",
+        ];
+        const stringFields = ["theme", "language"];
+
+        booleanFields.forEach((field) => {
+          if (preferences[field] !== undefined) {
+            cleanPreferences[field] = Boolean(preferences[field]);
+          }
+        });
+
+        stringFields.forEach((field) => {
+          if (preferences[field] && typeof preferences[field] === "string") {
+            cleanPreferences[field] = preferences[field].trim();
+          }
+        });
+
+        // Validate theme if provided
+        if (
+          cleanPreferences.theme &&
+          !["light", "dark", "auto"].includes(cleanPreferences.theme)
+        ) {
+          return res.status(400).json({
+            message: "Invalid theme. Must be 'light', 'dark', or 'auto'",
+          });
+        }
+
+        updates.preferences =
+          Object.keys(cleanPreferences).length > 0 ? cleanPreferences : null;
+      }
+    }
+
     const updatedUser = await userCollection.findOneAndUpdate(
       { email: req.user.email },
       { $set: updates },
@@ -591,6 +669,10 @@ const updateUserInfo = async (req, res) => {
         role: updatedUser.role,
         phoneNumber: updatedUser.phoneNumber,
         address: updatedUser.address,
+        profileImage: updatedUser.profileImage,
+        preferences: updatedUser.preferences,
+        isVerified: updatedUser.isVerified,
+        createdAt: updatedUser.createdAt,
       },
     });
   } catch (error) {

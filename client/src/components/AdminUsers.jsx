@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { adminAPI } from "../services/api";
 import UserDetailsModal from "./UserDetailsModal";
+import { getProfileImageUrl, getUserInitials } from "../utils/imageUtils";
 import {
   MagnifyingGlassIcon,
   UserIcon,
@@ -25,7 +26,7 @@ const AdminUsers = () => {
   });
 
   const AllUsers = users?.data?.data || [];
-  console.log("users:", users);
+  console.log("users in admin:", users);
 
   const filteredUsers = AllUsers?.filter(
     (user) =>
@@ -139,6 +140,40 @@ const AdminUsers = () => {
                 <tr key={user.id}>
                   <td>
                     <div className="flex items-center space-x-3">
+                      {/* Avatar */}
+                      <div className="relative">
+                        <div className="avatar">
+                          <div className="w-10 h-10 lg:w-10 lg:h-10 rounded-lg">
+                            {user?.profileImage ? (
+                              <img
+                                src={getProfileImageUrl(user.profileImage)}
+                                alt="Profile"
+                                className="w-full h-full object-cover rounded-full"
+                                onError={(e) => {
+                                  console.log(
+                                    "Image failed to load:",
+                                    user.profileImage
+                                  );
+                                  // Hide the img and show fallback
+                                  e.target.style.display = "none";
+                                  e.target.nextElementSibling.style.display =
+                                    "flex";
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className="bg-primary text-primary-content rounded-full w-full h-full flex items-center justify-center"
+                              style={{
+                                display: user?.profileImage ? "none" : "flex",
+                              }}
+                            >
+                              <span className="text-sm font-bold">
+                                {getUserInitials(user)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <div className="font-bold text-lg">{user.username}</div>
                     </div>
                   </td>

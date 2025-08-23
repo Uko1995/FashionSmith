@@ -77,6 +77,49 @@ export const userSchema = {
           },
           description: "User's address information",
         },
+        profileImage: {
+          bsonType: ["string", "null"],
+          description: "User's profile image URL",
+        },
+        preferences: {
+          bsonType: ["object", "null"],
+          properties: {
+            orderUpdates: {
+              bsonType: ["bool", "null"],
+              description: "Email notifications for order updates",
+            },
+            paymentNotifications: {
+              bsonType: ["bool", "null"],
+              description: "Email notifications for payments",
+            },
+            autoSaveReceipts: {
+              bsonType: ["bool", "null"],
+              description: "Automatically save receipts",
+            },
+            emailNotifications: {
+              bsonType: ["bool", "null"],
+              description: "General email notifications",
+            },
+            smsNotifications: {
+              bsonType: ["bool", "null"],
+              description: "SMS notifications",
+            },
+            marketingEmails: {
+              bsonType: ["bool", "null"],
+              description: "Marketing and promotional emails",
+            },
+            theme: {
+              bsonType: ["string", "null"],
+              enum: ["light", "dark", "auto"],
+              description: "UI theme preference",
+            },
+            language: {
+              bsonType: ["string", "null"],
+              description: "Language preference",
+            },
+          },
+          description: "User preferences and settings",
+        },
       },
     },
   },
@@ -108,6 +151,17 @@ export const UserInterface = {
     state: "string | null",
     country: "string | null",
   },
+  profileImage: "string | null",
+  preferences: {
+    orderUpdates: "boolean | null",
+    paymentNotifications: "boolean | null",
+    autoSaveReceipts: "boolean | null",
+    emailNotifications: "boolean | null",
+    smsNotifications: "boolean | null",
+    marketingEmails: "boolean | null",
+    theme: "light | dark | auto | null",
+    language: "string | null",
+  },
 };
 
 // Default values
@@ -117,6 +171,17 @@ export const userDefaults = {
   refreshToken: null,
   phoneNumber: null,
   address: null,
+  profileImage: null,
+  preferences: {
+    orderUpdates: true,
+    paymentNotifications: true,
+    autoSaveReceipts: true,
+    emailNotifications: true,
+    smsNotifications: false,
+    marketingEmails: false,
+    theme: "light",
+    language: "en",
+  },
   createdAt: () => new Date(),
 };
 

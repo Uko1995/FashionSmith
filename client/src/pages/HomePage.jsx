@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <>
       <ScrollToTop />
-      <div className="flex flex-col min-h-screen ">
+      <div className="flex flex-col mt-15 min-h-screen ">
         <NavBar />
         <main className="flex-1">
           <Outlet />

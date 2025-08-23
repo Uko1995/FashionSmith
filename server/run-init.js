@@ -21,7 +21,7 @@ async function runInitialization() {
     await setupDatabase();
 
     // Seed sample data
-    await seedSampleData();
+    // await seedSampleData();
 
     console.log("🎉 Database initialization completed successfully!");
   } catch (error) {

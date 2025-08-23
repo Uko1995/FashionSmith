@@ -1,6 +1,11 @@
 import React from "react";
 import { useCart } from "../hooks/useCart";
-import { MinusIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  MinusIcon,
+  PlusIcon,
+  TrashIcon,
+  ShoppingCartIcon,
+} from "@phosphor-icons/react";
 import { formatCurrency, parsePrice } from "../utils/currency";
 
 const CartPage = () => {
@@ -21,19 +26,7 @@ const CartPage = () => {
         <h2 className="text-3xl font-bold mb-8">Your Cart</h2>
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
-            <svg
-              className="w-24 h-24 mx-auto"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 5M7 13l-1.5-5m0 0L3 3m16 10v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6m14 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
-              />
-            </svg>
+            <ShoppingCartIcon className="w-24 h-24 mx-auto" />
           </div>
           <h3 className="text-xl font-semibold text-gray-600 mb-2">
             Your cart is empty
@@ -42,7 +35,7 @@ const CartPage = () => {
             Looks like you haven't added anything to your cart yet.
           </p>
           <a
-            href="/gallery"
+            href="/shop"
             className="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
           >
             Continue Shopping

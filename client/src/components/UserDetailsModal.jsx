@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { adminAPI } from "../services/api";
+import { getProfileImageUrl, getUserInitials } from "../utils/imageUtils";
 
 const UserDetailsModal = ({ userId, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -70,8 +71,28 @@ const UserDetailsModal = ({ userId, isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <UserIcon className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 rounded-full overflow-hidden">
+              {user?.profileImage ? (
+                <img
+                  src={getProfileImageUrl(user.profileImage)}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.log('Image failed to load:', user.profileImage);
+                    // Hide the img and show fallback
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"
+                style={{ display: user?.profileImage ? 'none' : 'flex' }}
+              >
+                <span className="text-sm font-bold text-blue-600">
+                  {getUserInitials(user)}
+                </span>
+              </div>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">

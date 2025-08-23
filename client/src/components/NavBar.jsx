@@ -178,7 +178,7 @@ export default function NavBar() {
               <div className="flex items-center space-x-4">
                 <UnderlineNavLink>
                   <NavLink
-                    to="/dashboard/profile"
+                    to="/profile"
                     aria-label="profile"
                     className={({ isActive }) =>
                       `text-sm font-medium transition-colors duration-200 hover:text-accent ${
@@ -187,8 +187,20 @@ export default function NavBar() {
                     }
                   >
                     <div className="flex items-center justify-center gap-1">
-                      <UserCircleIcon size={24} />
-                      {user ? user.firstName : ""}
+                      {user?.profileImage ? (
+                        <div>
+                          <img
+                            src={user?.profileImage}
+                            alt="Profile"
+                            className="w-8 h-8 rounded-full"
+                          />
+                        </div>
+                      ) : (
+                        <UserCircleIcon size={24} />
+                      )}
+                      <span className="font-medium text-base">
+                        {user ? user?.firstName : ""}
+                      </span>
                     </div>
                   </NavLink>
                 </UnderlineNavLink>

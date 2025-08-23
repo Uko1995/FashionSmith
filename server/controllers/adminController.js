@@ -13,6 +13,7 @@ const getUsers = async (req, res) => {
       createdAt: user.createdAt,
       role: user.role,
       isVerified: user.isVerified,
+      profileImage: user.profileImage || null,
     }));
 
     res.json({

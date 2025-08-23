@@ -50,13 +50,13 @@ export default function SignIn() {
   useEffect(() => {
     if (isSuccess && data) {
       // Get the intended destination from location state (set by ProtectedRoute)
-      const from = location.state?.from?.pathname || "/dashboard";
+      const from = location.state?.from?.pathname || "/";
 
       // Redirect to intended destination or dashboard
-      if (data.redirectTo) {
-        navigate(data.redirectTo);
-      } else {
+      if (from) {
         navigate(from, { replace: true });
+      } else {
+        navigate(data.redirectTo);
       }
 
       // Reset the form after successful submission

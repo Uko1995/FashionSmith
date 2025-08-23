@@ -13,7 +13,18 @@ export const authAPI = {
 // User API calls
 export const userAPI = {
   getProfile: () => apiClient.get("/api/users/profile"),
-  updateProfile: (data) => apiClient.patch("/api/users/updateProfile", data),
+  updateProfile: (data) => {
+    // Check if data contains file upload (FormData)
+    if (data instanceof FormData) {
+      return apiClient.patch("/api/users/updateProfile", data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+    // Regular JSON data
+    return apiClient.patch("/api/users/updateProfile", data);
+  },
   changePassword: (data) => apiClient.patch("/api/users/changePassword", data),
   deleteProfile: () => apiClient.delete("/api/users/profile"),
   getMeasurements: () => apiClient.get("/api/users/getMeasurement"),
