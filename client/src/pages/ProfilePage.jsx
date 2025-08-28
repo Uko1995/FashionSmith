@@ -54,7 +54,13 @@ export default function ProfilePage() {
     const tab = searchParams.get("tab");
     if (
       tab &&
-      ["overview", "orders", "measurements", "notifications", "payments"].includes(tab)
+      [
+        "overview",
+        "orders",
+        "measurements",
+        "notifications",
+        "payments",
+      ].includes(tab)
     ) {
       setActiveTab(tab);
     }
@@ -70,8 +76,6 @@ export default function ProfilePage() {
     queryFn: userAPI.getProfile,
     select: (response) => response.data,
   });
-
-  console.log(userProfile);
 
   // Form for profile editing
   const {

@@ -75,6 +75,19 @@ const router = createBrowserRouter([
         }),
         errorElement: <ErrorElement />,
       },
+      {
+        path: "email-verification",
+        lazy: async () => ({
+          Component: (await import("../components/EmailVerification")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "payment-success",
+        Component: (await import("../pages/PaymentSuccess")).default,
+        errorElement: <ErrorElement />,
+      },
+
       // Add direct profile and settings routes
       {
         path: "profile",

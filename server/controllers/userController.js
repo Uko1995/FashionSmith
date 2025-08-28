@@ -787,8 +787,9 @@ const addMeasurement = async (req, res) => {
     SuitChest,
     SuitWaist,
     unit,
-    agbadaLength,
-    waistCoatLength,
+    AgbadaLength,
+    WaistCoatLength,
+    Bicep,
   } = req.body;
   try {
     // Validate user authentication
@@ -823,8 +824,9 @@ const addMeasurement = async (req, res) => {
       SuitChest,
       SuitWaist,
       unit,
-      agbadaLength,
-      waistCoatLength,
+      AgbadaLength,
+      WaistCoatLength,
+      Bicep,
     };
 
     // Validate measurement data
@@ -976,8 +978,9 @@ const updateMeasurement = async (req, res) => {
     SuitChest,
     SuitWaist,
     unit,
-    agbadaLength,
-    waistCoatLength,
+    AgbadaLength,
+    WaistCoatLength,
+    Bicep,
   } = req.body;
 
   try {
@@ -1013,8 +1016,9 @@ const updateMeasurement = async (req, res) => {
       SuitChest,
       SuitWaist,
       unit,
-      agbadaLength,
-      waistCoatLength,
+      AgbadaLength,
+      WaistCoatLength,
+      Bicep,
     };
 
     // Validate measurement data
@@ -1092,20 +1096,41 @@ const createOrder = async (req, res) => {
     selectedColor,
     deliveryDate,
     deliveryAddress,
+    measurements,
+    unit,
+    status,
+    paymentStatus,
+    garment,
   } = req.body;
 
   // Validate required fields
-  if (
-    !productId ||
-    !quantity ||
-    !selectedFabric ||
-    !selectedColor ||
-    !deliveryDate ||
-    !deliveryAddress
-  ) {
+  const requiredFields = [
+    "productId",
+    "quantity",
+    "selectedFabric",
+    "selectedColor",
+    "deliveryDate",
+    "deliveryAddress",
+    "measurements",
+    "unit",
+    "status",
+    "paymentStatus",
+    "garment",
+  ];
+  // Determine which required fields are missing or empty
+  const missing = requiredFields.filter(
+    (field) =>
+      !Object.prototype.hasOwnProperty.call(req.body, field) ||
+      req.body[field] === undefined ||
+      req.body[field] === null ||
+      (typeof req.body[field] === "string" && req.body[field].trim() === "") ||
+      (Array.isArray(req.body[field]) && req.body[field].length === 0)
+  );
+
+  if (missing.length) {
     return res.status(400).json({
-      message:
-        "All fields are required: productId, quantity, selectedFabric, selectedColor, deliveryDate, deliveryAddress",
+      message: `Missing required fields: ${missing.join(", ")}`,
+      missing,
     });
   }
 
@@ -1128,36 +1153,6 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Validate selected fabric
-    const fabricOption = product.fabrics?.find(
-      (f) => f.name === selectedFabric.name
-    );
-    if (!fabricOption) {
-      return res.status(400).json({
-        message: `Fabric "${selectedFabric.name}" is not available for this product`,
-      });
-    }
-    if (!fabricOption.available) {
-      return res.status(400).json({
-        message: `Fabric "${selectedFabric.name}" is currently unavailable`,
-      });
-    }
-
-    // Validate selected color
-    const colorOption = product.colors?.find(
-      (c) => c.name === selectedColor.name
-    );
-    if (!colorOption) {
-      return res.status(400).json({
-        message: `Color "${selectedColor.name}" is not available for this product`,
-      });
-    }
-    if (!colorOption.available) {
-      return res.status(400).json({
-        message: `Color "${selectedColor.name}" is currently unavailable`,
-      });
-    }
-
     // Validate delivery date
     const deliveryDateObj = new Date(deliveryDate);
     if (isNaN(deliveryDateObj.getTime()) || deliveryDateObj <= new Date()) {
@@ -1166,47 +1161,77 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Calculate total price
-    const basePrice = product.basePrice || 0;
-    const fabricPrice = fabricOption.price || 0;
-    const colorPrice = colorOption.extraPrice || 0;
-    const unitPrice = basePrice + fabricPrice + colorPrice;
-    const totalCost = unitPrice * quantity;
+    // Validate measurements
+    if (!Array.isArray(measurements) || measurements.length === 0) {
+      return res.status(400).json({
+        message: "Measurements must be a non-empty array",
+      });
+    }
 
-    // Prepare order data
+    // Validate each measurement object
+    for (const measurement of measurements) {
+      if (!measurement.name || typeof measurement.value !== "number") {
+        return res.status(400).json({
+          message: "Each measurement must have a name and numeric value",
+          receivedMeasurement: measurement,
+        });
+      }
+    }
+
+    // Calculate total price
+    const unitPrice = product.basePrice || 0;
+    const cost = unitPrice * quantity;
+
+    // Prepare and normalize order data to match MongoDB schema types
+    const normalizedMeasurements = measurements
+      .map((m) => {
+        // If client provided { name, value } ensure types
+        return {
+          name: String(m.name),
+          value: Number(m.value),
+        };
+      })
+      .filter((m) => !isNaN(m.value) && m.value > 0);
+
     const orderData = {
-      userId,
-      productId: productObjectId,
-      garment: product.name, // For reference
-      quantity,
-      selectedFabric: {
-        name: fabricOption.name,
-        price: fabricOption.price,
-      },
-      selectedColor: {
-        name: colorOption.name,
-        extraPrice: colorOption.extraPrice || 0,
-        hex: colorOption.hex,
-      },
-      unitPrice,
-      totalCost,
+      userId: new ObjectId(userId),
+      productId: new ObjectId(productId),
+      garment: String(garment || ""), // For reference
+      quantity: Number(quantity) || 1,
+      // Accept either string or object for fabric/color from various clients
+      selectedFabric:
+        typeof selectedFabric === "object"
+          ? String(selectedFabric.name || selectedFabric)
+          : String(selectedFabric),
+      selectedColor:
+        typeof selectedColor === "object"
+          ? String(selectedColor.name || selectedColor)
+          : String(selectedColor),
+      price: Number(unitPrice) || 0,
+      cost: Number(cost) || Number(unitPrice || 0) * Number(quantity || 1),
       deliveryDate: deliveryDateObj,
-      deliveryAddress,
-      status: "Pending",
-      paymentStatus: "Pending",
+      deliveryAddress: String(deliveryAddress),
+      measurements: normalizedMeasurements,
+      unit: String(unit || ""),
+      status: String(status || "Pending"),
+      paymentStatus: String(paymentStatus || "Pending"),
     };
 
     // Validate order data
     const validation = validateOrder(orderData);
     if (!validation.isValid) {
       return res.status(400).json({
-        message: "Order validation failed",
+        message: `Order validation failed: ${validation.errors.join(", ")}`,
         errors: validation.errors,
       });
     }
 
     // Prepare and insert order
-    const preparedOrder = prepareOrderData(orderData);
+    let preparedOrder = prepareOrderData(orderData);
+    console.log(
+      "Prepared order for insertion:",
+      JSON.stringify(preparedOrder, null, 2)
+    );
     const result = await ordersCollection.insertOne(preparedOrder);
 
     if (!result.insertedId) {
@@ -1216,25 +1241,32 @@ const createOrder = async (req, res) => {
     }
 
     res.status(201).json({
+      status: "success",
       message: `Order created successfully, your order ID is ${result.insertedId}. Please proceed to payment.`,
       orderId: result.insertedId,
-      orderDetails: {
-        product: product.name,
-        quantity,
-        unitPrice,
-        totalCost,
-        selectedFabric: orderData.selectedFabric,
-        selectedColor: orderData.selectedColor,
-        deliveryDate,
-      },
+      orderDetails: orderData,
     });
   } catch (error) {
+    // Enhanced logging for MongoDB schema validation errors
     console.error("Order creation error:", {
       message: error.message,
       stack: error.stack,
       body: req.body,
+      preparedOrder: preparedOrder ? preparedOrder : null,
+      errInfo: error.errInfo ? error.errInfo : null,
     });
+
+    // If MongoDB returned validation details, surface them to the client for easier debugging
+    if (error.code === 121 && error.errInfo) {
+      return res.status(400).json({
+        status: "failed",
+        message: "Document failed validation",
+        validation: error.errInfo,
+      });
+    }
+
     return res.status(500).json({
+      status: "failed",
       message: "Order creation failed",
       error: error.message,
     });

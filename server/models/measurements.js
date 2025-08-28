@@ -71,6 +71,16 @@ export const measurementSchema = {
           minimum: 0,
           description: "Mid sleeve measurement in inches/cm",
         },
+        Bicep: {
+          bsonType: "number",
+          minimum: 0,
+          description: "Bicep measurement in inches/cm",
+        },
+        AgbadaLength: {
+          bsonType: "number",
+          minimum: 0,
+          description: "Agbada length measurement in inches/cm",
+        },
         ShortSleeveWidth: {
           bsonType: "number",
           minimum: 0,

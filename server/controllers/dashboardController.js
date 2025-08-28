@@ -26,11 +26,11 @@ export const getUserDashboard = async (req, res) => {
       });
     }
 
-    // Get user's orders (recent 5)
+    // Get user's orders (recent 10)
     const recentOrders = await collections.orders
       .find({ userId: new ObjectId(userId) })
       .sort({ orderDate: -1 })
-      .limit(5)
+      .limit(10)
       .toArray();
 
     // Get user's measurements if they exist
@@ -39,17 +39,22 @@ export const getUserDashboard = async (req, res) => {
     });
 
     // Get user statistics
-    const [totalOrders, pendingOrders, completedOrders] = await Promise.all([
-      collections.orders.countDocuments({ userId: new ObjectId(userId) }),
-      collections.orders.countDocuments({
-        userId: new ObjectId(userId),
-        status: "Pending",
-      }),
-      collections.orders.countDocuments({
-        userId: new ObjectId(userId),
-        status: "Delivered",
-      }),
-    ]);
+    const [totalOrders, pendingOrders, ongoingOrders, completedOrders] =
+      await Promise.all([
+        collections.orders.countDocuments({ userId: new ObjectId(userId) }),
+        collections.orders.countDocuments({
+          userId: new ObjectId(userId),
+          status: "Pending",
+        }),
+        collections.orders.countDocuments({
+          userId: new ObjectId(userId),
+          status: "In Progress",
+        }),
+        collections.orders.countDocuments({
+          userId: new ObjectId(userId),
+          status: "Delivered",
+        }),
+      ]);
 
     // Get featured products for recommendations
     const recommendedProducts = await collections.products
@@ -98,18 +103,7 @@ export const getUserDashboard = async (req, res) => {
         completedOrders,
         totalSpent: totalSpent || 0,
       },
-      recentOrders: recentOrders.map((order) => ({
-        id: order._id,
-        garment: order.garment,
-        quantity: order.quantity,
-        selectedFabric: order.selectedFabric,
-        selectedColor: order.selectedColor,
-        unitPrice: order.unitPrice,
-        totalCost: order.totalCost,
-        status: order.status,
-        orderDate: order.orderDate,
-        deliveryDate: order.deliveryDate,
-      })),
+      recentOrders,
       measurements: measurements
         ? {
             hasMeasurements: true,
@@ -161,7 +155,6 @@ export const getUserDashboard = async (req, res) => {
         },
       ],
     };
-    console.log(dashboardData);
 
     res.json({
       success: true,
@@ -195,7 +188,7 @@ export const getUserOrders = async (req, res) => {
 
     // Add status filter if provided
     if (status && status !== "all") {
-      query.Status = status;
+      query.status = status;
     }
 
     // Add payment status filter if provided
@@ -222,10 +215,13 @@ export const getUserOrders = async (req, res) => {
       id: order._id,
       garment: order.garment,
       quantity: order.quantity,
-      color: order.color,
-      fabric: order.fabric,
-      price: order.Cost || order.price,
-      status: order.Status,
+      color: order.selectedColor || order.color || null,
+      fabric: order.selectedFabric || order.fabric || null,
+      price: order.price || 0,
+      cost: order.totalCost || order.cost || order.price || 0,
+      status: order.status || order.Status || "Pending",
+      paymentStatus: order.paymentStatus || null,
+      productId: order.productId ? String(order.productId) : null,
       orderDate: order.orderDate,
       deliveryDate: order.deliveryDate,
       deliveryAddress: order.deliveryAddress,

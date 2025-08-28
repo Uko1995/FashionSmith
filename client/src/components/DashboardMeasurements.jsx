@@ -374,7 +374,7 @@ export default function DashboardMeasurements() {
           required: false,
         },
         {
-          name: "agbadaLength",
+          name: "AgbadaLength",
           label: "Agbada Length",
           description: "From shoulder to desired agbada hemline",
           icon: ArrowsDownUpIcon,
@@ -388,7 +388,7 @@ export default function DashboardMeasurements() {
           required: false,
         },
         {
-          name: "waistCoatLength",
+          name: "WaistCoatLength",
           label: "Waist Coat Length",
           description: "From shoulder to desired waist coat length",
           icon: ArrowsDownUpIcon,
@@ -427,6 +427,14 @@ export default function DashboardMeasurements() {
           name: "ShortSleeveWidth",
           label: "Short Sleeve Width",
           description: "Circumference around the arm for short sleeves",
+          icon: ArrowsOutIcon,
+          required: false,
+        },
+        {
+          name: "Bicep",
+          label: "Bicep Width",
+          description:
+            "Circumference around the biceps for short long sleeves and suit sleeves",
           icon: ArrowsOutIcon,
           required: false,
         },
@@ -731,16 +739,6 @@ export default function DashboardMeasurements() {
       />
 
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8 lg:mb-12">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3">
-            My Measurements
-          </h1>
-          <p className="text-base-content/70 text-lg max-w-2xl mx-auto">
-            Precise measurements for perfect bespoke tailoring
-          </p>
-        </div>
-
         {/* Measurements Overview Grid */}
         {measurements && (
           <div className="card bg-base-100 shadow-xl border border-base-300/50 mb-8">

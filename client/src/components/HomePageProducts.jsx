@@ -177,7 +177,10 @@ export default function HomePageProducts() {
                   {/* Price and Actions */}
                   <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <button className="btn btn-primary btn-md flex-1 sm:flex-none sm:px-6 group">
+                      <button
+                        onClick={() => navigate("/gallery")}
+                        className="btn btn-primary btn-md flex-1 sm:flex-none sm:px-6 group"
+                      >
                         Order Now
                         <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                       </button>

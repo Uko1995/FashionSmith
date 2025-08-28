@@ -23,6 +23,7 @@ const AdminOrders = () => {
   });
 
   const allOrders = orders?.data?.data || [];
+  console.log("all orders: ", allOrders);
 
   const filteredOrders = allOrders.filter((order) => {
     const matchesSearch =
@@ -142,7 +143,7 @@ const AdminOrders = () => {
                     <tr key={order._id}>
                       <td>
                         <div className="font-mono text-sm">
-                          #{order._id.slice(-8)}
+                          #{order.orderId.slice(-8)}
                         </div>
                       </td>
                       <td>
@@ -168,14 +169,9 @@ const AdminOrders = () => {
                       </td>
                       <td>
                         <div className="max-w-xs">
-                          {order.items?.length > 0 ? (
+                          {order.garment.length > 0 ? (
                             <div className="text-sm">
-                              {order.items.map((item, index) => (
-                                <div key={index} className="truncate">
-                                  {item.product?.name || "Unknown Product"} x
-                                  {item.quantity}
-                                </div>
-                              ))}
+                              {order.garment || "Unknown Product"}
                             </div>
                           ) : (
                             <span className="text-base-content/50">
@@ -186,7 +182,7 @@ const AdminOrders = () => {
                       </td>
                       <td>
                         <div className="font-semibold">
-                          ₦{order.totalAmount?.toLocaleString() || "0"}
+                          ₦{order.totalCost?.toLocaleString() || "0"}
                         </div>
                       </td>
                       <td>

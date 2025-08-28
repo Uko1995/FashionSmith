@@ -1,11 +1,15 @@
 // Paystack-only payment configuration for FashionSmith
 // Simplified configuration for Nigerian Naira transactions
+import dotenv from "dotenv";
+dotenv.config();
+
+console.log("PAYSTACK_ENABLED:", process.env.PAYSTACK_ENABLED);
 
 export const paymentConfig = {
   // Default settings
   defaultCurrency: "NGN",
   defaultProvider: "paystack",
-  
+
   // Paystack configuration
   paystack: {
     enabled: process.env.PAYSTACK_ENABLED !== "false", // Default to true
@@ -19,7 +23,7 @@ export const paymentConfig = {
       cap: 2000, // ₦2000 maximum fee
     },
   },
-  
+
   // Currency configuration (NGN only)
   currency: {
     symbol: "₦",
@@ -27,7 +31,7 @@ export const paymentConfig = {
     code: "NGN",
     decimalPlaces: 2,
   },
-  
+
   // Payment methods supported by Paystack
   paymentMethods: {
     card: {
@@ -52,25 +56,25 @@ export const paymentConfig = {
       displayName: "Mobile Money",
     },
   },
-  
+
   // Security settings
   security: {
     // Maximum transaction amount in NGN
     maxTransactionAmount: 5000000, // ₦5,000,000
-    
+
     // Minimum transaction amount in NGN
     minTransactionAmount: 100, // ₦100
-    
+
     // Require additional verification for high amounts
     highValueThreshold: 500000, // ₦500,000
-    
+
     // Enable metadata for tracking
     enableMetadata: true,
-    
+
     // Webhook verification
     verifyWebhooks: true,
   },
-  
+
   // Webhook configuration
   webhook: {
     endpoint: "/api/webhooks/paystack",
@@ -82,11 +86,11 @@ export const paymentConfig = {
       "transfer.reversed",
     ],
   },
-  
+
   // Transaction statuses
   statuses: {
     pending: "pending",
-    processing: "processing", 
+    processing: "processing",
     success: "success",
     failed: "failed",
     abandoned: "abandoned",
@@ -98,25 +102,25 @@ export const paymentConfig = {
 // Helper functions
 export const validateAmount = (amount) => {
   const numAmount = parseFloat(amount);
-  
+
   if (isNaN(numAmount) || numAmount <= 0) {
     return { valid: false, error: "Invalid amount" };
   }
-  
+
   if (numAmount < paymentConfig.security.minTransactionAmount) {
-    return { 
-      valid: false, 
-      error: `Amount must be at least ₦${paymentConfig.security.minTransactionAmount}` 
+    return {
+      valid: false,
+      error: `Amount must be at least ₦${paymentConfig.security.minTransactionAmount}`,
     };
   }
-  
+
   if (numAmount > paymentConfig.security.maxTransactionAmount) {
-    return { 
-      valid: false, 
-      error: `Amount cannot exceed ₦${paymentConfig.security.maxTransactionAmount.toLocaleString()}` 
+    return {
+      valid: false,
+      error: `Amount cannot exceed ₦${paymentConfig.security.maxTransactionAmount.toLocaleString()}`,
     };
   }
-  
+
   return { valid: true };
 };
 
@@ -124,7 +128,7 @@ export const calculatePaystackFee = (amount) => {
   const { rate, fixed, cap } = paymentConfig.paystack.fees;
   const percentageFee = amount * rate;
   const totalFee = Math.min(percentageFee + fixed, cap);
-  
+
   return {
     fee: Math.round(totalFee * 100) / 100,
     total: amount + totalFee,
@@ -132,14 +136,14 @@ export const calculatePaystackFee = (amount) => {
       percentage: percentageFee,
       fixed: fixed,
       capped: totalFee >= cap,
-    }
+    },
   };
 };
 
 export const formatNaira = (amount) => {
-  return new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);

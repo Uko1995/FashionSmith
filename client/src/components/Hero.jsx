@@ -8,9 +8,12 @@ import {
   SparkleIcon,
 } from "@phosphor-icons/react";
 
+import { useUiStore } from "../store/uiStore";
+
 export default function Hero() {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
+  const { isLoggedIn } = useUiStore();
 
   // Handle navigation with smooth transitions
   const handleGetStarted = useCallback(() => {
@@ -69,17 +72,19 @@ export default function Hero() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 animate-fade-in animation-delay-900">
-                <button
-                  onClick={handleGetStarted}
-                  className="group btn btn-primary btn-lg text-white font-bold shadow-2xl hover:shadow-primary/25 hover:scale-105 transition-all duration-300"
-                  aria-label="Start your bespoke journey"
-                >
-                  <span>Start Your Journey</span>
-                  <ArrowRightIcon
-                    size={20}
-                    className="group-hover:translate-x-1 transition-transform duration-300"
-                  />
-                </button>
+                {!isLoggedIn && (
+                  <button
+                    onClick={handleGetStarted}
+                    className="group btn btn-primary btn-lg text-white font-bold shadow-2xl hover:shadow-primary/25 hover:scale-105 transition-all duration-300"
+                    aria-label="Start your bespoke journey"
+                  >
+                    <span>Start Your Journey</span>
+                    <ArrowRightIcon
+                      size={20}
+                      className="group-hover:translate-x-1 transition-transform duration-300"
+                    />
+                  </button>
+                )}
 
                 <button
                   onClick={handleViewGallery}

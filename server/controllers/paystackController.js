@@ -95,7 +95,7 @@ export const initializePayment = async (req, res) => {
         ...metadata,
         orderNumber: order.orderNumber,
         customerName: req.user.firstName + " " + req.user.lastName,
-        orderTotal: order.totalAmount,
+        orderTotal: order.totalCost,
         userAgent: req.headers["user-agent"],
         highValue: isHighValueTransaction(amount),
       },
@@ -136,10 +136,13 @@ export const initializePayment = async (req, res) => {
       });
 
       if (!paystackResponse.status) {
+        console.error("Paystack initialization failed:", paystackResponse);
         throw new Error(
           paystackResponse.message || "Paystack initialization failed"
         );
       }
+
+      console.log("Paystack response data:", paystackResponse.data);
 
       // Update payment record with Paystack details
       await collections.payments.updateOne(
@@ -155,24 +158,28 @@ export const initializePayment = async (req, res) => {
       );
 
       // Return payment initialization data
+      const responseData = {
+        paymentId: result.insertedId,
+        reference,
+        authorizationUrl: paystackResponse.data.authorization_url,
+        accessCode: paystackResponse.data.access_code,
+        amount: koboToNaira(amountInKobo),
+        fees: {
+          paystack: koboToNaira(paymentData.fees.paystack),
+          total: koboToNaira(paymentData.fees.total),
+        },
+      };
+
+      console.log("Sending response data:", responseData);
+
       res.status(201).json({
         success: true,
         message: "Payment initialized successfully",
-        data: {
-          paymentId: result.insertedId,
-          reference,
-          authorizationUrl: paystackResponse.data.authorization_url,
-          accessCode: paystackResponse.data.access_code,
-          amount: koboToNaira(amountInKobo),
-          fees: {
-            paystack: koboToNaira(paymentData.fees.paystack),
-            total: koboToNaira(paymentData.fees.total),
-          },
-        },
+        data: responseData,
       });
     } catch (paystackError) {
       // Update payment status to failed
-      await db.collection("payments").updateOne(
+      await collections.payments.updateOne(
         { _id: result.insertedId },
         {
           $set: {
@@ -224,6 +231,7 @@ export const verifyPayment = async (req, res) => {
     // Verify with Paystack
     try {
       const verificationResponse = await verifyPaystackPayment(reference);
+      console.log("payment verification response: ", verificationResponse);
 
       if (!verificationResponse.status) {
         throw new Error(
@@ -248,7 +256,7 @@ export const verifyPayment = async (req, res) => {
           paystackResponse: {
             gateway_response: paystackData.gateway_response,
             channel: paystackData.channel,
-            fees: paystackData.fees,
+            fees: koboToNaira(paystackData.fees),
             authorization: paystackData.authorization,
           },
         },
@@ -266,12 +274,13 @@ export const verifyPayment = async (req, res) => {
 
       // If payment successful, update order status
       if (paystackData.status === "success") {
-        await collections.payments.updateOne(
+        // Update the corresponding order document to reflect successful payment
+        await collections.orders.updateOne(
           { _id: payment.orderId },
           {
             $set: {
-              status: "paid",
-              paymentStatus: "completed",
+              status: "In Progress",
+              paymentStatus: "Paid",
               paidAt: new Date(),
               updatedAt: new Date(),
             },
@@ -539,6 +548,19 @@ export const handlePaystackWebhook = async (req, res) => {
 
 // Helper functions for Paystack API calls
 const initializePaystackPayment = async (paymentData) => {
+  // Debug logging
+  console.log(
+    "Paystack Secret Key:",
+    paymentConfig.paystack.secretKey ? "✓ Present" : "✗ Missing"
+  );
+  console.log("Paystack Enabled:", paymentConfig.paystack.enabled);
+
+  if (!paymentConfig.paystack.secretKey) {
+    throw new Error(
+      "Paystack secret key is not configured. Please set PAYSTACK_SECRET_KEY in environment variables."
+    );
+  }
+
   const response = await fetch(
     `${paymentConfig.paystack.baseUrl}/transaction/initialize`,
     {
@@ -551,7 +573,14 @@ const initializePaystackPayment = async (paymentData) => {
     }
   );
 
-  return await response.json();
+  const result = await response.json();
+
+  if (!response.ok) {
+    console.error("Paystack API Error:", result);
+    throw new Error(result.message || "Paystack API request failed");
+  }
+
+  return result;
 };
 
 const verifyPaystackPayment = async (reference) => {

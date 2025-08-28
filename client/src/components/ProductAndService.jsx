@@ -10,10 +10,13 @@ import {
   TrendUpIcon,
 } from "@phosphor-icons/react";
 import { useCart } from "@/hooks/useCart";
+import OrderModal from "./OrderModal";
 
 export default function ProductAndService() {
   const { addToCart } = useCart();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Fetch products from API
   const {
@@ -41,6 +44,18 @@ export default function ProductAndService() {
       image: imageUrl,
       category: product.category,
     });
+  };
+
+  // Handle opening order modal
+  const handleOrderNow = (product) => {
+    setSelectedProduct(product);
+    setIsOrderModalOpen(true);
+  };
+
+  // Handle closing order modal
+  const handleCloseOrderModal = () => {
+    setIsOrderModalOpen(false);
+    setSelectedProduct(null);
   };
 
   // Extract unique categories from products
@@ -252,10 +267,16 @@ export default function ProductAndService() {
 
                             {/* Action Buttons */}
                             <div className="flex gap-2">
-                              <button className="btn btn-primary flex-1 btn-sm hover:btn-secondary transition-all duration-300 shadow-lg">
+                              <button
+                                onClick={() => handleOrderNow(product)}
+                                className="btn btn-primary flex-1 btn-sm hover:btn-secondary transition-all duration-300 shadow-lg"
+                              >
                                 Order Now
                               </button>
-                              <button onClick={handleAddToCart} className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300">
+                              <button
+                                onClick={() => handleAddToCart(product)}
+                                className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300"
+                              >
                                 <ShoppingCartIcon className="w-4 h-4" />
                               </button>
                             </div>
@@ -299,6 +320,13 @@ export default function ProductAndService() {
           </div>
         </div>
       </div>
+
+      {/* Order Modal */}
+      <OrderModal
+        isOpen={isOrderModalOpen}
+        onClose={handleCloseOrderModal}
+        product={selectedProduct}
+      />
     </section>
   );
 }

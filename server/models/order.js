@@ -13,6 +13,8 @@ export const orderSchema = {
         "selectedColor",
         "deliveryDate",
         "deliveryAddress",
+        "measurements",
+        "unit",
       ],
       properties: {
         userId: {
@@ -33,40 +35,12 @@ export const orderSchema = {
           description: "Quantity must be at least 1",
         },
         selectedFabric: {
-          bsonType: "object",
-          properties: {
-            name: {
-              bsonType: "string",
-              description: "Selected fabric name",
-            },
-            price: {
-              bsonType: "number",
-              minimum: 0,
-              description: "Price for selected fabric",
-            },
-          },
-          required: ["name", "price"],
-          description: "Selected fabric with pricing",
+          bsonType: "string",
+          description: "Selected fabric name",
         },
         selectedColor: {
-          bsonType: "object",
-          properties: {
-            name: {
-              bsonType: "string",
-              description: "Selected color name",
-            },
-            hex: {
-              bsonType: "string",
-              description: "Hex color code",
-            },
-            extraPrice: {
-              bsonType: "number",
-              minimum: 0,
-              description: "Extra price for premium colors",
-            },
-          },
-          required: ["name"],
-          description: "Selected color with details",
+          bsonType: "string",
+          description: "Selected color name",
         },
         price: {
           bsonType: "number",
@@ -76,7 +50,7 @@ export const orderSchema = {
         cost: {
           bsonType: "number",
           minimum: 0,
-          description: "Total cost (price * quantity)",
+          description: "cost (price * quantity)",
         },
         orderDate: {
           bsonType: "date",
@@ -102,9 +76,32 @@ export const orderSchema = {
           bsonType: "string",
           description: "Delivery address",
         },
+        measurements: {
+          bsonType: "array",
+          items: {
+            bsonType: "object",
+            properties: {
+              name: {
+                bsonType: "string",
+                description: "Measurement name",
+              },
+              value: {
+                bsonType: "number",
+                minimum: 0,
+                description: "Measurement value",
+              },
+            },
+            required: ["name", "value"],
+          },
+          description: "Array of measurement objects with name and value",
+        },
         username: {
           bsonType: "string",
           description: "Customer username for reference",
+        },
+        unit: {
+          bsonType: "string",
+          description: "Measurement unit (e.g., 'inches', 'cm')",
         },
         paymentStatus: {
           bsonType: "string",
@@ -146,8 +143,8 @@ export const OrderInterface = {
   productId: "ObjectId",
   garment: "string",
   quantity: "number",
-  selectedFabric: "{ name: string, price: number }",
-  selectedColor: "{ name: string, hex?: string, extraPrice?: number }",
+  selectedFabric: "string",
+  selectedColor: "string",
   price: "number",
   cost: "number",
   orderDate: "Date",
@@ -159,6 +156,8 @@ export const OrderInterface = {
   notes: "string",
   createdAt: "Date",
   updatedAt: "Date",
+  measurements: "array",
+  unit: "string",
 };
 
 // Default values
@@ -194,6 +193,8 @@ export const validateOrder = (orderData) => {
     "selectedColor",
     "deliveryDate",
     "deliveryAddress",
+    "measurements",
+    "unit",
   ];
   requiredFields.forEach((field) => {
     if (!orderData[field]) {
@@ -204,33 +205,20 @@ export const validateOrder = (orderData) => {
   // Validate selectedFabric
   if (orderData.selectedFabric) {
     if (
-      !orderData.selectedFabric.name ||
-      typeof orderData.selectedFabric.name !== "string"
+      !orderData.selectedFabric ||
+      typeof orderData.selectedFabric !== "string"
     ) {
-      errors.push("selectedFabric.name is required and must be a string");
-    }
-    if (
-      typeof orderData.selectedFabric.price !== "number" ||
-      orderData.selectedFabric.price < 0
-    ) {
-      errors.push("selectedFabric.price must be a positive number");
+      errors.push("selectedFabric is required and must be a string");
     }
   }
 
   // Validate selectedColor
   if (orderData.selectedColor) {
     if (
-      !orderData.selectedColor.name ||
-      typeof orderData.selectedColor.name !== "string"
+      !orderData.selectedColor ||
+      typeof orderData.selectedColor !== "string"
     ) {
-      errors.push("selectedColor.name is required and must be a string");
-    }
-    if (
-      orderData.selectedColor.extraPrice !== undefined &&
-      (typeof orderData.selectedColor.extraPrice !== "number" ||
-        orderData.selectedColor.extraPrice < 0)
-    ) {
-      errors.push("selectedColor.extraPrice must be a positive number");
+      errors.push("selectedColor is required and must be a string");
     }
   }
 
@@ -263,6 +251,32 @@ export const validateOrder = (orderData) => {
     }
   }
 
+  // validate measurements
+  if (orderData.measurements) {
+    if (!Array.isArray(orderData.measurements)) {
+      errors.push("measurements must be an array");
+    } else {
+      orderData.measurements.forEach((measurement, index) => {
+        if (
+          !measurement.name ||
+          typeof measurement.name !== "string" ||
+          !measurement.value ||
+          typeof measurement.value !== "number" ||
+          measurement.value <= 0
+        ) {
+          errors.push(
+            `measurements[${index}] must have a valid name (string) and value (positive number)`
+          );
+        }
+      });
+    }
+  }
+
+  // validate unit
+  if (orderData.unit && typeof orderData.unit !== "string") {
+    errors.push("unit must be a string");
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -277,5 +291,6 @@ export const prepareOrderData = (orderData) => {
     orderDate: orderData.orderDate || new Date(),
     createdAt: orderData.createdAt || new Date(),
     updatedAt: new Date(),
+    cost: orderData.cost,
   };
 };

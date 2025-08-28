@@ -85,65 +85,6 @@ export const productSchema = {
           },
           description: "Product images array with metadata",
         },
-        fabrics: {
-          bsonType: "array",
-          items: {
-            bsonType: "object",
-            properties: {
-              name: {
-                bsonType: "string",
-                description: "Fabric name (e.g., Cotton, Silk)",
-              },
-              price: {
-                bsonType: "number",
-                minimum: 0,
-                description: "Additional price for this fabric",
-              },
-              available: {
-                bsonType: "bool",
-                description: "Whether this fabric is currently available",
-              },
-              description: {
-                bsonType: "string",
-                description: "Fabric description or details",
-              },
-            },
-            required: ["name", "price", "available"],
-          },
-          description: "Available fabric options with pricing",
-        },
-        colors: {
-          bsonType: "array",
-          items: {
-            bsonType: "object",
-            properties: {
-              name: {
-                bsonType: "string",
-                description: "Color name (e.g., Navy Blue, Burgundy)",
-              },
-              hex: {
-                bsonType: "string",
-                description: "Hex color code (e.g., 'Red', 'Navy Blue')",
-              },
-              available: {
-                bsonType: "bool",
-                description: "Whether this color is currently available",
-              },
-              premium: {
-                bsonType: "bool",
-                description:
-                  "Whether this is a premium color with extra charge",
-              },
-              extraPrice: {
-                bsonType: "number",
-                minimum: 0,
-                description: "Additional price for premium colors",
-              },
-            },
-            required: ["name", "available"],
-          },
-          description: "Available color options",
-        },
         sizes: {
           bsonType: "array",
           items: {
@@ -204,10 +145,6 @@ export const ProductInterface = {
   featured: "boolean",
   available: "boolean",
   image: "string",
-  fabrics:
-    "Array<{name: string, price: number, available: boolean, description?: string}>",
-  colors:
-    "Array<{name: string, hex?: string, available: boolean, premium?: boolean, extraPrice?: number}>",
   sizes: "string[]",
   tags: "string[]",
   makingTime: "string",
@@ -220,69 +157,6 @@ export const ProductInterface = {
 export const productDefaults = {
   featured: false,
   available: true,
-  fabrics: [
-    {
-      name: "Cotton",
-      price: 0,
-      available: true,
-      description: "High-quality cotton fabric",
-    },
-    {
-      name: "Linen",
-      price: 5000,
-      available: true,
-      description: "Premium linen fabric",
-    },
-    {
-      name: "Ankara",
-      price: 3000,
-      available: true,
-      description: "Traditional African print",
-    },
-    {
-      name: "Cashmere",
-      price: 8000,
-      available: true,
-      description: "Luxury senator material",
-    },
-  ],
-  colors: [
-    {
-      name: "Navy Blue",
-      hex: "#1e3a8a",
-      available: true,
-      premium: false,
-      extraPrice: 0,
-    },
-    {
-      name: "Black",
-      hex: "#000000",
-      available: true,
-      premium: false,
-      extraPrice: 0,
-    },
-    {
-      name: "White",
-      hex: "#ffffff",
-      available: true,
-      premium: false,
-      extraPrice: 0,
-    },
-    {
-      name: "Burgundy",
-      hex: "#7c2d12",
-      available: true,
-      premium: true,
-      extraPrice: 2000,
-    },
-    {
-      name: "Royal Blue",
-      hex: "#1e40af",
-      available: true,
-      premium: false,
-      extraPrice: 0,
-    },
-  ],
   sizes: ["S", "M", "L", "XL", "XXL", "Custom"],
   tags: [],
   orderCount: 0,

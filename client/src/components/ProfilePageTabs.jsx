@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -15,15 +17,18 @@ import {
   CheckIcon,
 } from "@phosphor-icons/react";
 import toast from "react-hot-toast";
-import { dashboardAPI, notificationAPI, userAPI } from "../services/api";
+import {
+  dashboardAPI,
+  notificationAPI,
+  userAPI,
+  productAPI,
+} from "../services/api";
 
 export default function ProfilePageTabs({ activeTab, onTabChange }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  // eslint-disable-next-line no-unused-vars
   const [selectedOrder, setSelectedOrder] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showFullOrder, setShowFullOrder] = useState(false);
 
   // Fetch dashboard data
   const { data: dashboardData } = useQuery({
@@ -31,11 +36,11 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
     queryFn: dashboardAPI.getOverview,
   });
 
-  // Fetch recent orders
+  // Fetch orders
   const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ["userOrders"],
     queryFn: () => dashboardAPI.getUserOrders({ limit: 10 }),
-    select: (response) => response.data?.data || [],
+    select: (response) => response?.data || [],
   });
 
   // Fetch notifications
@@ -46,13 +51,6 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
       refetchInterval: 30000,
     }
   );
-
-  // Fetch pending orders for payments
-  const { data: pendingOrders, isLoading: paymentsLoading } = useQuery({
-    queryKey: ["pendingOrders"],
-    queryFn: () => dashboardAPI.getUserOrders({ paymentStatus: "Pending" }),
-    select: (response) => response.data?.data || [],
-  });
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
@@ -93,9 +91,15 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
 
   // Extract data
   const stats = dashboardData?.data?.data?.statistics || {};
-  const recentOrders = ordersData || [];
+  const orders = ordersData?.data || [];
   const notifications = notificationsData?.data?.data?.notifications || [];
   const unreadCount = notificationsData?.data?.data?.unreadCount || 0;
+
+  const viewFullOrder = (order = []) => {
+    setSelectedOrder(order);
+    setShowFullOrder(true);
+    console.log("The user has clicked the button to view full order: ", order);
+  };
 
   const statsCards = [
     {
@@ -129,16 +133,21 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
   ];
 
   const getStatusBadgeClass = (status) => {
-    switch (status?.toLowerCase()) {
-      case "pending":
+    switch (status) {
+      case "Pending":
         return "badge-warning";
-      case "in progress":
-        return "badge-info";
-      case "ready":
+      case "In Progress":
+      case "Ready":
         return "badge-success";
-      case "delivered":
+      case "Paid":
+        return "btn-success";
+      case "Failed":
+        return "btn-error";
+      case "Refunded":
+        return "btn-secondary";
+      case "Delivered":
         return "badge-success";
-      case "cancelled":
+      case "Cancelled":
         return "badge-error";
       default:
         return "badge-neutral";
@@ -338,7 +347,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
           <div className="text-center py-8">
             <span className="loading loading-spinner loading-lg"></span>
           </div>
-        ) : recentOrders.length === 0 ? (
+        ) : orders.length === 0 ? (
           <div className="text-center py-12">
             <PackageIcon
               size={64}
@@ -357,85 +366,160 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {recentOrders.map((order, index) => (
-              <div
-                key={order.id || index}
-                className="border border-base-300 rounded-lg p-4 hover:bg-base-50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="avatar placeholder">
-                      <div className="bg-primary/10 text-primary rounded-lg w-12 h-12">
-                        <PackageIcon size={24} />
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">
-                        {order.garment || "Custom Garment"}
-                      </h4>
-                      <p className="text-sm text-base-content/60">
-                        Order #{order.id || `00${index + 1}`} •{" "}
-                        {order.orderDate
-                          ? new Date(order.orderDate).toLocaleDateString()
-                          : "Recently"}
-                      </p>
-                      <p className="text-sm font-medium">
-                        ₦{(order.totalCost || 0).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`badge ${getStatusBadgeClass(order.status)}`}
-                    >
-                      {order.status || "Pending"}
-                    </div>
-                    <div className="dropdown dropdown-end">
-                      <div
-                        tabIndex={0}
-                        role="button"
-                        className="btn btn-ghost btn-sm"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 5v.01M12 12v.01M12 19v.01"
-                          />
-                        </svg>
-                      </div>
-                      <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <li>
-                          <button onClick={() => setSelectedOrder(order)}>
-                            <EyeIcon size={16} />
-                            View Details
-                          </button>
-                        </li>
-                        {order.status === "Pending" && (
-                          <li>
-                            <button
-                              onClick={() =>
-                                cancelOrderMutation.mutate(order.id)
-                              }
-                              className="text-error"
+            {orders.map((order, index) => {
+              const isExpanded = selectedOrder?.id === order.id;
+              return (
+                <div
+                  key={order.id || index}
+                  className="border border-base-300 rounded-lg p-4 hover:bg-base-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    {!isExpanded ? (
+                      <>
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <h4 className="font-semibold">
+                              {order.garment || "Custom Garment"}
+                            </h4>
+                            <p className="text-sm text-base-content/80">
+                              Order #{order.id} •{"   "}
+                              {order.orderDate
+                                ? new Date(order.orderDate).toLocaleDateString()
+                                : "Recently"}
+                            </p>
+                            <p className="text-sm font-medium">
+                              ₦{(order.cost || 0).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`badge badge-lg badge-soft ${getStatusBadgeClass(
+                              order.status
+                            )}`}
+                          >
+                            {order.status}
+                          </div>
+                          <div className="dropdown dropdown-end">
+                            <div
+                              tabIndex={0}
+                              role="button"
+                              className="btn btn-ghost btn-sm"
                             >
-                              <TrashIcon size={16} />
-                              Cancel Order
-                            </button>
-                          </li>
-                        )}
-                      </ul>
-                    </div>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 5v.01M12 12v.01M12 19v.01"
+                                />
+                              </svg>
+                            </div>
+                            <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                              <li>
+                                <button
+                                  className="flex items-center gap-2 btn btn-ghost"
+                                  onClick={() => viewFullOrder(order)}
+                                >
+                                  <EyeIcon size={16} />
+                                  View Details
+                                </button>
+                              </li>
+                              {order.status === "Pending" && (
+                                <li>
+                                  <button
+                                    onClick={() =>
+                                      cancelOrderMutation.mutate(order.id)
+                                    }
+                                    className="text-error"
+                                  >
+                                    <TrashIcon size={16} />
+                                    Cancel Order
+                                  </button>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-lg mb-2">
+                            {selectedOrder.garment || "Custom Garment"} - Full
+                            Details
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <p>
+                                <strong>Order ID:</strong> {selectedOrder.id}
+                              </p>
+                              <p>
+                                <strong>Garment:</strong>{" "}
+                                {selectedOrder.garment}
+                              </p>
+                              <p>
+                                <strong>Color:</strong> {selectedOrder.color}
+                              </p>
+                              <p>
+                                <strong>Fabric:</strong> {selectedOrder.fabric}
+                              </p>
+                              <p>
+                                <strong>Quantity:</strong>{" "}
+                                {selectedOrder.quantity}
+                              </p>
+                            </div>
+                            <div>
+                              <p>
+                                <strong>Cost:</strong> ₦
+                                {(selectedOrder.cost || 0).toLocaleString()}
+                              </p>
+                              <p>
+                                <strong>Status:</strong> {selectedOrder.status}
+                              </p>
+                              <p>
+                                <strong>Order Date:</strong>{" "}
+                                {selectedOrder.orderDate
+                                  ? new Date(
+                                      selectedOrder.orderDate
+                                    ).toLocaleDateString()
+                                  : "N/A"}
+                              </p>
+                              <p>
+                                <strong>Delivery Date:</strong>{" "}
+                                {selectedOrder.deliveryDate
+                                  ? new Date(
+                                      selectedOrder.deliveryDate
+                                    ).toLocaleDateString()
+                                  : "N/A"}
+                              </p>
+                              <p>
+                                <strong>Delivery Address:</strong>{" "}
+                                {selectedOrder.deliveryAddress}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedOrder(null);
+                            setShowFullOrder(false);
+                          }}
+                          className="btn btn-ghost btn-sm ml-4"
+                        >
+                          <XIcon size={20} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -533,41 +617,45 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
       <div className="card-body">
         <h3 className="card-title mb-6">Payment Management</h3>
 
-        {paymentsLoading ? (
+        {ordersLoading ? (
           <div className="text-center py-8">
             <span className="loading loading-spinner loading-lg"></span>
           </div>
         ) : (
           <div className="space-y-6">
             {/* Pending Payments */}
-            {pendingOrders.length > 0 && (
+            {orders.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-4 text-warning">
-                  Pending Payments ({pendingOrders.length})
+                <h4 className="font-semibold mb-4 text-primary">
+                  Payments ({orders.length})
                 </h4>
                 <div className="space-y-3">
-                  {pendingOrders.map((order, index) => (
+                  {orders.map((order, index) => (
                     <div
                       key={order.id || index}
                       className="p-4 border border-warning/30 bg-warning/5 rounded-lg"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h5 className="font-medium">
+                          <h5 className="font-medium text-lg">
                             {order.garment || "Custom Garment"}
                           </h5>
                           <p className="text-sm text-base-content/60">
                             Order #{order.id || `00${index + 1}`}
                           </p>
-                          <p className="text-lg font-bold text-warning">
-                            ₦{(order.totalCost || 0).toLocaleString()}
+                          <p className="text-base font-bold text-base-content/60">
+                            ₦{(order.cost || 0).toLocaleString()}
                           </p>
                         </div>
                         <button
                           onClick={() => navigate("/dashboard/payments")}
-                          className="btn btn-warning btn-sm"
+                          className={`btn ${getStatusBadgeClass(
+                            order.paymentStatus
+                          )} btn-sm`}
                         >
-                          Pay Now
+                          {order.paymentStatus === "Pending"
+                            ? "Pay Now"
+                            : order.paymentStatus}
                         </button>
                       </div>
                     </div>
