@@ -18,7 +18,7 @@ export const userAPI = {
     if (data instanceof FormData) {
       return apiClient.patch("/api/users/updateProfile", data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
     }
@@ -106,6 +106,11 @@ export const productAPI = {
   getProduct: (id) => apiClient.get(`/api/products/${id}`),
 };
 
+// Email API calls
+export const emailAPI = {
+  sendEmail: (data) => apiClient.post("/api/users/send-email", data),
+};
+
 // Dashboard API calls
 export const dashboardAPI = {
   getDashboard: () => apiClient.get("/api/dashboard"),
@@ -120,6 +125,18 @@ export const dashboardAPI = {
     const queryString = queryParams.toString();
     return apiClient.get(
       `/api/dashboard/orders${queryString ? `?${queryString}` : ""}`
+    );
+  },
+  getPaymentHistory: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value);
+      }
+    });
+    const queryString = queryParams.toString();
+    return apiClient.get(
+      `/api/dashboard/payments${queryString ? `?${queryString}` : ""}`
     );
   },
 };
@@ -170,7 +187,8 @@ export const adminAPI = {
   // Product management
   getProducts: () => apiClient.get("/api/admin/products"),
   createProduct: (data) => apiClient.post("/api/admin/products", data),
-  updateProduct: (productId, data) => apiClient.put(`/api/products/${productId}`, data),
+  updateProduct: (productId, data) =>
+    apiClient.put(`/api/products/${productId}`, data),
   deleteProduct: (productId) => apiClient.delete(`/api/products/${productId}`),
   uploadProductImages: (productId, formData) => {
     return apiClient.post(`/api/products/${productId}/images`, formData, {

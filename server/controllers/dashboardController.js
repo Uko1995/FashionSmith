@@ -248,6 +248,99 @@ export const getUserOrders = async (req, res) => {
   }
 };
 
+// Get user's payment history with pagination
+export const getUserPaymentHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const query = { userId: new ObjectId(userId) };
+
+    // Add status filter if provided
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const sort = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+
+    const [payments, totalCount] = await Promise.all([
+      collections.payments
+        .find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .toArray(),
+      collections.payments.countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / parseInt(limit));
+
+    // Get order details for each payment
+    const formattedPayments = await Promise.all(
+      payments.map(async (payment) => {
+        let orderDetails = null;
+        if (payment.orderId) {
+          const order = await collections.orders.findOne({
+            _id: new ObjectId(payment.orderId),
+          });
+          if (order) {
+            orderDetails = {
+              garment: order.garment,
+              quantity: order.quantity,
+              totalCost: order.totalCost || order.cost,
+            };
+          }
+        }
+
+        return {
+          id: payment._id,
+          orderId: payment.orderId,
+          transactionId: payment.transactionId || payment.reference,
+          reference: payment.reference,
+          amount: payment.amount,
+          status: payment.status || "Completed",
+          paymentMethod: payment.paymentMethod || "Paystack",
+          gateway: payment.gateway || "Paystack",
+          description: orderDetails
+            ? `Payment for ${orderDetails.garment} (x${orderDetails.quantity})`
+            : `Payment - ${payment.reference}`,
+          createdAt: payment.createdAt,
+          updatedAt: payment.updatedAt,
+          failureReason: payment.failureReason,
+          refundAmount: payment.refundAmount,
+          orderDetails: orderDetails,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: formattedPayments,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalCount,
+        hasNextPage: parseInt(page) < totalPages,
+        hasPrevPage: parseInt(page) > 1,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user payment history:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching payment history",
+      error: error.message,
+    });
+  }
+};
+
 // Get user notifications/alerts
 export const getUserNotifications = async (req, res) => {
   try {

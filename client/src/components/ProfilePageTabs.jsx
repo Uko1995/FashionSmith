@@ -43,12 +43,20 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
     select: (response) => response?.data || [],
   });
 
+  // Fetch payment history
+  const { data: paymentHistoryData, isLoading: paymentHistoryLoading } =
+    useQuery({
+      queryKey: ["paymentHistory"],
+      queryFn: () => dashboardAPI.getPaymentHistory({ limit: 20 }),
+      select: (response) => response?.data || [],
+    });
+
   // Fetch notifications
   const { data: notificationsData, isLoading: notificationsLoading } = useQuery(
     {
       queryKey: ["notifications"],
       queryFn: () => notificationAPI.getNotifications({ limit: 10 }),
-      refetchInterval: 30000,
+      select: (response) => response?.data || {},
     }
   );
 
@@ -94,6 +102,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
   const orders = ordersData?.data || [];
   const notifications = notificationsData?.data?.data?.notifications || [];
   const unreadCount = notificationsData?.data?.data?.unreadCount || 0;
+  const paymentHistory = paymentHistoryData?.data || [];
 
   const viewFullOrder = (order = []) => {
     setSelectedOrder(order);
@@ -132,23 +141,20 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
     },
   ];
 
-  const getStatusBadgeClass = (status) => {
+  const getPaymentStatusBadgeClass = (status) => {
     switch (status) {
+      case "Completed":
+      case "success":
+      case "Successful":
+        return "badge-success";
       case "Pending":
         return "badge-warning";
-      case "In Progress":
-      case "Ready":
-        return "badge-success";
-      case "Paid":
-        return "btn-success";
       case "Failed":
-        return "btn-error";
-      case "Refunded":
-        return "btn-secondary";
-      case "Delivered":
-        return "badge-success";
-      case "Cancelled":
         return "badge-error";
+      case "Refunded":
+        return "badge-info";
+      case "Cancelled":
+        return "badge-neutral";
       default:
         return "badge-neutral";
     }
@@ -613,85 +619,311 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
   );
 
   const renderPaymentsTab = () => (
-    <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h3 className="card-title mb-6">Payment Management</h3>
-
-        {ordersLoading ? (
-          <div className="text-center py-8">
-            <span className="loading loading-spinner loading-lg"></span>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Pending Payments */}
-            {orders.length > 0 && (
+    <div className="space-y-6">
+      {/* Payment Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="card bg-base-100 shadow-xl border border-base-300/50">
+          <div className="card-body p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold mb-4 text-primary">
-                  Payments ({orders.length})
-                </h4>
-                <div className="space-y-3">
-                  {orders.map((order, index) => (
-                    <div
-                      key={order.id || index}
-                      className="p-4 border border-warning/30 bg-warning/5 rounded-lg"
-                    >
-                      <div className="flex items-center justify-between">
+                <p className="text-sm text-base-content/60 mb-1">Total Paid</p>
+                <p className="text-2xl font-bold text-success">
+                  ₦{(stats.totalSpent || 0).toLocaleString()}
+                </p>
+              </div>
+              <div className="p-3 rounded-full bg-success/10">
+                <CheckCircleIcon size={24} className="text-success" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 shadow-xl border border-base-300/50">
+          <div className="card-body p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-base-content/60 mb-1">
+                  Pending Payments
+                </p>
+                <p className="text-2xl font-bold text-warning">
+                  {stats.pendingOrders || 0}
+                </p>
+              </div>
+              <div className="p-3 rounded-full bg-warning/10">
+                <ClockIcon size={24} className="text-warning" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 shadow-xl border border-base-300/50">
+          <div className="card-body p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-base-content/60 mb-1">
+                  Payment Methods
+                </p>
+                <p className="text-2xl font-bold text-info">2</p>
+              </div>
+              <div className="p-3 rounded-full bg-info/10 flex items-center justify-center">
+                <CreditCardIcon size={24} className="text-info" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Pending Payments */}
+      {orders.length > 0 && (
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title mb-4 text-warning">
+              <ClockIcon size={24} className="mr-2" />
+              Pending Payments
+            </h3>
+            <div className="space-y-3">
+              {orders
+                .filter((order) => order.paymentStatus === "Pending")
+                .map((order, index) => (
+                  <div
+                    key={order.id || index}
+                    className="p-4 border border-warning/30 bg-warning/5 rounded-lg"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="avatar placeholder">
+                          <div className="bg-warning/10 text-warning rounded-lg w-12 h-12">
+                            <PackageIcon size={20} />
+                          </div>
+                        </div>
                         <div>
-                          <h5 className="font-medium text-lg">
+                          <h4 className="font-semibold">
                             {order.garment || "Custom Garment"}
-                          </h5>
+                          </h4>
                           <p className="text-sm text-base-content/60">
-                            Order #{order.id || `00${index + 1}`}
+                            Order #{order.id} •{" "}
+                            {order.orderDate
+                              ? new Date(order.orderDate).toLocaleDateString()
+                              : "Recently"}
                           </p>
-                          <p className="text-base font-bold text-base-content/60">
+                          <p className="text-sm font-medium">
                             ₦{(order.cost || 0).toLocaleString()}
                           </p>
                         </div>
-                        <button
-                          onClick={() => navigate("/dashboard/payments")}
-                          className={`btn ${getStatusBadgeClass(
-                            order.paymentStatus
-                          )} btn-sm`}
+                      </div>
+                      <button
+                        onClick={() => navigate("/dashboard/payments")}
+                        className="btn btn-warning btn-sm"
+                      >
+                        Pay Now
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment History */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h3 className="card-title mb-4">
+            <CreditCardIcon size={24} className="mr-2" />
+            Payment History
+          </h3>
+
+          {paymentHistoryLoading ? (
+            <div className="text-center py-8">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          ) : paymentHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <CreditCardIcon
+                size={64}
+                className="mx-auto text-base-content/30 mb-4"
+              />
+              <h4 className="text-lg font-semibold mb-2">No payment history</h4>
+              <p className="text-base-content/60 mb-6">
+                Your completed payments will appear here
+              </p>
+              <button
+                onClick={() => navigate("/gallery")}
+                className="btn btn-primary"
+              >
+                Make Your First Order
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {paymentHistory.map((payment, index) => (
+                <div
+                  key={payment.id || index}
+                  className="p-4 border border-base-300 rounded-lg hover:bg-base-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="avatar placeholder">
+                        <div
+                          className={`rounded-lg flex justify-center items-center w-12 h-12 ${
+                            payment.status === "Completed" ||
+                            payment.status === "Successful"
+                              ? "bg-success/10 text-success"
+                              : payment.status === "Failed"
+                              ? "bg-error/10 text-error"
+                              : "bg-warning/10 text-warning"
+                          }`}
                         >
-                          {order.paymentStatus === "Pending"
-                            ? "Pay Now"
-                            : order.paymentStatus}
-                        </button>
+                          <CreditCardIcon size={20} />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">
+                          {payment.description ||
+                            `Payment for Order #${payment.orderId}`}
+                        </h4>
+                        <p className="text-sm text-base-content/60">
+                          {payment.transactionId
+                            ? `Txn: ${payment.transactionId}`
+                            : ""}
+                          {payment.paymentMethod &&
+                            ` • ${payment.paymentMethod}`}
+                        </p>
+                        <p className="text-sm text-base-content/60">
+                          {payment.createdAt
+                            ? new Date(payment.createdAt).toLocaleDateString()
+                            : "Date not available"}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                    <div className="text-right">
+                      <div
+                        className={`badge badge-lg ${getPaymentStatusBadgeClass(
+                          payment.status
+                        )} mb-2`}
+                      >
+                        {payment.status || "Unknown"}
+                      </div>
+                      <p className="text-lg font-bold">
+                        ₦{(payment.amount / 100 || 0).toLocaleString()}
+                      </p>
+                      {payment.refundAmount && (
+                        <p className="text-sm text-info">
+                          Refunded: ₦{payment.refundAmount.toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-            {/* Payment History placeholder */}
-            <div>
-              <h4 className="font-semibold mb-4">Payment History</h4>
-              <div className="text-center py-8">
-                <CreditCardIcon
-                  size={48}
-                  className="mx-auto text-base-content/30 mb-4"
-                />
-                <p className="text-base-content/60">
-                  Payment history will appear here
-                </p>
+                  {/* Expandable Details */}
+                  <div className="mt-3 pt-3 border-t border-base-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p>
+                          <strong>Payment ID:</strong> {payment.id || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Order ID:</strong> {payment.orderId || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Method:</strong>{" "}
+                          {payment.paymentMethod || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p>
+                          <strong>Reference:</strong>{" "}
+                          {payment.reference || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Gateway:</strong>{" "}
+                          {payment.gateway || "Paystack"}
+                        </p>
+                        <p>
+                          <strong>Processed:</strong>{" "}
+                          {payment.createdAt
+                            ? new Date(payment.createdAt).toLocaleString()
+                            : "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    {payment.failureReason && (
+                      <div className="mt-2 p-2 bg-error/10 border border-error/20 rounded">
+                        <p className="text-sm text-error">
+                          <strong>Failure Reason:</strong>{" "}
+                          {payment.failureReason}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Saved Payment Methods */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h3 className="card-title mb-4">
+            <CreditCardIcon size={24} className="mr-2" />
+            Saved Payment Methods
+          </h3>
+
+          <div className="space-y-3">
+            {/* Sample payment methods - replace with actual data */}
+            <div className="p-4 border border-base-300 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="avatar placeholder">
+                    <div className="bg-primary/10 text-primary rounded-lg w-10 h-10 flex items-center justify-center">
+                      <CreditCardIcon size={20} />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">•••• •••• •••• 4242</h4>
+                    <p className="text-sm text-base-content/60">
+                      Expires 12/26
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="btn btn-ghost btn-sm">Edit</button>
+                  <button className="btn btn-ghost btn-sm text-error">
+                    Remove
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Payment Methods placeholder */}
-            <div>
-              <h4 className="font-semibold mb-4">Saved Payment Methods</h4>
-              <div className="text-center py-8">
-                <p className="text-base-content/60 mb-4">
-                  No saved payment methods
-                </p>
-                <button className="btn btn-outline btn-sm">
-                  Add Payment Method
-                </button>
+            <div className="p-4 border border-base-300 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="avatar placeholder">
+                    <div className="bg-success/10 text-success rounded-lg w-10 h-10 flex items-center justify-center">
+                      <CreditCardIcon size={20} />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Paystack Wallet</h4>
+                    <p className="text-sm text-base-content/60">
+                      Default payment method
+                    </p>
+                  </div>
+                </div>
+                <div className="badge badge-success">Active</div>
               </div>
             </div>
           </div>
-        )}
+
+          <div className="mt-4 pt-4 border-t border-base-300">
+            <button className="btn btn-outline btn-sm">
+              <CreditCardIcon size={16} className="mr-2" />
+              Add New Payment Method
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

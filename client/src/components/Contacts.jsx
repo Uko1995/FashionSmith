@@ -9,7 +9,10 @@ import {
   CheckCircleIcon,
   WhatsappLogoIcon,
 } from "@phosphor-icons/react";
+import toast from "react-hot-toast";
+
 import RedAsterix from "./RedAsterix";
+import { emailAPI } from "@/services/api";
 
 export default function Contacts() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -23,18 +26,28 @@ export default function Contacts() {
   } = useForm();
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
+    try {
+      setIsSubmitting(true);
+      const response = await emailAPI.sendEmail(data);
+      console.log(response);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (response.status === 200) {
+        setIsSubmitted(true);
 
-    console.log("Form data:", data);
-    setIsSubmitted(true);
-    setIsSubmitting(false);
-    reset();
-
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+        toast.success(response?.data?.message);
+        reset();
+      } else {
+        toast.error(response?.data?.message);
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("EmailJS error:", error);
+      toast.error(
+        `Email failed: ${error.text || error.message || "Unknown error"}`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -72,7 +85,7 @@ export default function Contacts() {
   ];
 
   return (
-    <section className="py-6 md:py-12 lg:py-16 px-4 bg-gradient-to-br from-base-100 to-base-200">
+    <section className="py-6 md:py-12 w-full lg:py-16 px-4 bg-gradient-to-br from-base-100 to-base-200">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">

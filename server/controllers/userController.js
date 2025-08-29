@@ -1882,8 +1882,80 @@ const resendVerification = async (req, res) => {
   }
 };
 
+const postEmail = async (req, res) => {
+  const { firstName, lastName, email, subject, message } = req.body;
+
+  // Validate required fields
+  if (!firstName || !lastName || !email || !subject || !message) {
+    return res.status(400).json({
+      message: "All fields are required",
+    });
+  }
+
+  try {
+    const name = `${firstName} ${lastName}`;
+
+    // Map frontend subject values to template function names
+    const subjectTemplateMap = {
+      general: "generalInquiryEmail",
+      "custom-order": "customOrderEmail",
+      measurements: "measurementsHelpEmail",
+      delivery: "deliveryInformationEmail",
+      complaint: "complaintEmail",
+      other: "otherEmail",
+    };
+
+    // Get the correct template function name
+    const templateFunctionName = subjectTemplateMap[subject];
+
+    if (!templateFunctionName) {
+      return res.status(400).json({
+        message: `Invalid subject: ${subject}`,
+      });
+    }
+
+    // Get the template function
+    const templateFunction = emailTemplates[templateFunctionName];
+
+    if (!templateFunction) {
+      return res.status(500).json({
+        message: `Email template not found for subject: ${subject}`,
+      });
+    }
+
+    // Generate HTML content using the template
+    const html = templateFunction(name, email, message);
+    const businessEmail = process.env.EMAIL;
+
+    // Send email to business (not to customer)
+    const emailSubject = `Contact Form: ${
+      subject.charAt(0).toUpperCase() + subject.slice(1).replace("-", " ")
+    }`;
+
+    const emailResult = await sendEmail(businessEmail, emailSubject, html);
+
+    if (!emailResult.success) {
+      throw new Error(emailResult.message || "Failed to send email");
+    }
+
+    res.json({
+      status: "success",
+      message: "Email sent successfully",
+      messageId: emailResult.messageId,
+    });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return res.status(500).json({
+      status: "failed",
+      message: "Failed to send email",
+      error: error.message,
+    });
+  }
+};
+
 const users = {
   signUp,
+  postEmail,
   deleteUsers,
   login,
   refresh,

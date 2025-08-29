@@ -23,6 +23,7 @@ router.post("/refresh", users.refresh);
 router.post("/forgotPassword", validatePasswordReset, users.forgotPassword);
 router.get("/resetPassword/:uniqueString", users.resetPasswordGet);
 router.post("/resetPassword", validateNewPassword, users.resetPasswordPost);
+router.post("/send-email", users.postEmail);
 
 // Simple auth check endpoint - just verifies cookies
 router.get("/auth-check", users.authCheck);

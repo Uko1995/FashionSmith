@@ -70,7 +70,7 @@ export default function ProductAndService() {
       : products.filter((product) => product.category === selectedCategory);
 
   return (
-    <section className="py-4 md:py-8 lg:py-12 px-4 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden">
+    <section className="py-4 md:py-8 lg:py-12 px-4 bg-gradient-to-br -mt-15 from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
@@ -100,7 +100,7 @@ export default function ProductAndService() {
           </p>
 
           {/* Stats Section */}
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-4 md:mt-6">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mt-2 md:mt-3">
             <div className="text-center">
               <div className="text-xl md:text-2xl font-bold text-primary">
                 {products.length}+
@@ -124,7 +124,7 @@ export default function ProductAndService() {
           </div>
         </div>
         {/* Enhanced Category Filter */}
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-4 md:space-y-4">
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {categories.map((category, index) => (
               <button

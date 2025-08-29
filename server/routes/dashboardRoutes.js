@@ -13,6 +13,9 @@ router.get("/", verifyJWT, dashboardController.getUserDashboard);
 // User's order history with pagination and filtering
 router.get("/orders", verifyJWT, dashboardController.getUserOrders);
 
+// User payment history with pagination and filtering
+router.get("/payments", verifyJWT, dashboardController.getUserPaymentHistory);
+
 // User notifications/alerts
 router.get(
   "/notifications",
