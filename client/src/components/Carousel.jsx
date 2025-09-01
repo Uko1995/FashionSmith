@@ -102,11 +102,11 @@ export default function Carousel() {
   };
 
   return (
-    <div className="relative w-full lg:w-2/3 max-w-6xl mx-auto overflow-hidden">
+    <div className="relative w-full max-w-5xl mx-auto overflow-hidden">
       {/* Carousel container */}
       <div
         ref={scrollRef}
-        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide"
+        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
@@ -115,9 +115,9 @@ export default function Carousel() {
         {guideSteps.map((slide, index) => (
           <div
             key={slide.step}
-            className="snap-center shrink-0 w-full bg-base-100 rounded-2xl shadow-xl overflow-hidden group hover:shadow-2xl transition-all duration-500"
+            className="snap-center shrink-0 w-full bg-base-100 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300"
           >
-            {/* Image Section with Overlay */}
+            {/* Compact Image Section */}
             <div className="relative overflow-hidden">
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${slide.color} z-10`}
@@ -125,90 +125,74 @@ export default function Carousel() {
               <img
                 src={slide.image}
                 alt={slide.caption}
-                className="w-full h-80 md:h-96 object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                className="w-full h-48 md:h-56 lg:h-64 object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
 
-              {/* Progress Indicator */}
-              <div className="absolute top-6 right-6 z-20">
-                <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-800">
-                  {index + 1} of {guideSteps.length}
+              {/* Step Indicator */}
+              <div className="absolute top-3 right-3 z-20">
+                <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-gray-800">
+                  Step {index + 1}
                 </div>
               </div>
             </div>
 
-            {/* Content Section */}
-            <div className="p-3 md:p-4 lg:p-6">
-              <div className="mb-3 md:mb-2">
-                <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-base-content mb-1 md:mb-2 group-hover:text-primary transition-colors duration-300">
+            {/* Compact Content Section */}
+            <div className="p-3 md:p-4">
+              <div className="mb-2 md:mb-3">
+                <h3 className="text-base md:text-lg lg:text-xl font-bold text-base-content mb-1 group-hover:text-primary transition-colors duration-300">
                   {slide.title}
                 </h3>
-                <p className="text-base-content/70 leading-relaxed text-sm md:text-base lg:text-lg">
+                <p className="text-base-content/70 leading-relaxed text-xs md:text-sm">
                   {slide.description}
                 </p>
               </div>
 
-              {/* Features List */}
-              <div className="mb-4 md:mb-6">
-                <h4 className="font-semibold text-base-content mb-2 md:mb-3 flex items-center gap-2 text-sm md:text-base">
-                  <StarIcon size={16} className="text-yellow-500 md:hidden" />
-                  <StarIcon
-                    size={18}
-                    className="text-yellow-500 hidden md:block"
-                  />
-                  Key Features:
-                </h4>
-                <div className="space-y-1.5 md:space-y-2 flex gap-4 ">
-                  {slide.features.map((feature, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-row items-center gap-2 text-base-content/70"
-                    >
-                      <CheckCircleIcon
-                        size={14}
-                        className="text-success flex-shrink-0 md:hidden"
-                      />
-                      <CheckCircleIcon
-                        size={16}
-                        className="text-success flex-shrink-0 hidden md:block"
-                      />
-                      <span className="text-xs md:text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
+              {/* Compact Features List */}
+              <div className="grid grid-cols-3 gap-1 md:gap-2">
+                {slide.features.map((feature, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-1 text-base-content/70"
+                  >
+                    <CheckCircleIcon
+                      size={12}
+                      className="text-success flex-shrink-0"
+                    />
+                    <span className="text-xs truncate">{feature}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Enhanced Navigation Buttons */}
+      {/* Compact Navigation Buttons */}
       <button
         onClick={() => scroll("left")}
-        className="absolute left-2 md:left-4 top-1/3 md:top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-2 md:p-4 rounded-full shadow-2xl z-30 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-gray-200"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-2 rounded-full shadow-lg z-30 transition-all duration-300 hover:scale-110"
         aria-label="Previous step"
       >
-        <CaretLeftIcon size={20} className="text-gray-800 md:hidden" />
-        <CaretLeftIcon size={24} className="text-gray-800 hidden md:block" />
+        <CaretLeftIcon size={16} className="text-gray-800" />
       </button>
 
       <button
         onClick={() => scroll("right")}
-        className="absolute right-2 md:right-4 top-1/3 md:top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-2 md:p-4 rounded-full shadow-2xl z-30 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-gray-200"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-2 rounded-full shadow-lg z-30 transition-all duration-300 hover:scale-110"
         aria-label="Next step"
       >
-        <CaretRightIcon size={20} className="text-gray-800 md:hidden" />
-        <CaretRightIcon size={24} className="text-gray-800 hidden md:block" />
+        <CaretRightIcon size={16} className="text-gray-800" />
       </button>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+      {/* Compact Slide Indicators */}
+      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
         {guideSteps.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === currentSlide
-                ? "bg-primary shadow-lg scale-125"
+                ? "bg-primary shadow-md scale-125"
                 : "bg-gray-300 hover:bg-gray-400"
             }`}
             aria-label={`Go to step ${index + 1}`}

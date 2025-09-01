@@ -21,6 +21,7 @@ export default function DashboardSettings() {
   const { data: userProfile, isLoading } = useQuery({
     queryKey: ["userProfile"],
     queryFn: userAPI.getProfile,
+    select: (response) => response.data.user || response.data, // Handle both response structures
   });
 
   const user = userProfile?.data?.user || {};

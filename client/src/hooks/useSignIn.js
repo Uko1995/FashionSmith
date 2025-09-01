@@ -25,6 +25,10 @@ export default function useSignIn() {
       setIsLoggedIn(true);
       setUser(data.user);
 
+      // Set auth provider for local login
+      const { setAuthProvider } = useUiStore.getState();
+      setAuthProvider("local");
+
       // Save user data to localStorage for persistence across page reloads
       localStorage.setItem("user", JSON.stringify(data.user));
 

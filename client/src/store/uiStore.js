@@ -8,6 +8,7 @@ export const useUiStore = create(
         // Authentication state
         isLoggedIn: false,
         user: null,
+        authProvider: null, // 'local' or 'google'
         isAuthInitialized: false,
 
         // UI state
@@ -182,6 +183,11 @@ export const useUiStore = create(
           }
         },
 
+        setAuthProvider: (provider) => {
+          console.log("[ZUSTAND] Setting auth provider:", provider);
+          set({ authProvider: provider }, false, "setAuthProvider");
+        },
+
         setIsAuthInitialized: (value) => {
           console.log("[ZUSTAND] Setting isAuthInitialized:", value);
           set({ isAuthInitialized: value }, false, "setIsAuthInitialized");
@@ -200,6 +206,7 @@ export const useUiStore = create(
             {
               isLoggedIn: false,
               user: null,
+              authProvider: null,
               isAuthInitialized: true,
               // Keep cart items for anonymous shopping
             },
@@ -215,6 +222,7 @@ export const useUiStore = create(
             {
               isLoggedIn: false,
               user: null,
+              authProvider: null,
               isAuthInitialized: true,
               // Keep cart items for anonymous shopping
             },

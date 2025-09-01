@@ -42,6 +42,11 @@ export const orderSchema = {
           bsonType: "string",
           description: "Selected color name",
         },
+        sleeveType: {
+          bsonType: "string",
+          enum: ["shortSleeve", "longSleeve"],
+          description: "Sleeve type for shirts (shortSleeve or longSleeve)",
+        },
         price: {
           bsonType: "number",
           minimum: 0,
@@ -145,6 +150,7 @@ export const OrderInterface = {
   quantity: "number",
   selectedFabric: "string",
   selectedColor: "string",
+  sleeveType: "shortSleeve | longSleeve",
   price: "number",
   cost: "number",
   orderDate: "Date",
@@ -219,6 +225,15 @@ export const validateOrder = (orderData) => {
       typeof orderData.selectedColor !== "string"
     ) {
       errors.push("selectedColor is required and must be a string");
+    }
+  }
+
+  // Validate sleeveType (optional field)
+  if (orderData.sleeveType) {
+    if (typeof orderData.sleeveType !== "string") {
+      errors.push("sleeveType must be a string");
+    } else if (!["shortSleeve", "longSleeve"].includes(orderData.sleeveType)) {
+      errors.push("sleeveType must be either 'shortSleeve' or 'longSleeve'");
     }
   }
 

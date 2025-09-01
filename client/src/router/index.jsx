@@ -48,6 +48,13 @@ const router = createBrowserRouter([
         errorElement: <ErrorElement />,
       },
       {
+        path: "auth/callback",
+        lazy: async () => ({
+          Component: (await import("../pages/AuthCallback")).default,
+        }),
+        errorElement: <ErrorElement />,
+      },
+      {
         path: "register",
         lazy: async () => ({
           Component: (await import("../pages/Register")).default,

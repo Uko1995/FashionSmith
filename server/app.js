@@ -1,7 +1,10 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import session from "express-session";
+import passport from "./config/passport.js";
 import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
@@ -13,6 +16,8 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 
 const app = express();
+
+// Load environment variables FIRST
 dotenv.config();
 
 // Security middleware
@@ -64,6 +69,7 @@ app.use(
       const allowedOrigins = [
         "http://localhost:3000",
         "http://localhost:5173",
+        "https://c2a4caac8e65.ngrok-free.app",
         process.env.CLIENT_URL,
       ].filter(Boolean);
 
@@ -91,6 +97,24 @@ app.use(
   })
 );
 
+// Session middleware for Passport
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-session-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Request logging middleware
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
@@ -109,6 +133,7 @@ app.get("/api/health", (req, res) => {
 
 // API routes
 app.use("/api/users", authLimiter, userRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/admin", authLimiter, adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/dashboard", dashboardRoutes);

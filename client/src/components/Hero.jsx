@@ -65,9 +65,8 @@ export default function Hero() {
 
               {/* Description */}
               <p className="text-white/90 text-lg lg:text-xl max-w-2xl leading-relaxed font-medium animate-fade-in animation-delay-500">
-                Experience the pinnacle of bespoke tailoring where traditional
-                Nigerian craftsmanship meets contemporary design. Every garment
-                is a masterpiece crafted exclusively for you.
+                Experience bespoke tailoring where traditional Nigerian
+                craftsmanship meets contemporary design.
               </p>
 
               {/* CTA Buttons */}

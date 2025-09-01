@@ -4,14 +4,7 @@ export const userSchema = {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: [
-        "firstName",
-        "lastName",
-        "email",
-        "password",
-        "username",
-        "role",
-      ],
+      required: ["firstName", "lastName", "email", "username", "role"],
       properties: {
         firstName: {
           bsonType: "string",
@@ -29,9 +22,10 @@ export const userSchema = {
           description: "Email must be a valid email address",
         },
         password: {
-          bsonType: "string",
+          bsonType: ["string", "null"],
           minLength: 8,
-          description: "Password must be at least 8 characters long",
+          description:
+            "Password must be at least 8 characters long (null for OAuth users)",
         },
         username: {
           bsonType: "string",
@@ -81,6 +75,15 @@ export const userSchema = {
           bsonType: ["string", "null"],
           description: "User's profile image URL",
         },
+        googleId: {
+          bsonType: ["string", "null"],
+          description: "Google OAuth ID for Google login users",
+        },
+        authProvider: {
+          bsonType: ["string", "null"],
+          enum: ["local", "google"],
+          description: "Authentication provider used",
+        },
         preferences: {
           bsonType: ["object", "null"],
           properties: {
@@ -128,6 +131,7 @@ export const userSchema = {
 // Indexes for performance
 export const userIndexes = [
   { key: { email: 1 }, unique: true },
+  { key: { googleId: 1 }, sparse: true },
   { key: { refreshToken: 1 }, sparse: true },
   { key: { createdAt: 1 } },
   { key: { role: 1 } },
@@ -139,7 +143,7 @@ export const UserInterface = {
   firstName: "string",
   lastName: "string",
   email: "string",
-  password: "string",
+  password: "string | null",
   username: "string",
   role: "user | admin",
   createdAt: "Date",
@@ -152,6 +156,8 @@ export const UserInterface = {
     country: "string | null",
   },
   profileImage: "string | null",
+  googleId: "string | null",
+  authProvider: "local | google | null",
   preferences: {
     orderUpdates: "boolean | null",
     paymentNotifications: "boolean | null",
@@ -172,6 +178,9 @@ export const userDefaults = {
   phoneNumber: null,
   address: null,
   profileImage: null,
+  googleId: null,
+  authProvider: "local",
+  password: null, // null for OAuth users
   preferences: {
     orderUpdates: true,
     paymentNotifications: true,

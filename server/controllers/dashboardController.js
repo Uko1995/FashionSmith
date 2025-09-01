@@ -217,6 +217,7 @@ export const getUserOrders = async (req, res) => {
       quantity: order.quantity,
       color: order.selectedColor || order.color || null,
       fabric: order.selectedFabric || order.fabric || null,
+      sleeveType: order.sleeveType || null,
       price: order.price || 0,
       cost: order.totalCost || order.cost || order.price || 0,
       status: order.status || order.Status || "Pending",

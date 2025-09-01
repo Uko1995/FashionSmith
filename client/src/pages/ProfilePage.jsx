@@ -74,7 +74,7 @@ export default function ProfilePage() {
   } = useQuery({
     queryKey: ["userProfile"],
     queryFn: userAPI.getProfile,
-    select: (response) => response.data,
+    select: (response) => response.data.user || response.data, // Handle both response structures
   });
 
   // Form for profile editing

@@ -189,23 +189,46 @@ const deleteUsers = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await userCollection.findOne(
-      { email: req?.user?.email },
-      {
-        projection: {
-          _id: 0,
-          password: 0,
-          refreshToken: 0,
-          __v: 0,
-        },
-      }
-    );
+    console.log("[GET USER] Request user:", req.user);
+
+    // Try to find user by ID first (more reliable), then by email as fallback
+    let user;
+    if (req.user.id) {
+      user = await userCollection.findOne(
+        { _id: new ObjectId(req.user.id) },
+        {
+          projection: {
+            password: 0,
+            refreshToken: 0,
+            __v: 0,
+          },
+        }
+      );
+    }
+
+    // Fallback to email lookup if ID lookup fails
+    if (!user && req.user.email) {
+      user = await userCollection.findOne(
+        { email: req.user.email },
+        {
+          projection: {
+            password: 0,
+            refreshToken: 0,
+            __v: 0,
+          },
+        }
+      );
+    }
+
     if (!user) {
+      console.log("[GET USER] User not found for:", req.user);
       return res.status(404).json({
         message: "User not found",
       });
     }
-    res.json(user);
+
+    console.log("[GET USER] User found:", user.email);
+    res.json({ user });
   } catch (error) {
     console.error("Error:", error.message, error.stack);
     return res.status(500).json({
@@ -217,12 +240,31 @@ const getUser = async (req, res) => {
 // Simple auth check that only verifies if user has valid cookies
 const authCheck = async (req, res) => {
   try {
-    console.log("[AUTH CHECK] Checking authentication cookies...");
+    console.log("[AUTH CHECK] Checking authentication...");
 
+    // Check for JWT token in Authorization header (for Google OAuth and API calls)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+      try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        console.log("[AUTH CHECK] JWT token valid for user:", decoded.id);
+        return res.status(200).json({
+          success: true,
+          message: "Authenticated",
+        });
+      } catch (err) {
+        console.log("[AUTH CHECK] JWT token invalid:", err.message);
+      }
+    }
+
+    // Check for cookies (for traditional login flow)
     const accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
 
     console.log("[AUTH CHECK] Tokens present:", {
+      hasAuthHeader: !!authHeader,
       hasAccessToken: !!accessToken,
       hasRefreshToken: !!refreshToken,
     });
@@ -328,15 +370,16 @@ const login = async (req, res) => {
       return res.status(200).json({
         message: "User already logged in",
         code: "ALREADY_LOGGED_IN",
-        redirectTo: "/dashboard",
+        redirectTo: "/",
         user: {
-          id: user._id,
+          _id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
           role: user.role,
           isVerified: user.isVerified,
           profileImage: user.profileImage,
+          authProvider: user.authProvider || "local",
         },
       });
     }
@@ -373,7 +416,7 @@ const login = async (req, res) => {
         success: true,
         message: `Welcome back, ${user.firstName || user.username}!`,
         user: {
-          id: user._id,
+          _id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
           username: user.username,
@@ -381,9 +424,10 @@ const login = async (req, res) => {
           role: user.role,
           isVerified: user.isVerified,
           profileImage: user.profileImage,
+          authProvider: user.authProvider || "local",
         },
-        redirectTo: "/dashboard",
-        dashboardUrl: "/api/dashboard",
+        redirectTo: "/",
+        dashboardUrl: "/",
       });
   } catch (error) {
     console.error(error);
@@ -1094,6 +1138,7 @@ const createOrder = async (req, res) => {
     quantity,
     selectedFabric,
     selectedColor,
+    sleeveType, // Add sleeveType
     deliveryDate,
     deliveryAddress,
     measurements,
@@ -1207,6 +1252,7 @@ const createOrder = async (req, res) => {
         typeof selectedColor === "object"
           ? String(selectedColor.name || selectedColor)
           : String(selectedColor),
+      sleeveType: sleeveType ? String(sleeveType) : undefined, // Add sleeveType (optional)
       price: Number(unitPrice) || 0,
       cost: Number(cost) || Number(unitPrice || 0) * Number(quantity || 1),
       deliveryDate: deliveryDateObj,

@@ -4,7 +4,21 @@ import { ObjectId } from "mongodb";
 
 const verifyJWT = async (req, res, next) => {
   try {
-    const accessToken = req.cookies.accessToken;
+    let accessToken;
+
+    // Check for JWT token in Authorization header (Google OAuth)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+      console.log(
+        "[JWT MIDDLEWARE] Using Bearer token from Authorization header"
+      );
+    } else {
+      // Check for JWT token in cookies (regular users)
+      accessToken = req.cookies.accessToken;
+      console.log("[JWT MIDDLEWARE] Using token from cookies");
+    }
+
     if (!accessToken) {
       return res.status(401).json({
         success: false,

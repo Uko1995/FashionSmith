@@ -108,6 +108,14 @@ export const productSchema = {
           minimum: 0,
           description: "Number of times this product has been ordered",
         },
+        sleeveTypes: {
+          bsonType: "array",
+          items: {
+            bsonType: "string",
+            enum: ["shortSleeve", "longSleeve"],
+          },
+          description: "Available sleeve types for shirts",
+        },
         createdAt: {
           bsonType: "date",
           description: "Creation timestamp",
@@ -149,6 +157,7 @@ export const ProductInterface = {
   tags: "string[]",
   makingTime: "string",
   orderCount: "number",
+  sleeveTypes: "('shortSleeve' | 'longSleeve')[]",
   createdAt: "Date",
   updatedAt: "Date",
 };

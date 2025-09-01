@@ -40,6 +40,10 @@ export default function useLogoutWithNav() {
       console.log("[LOGOUT] Clearing local authentication state");
       resetAuthState();
       localStorage.removeItem("user");
+      localStorage.removeItem("authToken"); // Clear Google OAuth token
+
+      // Clear axios Authorization header for Google OAuth users
+      delete apiClient.defaults.headers.common["Authorization"];
 
       // Emit logout event for other components
       window.dispatchEvent(new CustomEvent("auth:logout"));

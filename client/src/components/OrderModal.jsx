@@ -23,11 +23,34 @@ import {
 import { useUiStore } from "../store/uiStore";
 import RedAsterix from "./RedAsterix";
 
+// Measurement descriptions for tooltips
+const measurementDescriptions = {
+  Neck: "Measure around the base of your neck where a collar would sit",
+  Shoulder: "Measure from one shoulder point to the other across your back",
+  Chest: "Measure around the fullest part of your chest, under your arms",
+  NaturalWaist:
+    "Measure around your natural waistline, typically the narrowest part",
+  Hip: "Measure around the fullest part of your hips",
+  KaftanLength: "Measure from shoulder to desired kaftan length",
+  AgbadaLength: "Measure from shoulder to desired agbada length",
+  ShirtLength: "Measure from shoulder to desired shirt length",
+  TrouserLength: "Measure from waist to desired trouser length",
+  TrouserWaist: "Measure around your waist where trousers would sit",
+  ThighWidth: "Measure around the fullest part of your thigh",
+  KneeWidth: "Measure around your knee",
+  AnkleWidth: "Measure around your ankle",
+  LongSleeve: "Measure from shoulder point to desired long sleeve length",
+  ShortSleeve: "Measure from shoulder point to desired short sleeve length",
+  ShortSleeveWidth: "Measure around your arm where short sleeves would end",
+  Bicep: "Measure around the fullest part of your upper arm",
+};
+
 export default function OrderModal({ isOpen, onClose, product }) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("preferences");
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedFabric, setSelectedFabric] = useState("");
+  const [selectedSleeveType, setSelectedSleeveType] = useState(""); // Add sleeve type state
   const [styleImage, setStyleImage] = useState(null);
   const [styleImagePreview, setStyleImagePreview] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -64,8 +87,8 @@ export default function OrderModal({ isOpen, onClose, product }) {
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: userAPI.getProfile,
+    select: (response) => response.data.user || response.data, // Handle both response structures
     enabled: isOpen,
-    select: (response) => response.data,
   });
 
   // Fetch user measurements
@@ -112,9 +135,24 @@ export default function OrderModal({ isOpen, onClose, product }) {
 
   const garmentType = product ? getGarmentType(product.name) : "kaftan";
   const requiredMeasurements = useMemo(() => {
-    const measurements = garmentSpecificMeasurements[garmentType] || [];
+    let measurements = garmentSpecificMeasurements[garmentType] || [];
+
+    // For shirts, filter measurements based on selected sleeve type
+    if (garmentType === "shirt" && selectedSleeveType) {
+      measurements = measurements.filter((measurement) => {
+        if (selectedSleeveType === "shortSleeve") {
+          return measurement !== "LongSleeve"; // Remove long sleeve measurement
+        } else if (selectedSleeveType === "longSleeve") {
+          return (
+            measurement !== "ShortSleeve" && measurement !== "ShortSleeveWidth"
+          ); // Remove short sleeve measurements
+        }
+        return true;
+      });
+    }
+
     return measurements;
-  }, [garmentType]);
+  }, [garmentType, selectedSleeveType]);
 
   // Auto-fill measurements when user data loads
   useEffect(() => {
@@ -140,6 +178,7 @@ export default function OrderModal({ isOpen, onClose, product }) {
       setActiveTab("preferences");
       setSelectedColor("");
       setSelectedFabric("");
+      setSelectedSleeveType(""); // Reset sleeve type
       setStyleImage(null);
       setStyleImagePreview(null);
       setQuantity(1);
@@ -197,9 +236,11 @@ export default function OrderModal({ isOpen, onClose, product }) {
     }
 
     // Validate required fields
+    const isShirt = garmentType === "shirt";
     if (
       !selectedColor ||
       !selectedFabric ||
+      (isShirt && !selectedSleeveType) ||
       !deliveryDate ||
       !deliveryAddress.trim()
     ) {
@@ -236,6 +277,7 @@ export default function OrderModal({ isOpen, onClose, product }) {
         garment: product.name,
         selectedFabric: selectedFabric, // string as expected by backend
         selectedColor: selectedColor, // string as expected by backend
+        sleeveType: garmentType === "shirt" ? selectedSleeveType : undefined, // Add sleeve type for shirts
         deliveryDate: deliveryDate,
         deliveryAddress: deliveryAddress.trim(),
         measurements: measurementsArray, // array of objects with name and value
@@ -251,7 +293,10 @@ export default function OrderModal({ isOpen, onClose, product }) {
       // createResult is the axios response returned by the mutationFn
       const created = createResult?.data || createResult;
       const orderId =
-        created?.orderId || created?._id || created?.data?.orderId || created?.data?._id;
+        created?.orderId ||
+        created?._id ||
+        created?.data?.orderId ||
+        created?.data?._id;
       toast.dismiss("order-process");
 
       toast.loading("Initializing payment...", { id: "order-process" });
@@ -301,6 +346,7 @@ export default function OrderModal({ isOpen, onClose, product }) {
   const isPreferencesComplete =
     selectedColor &&
     selectedFabric &&
+    (garmentType !== "shirt" || selectedSleeveType) && // Include sleeve type validation for shirts
     quantity > 0 &&
     deliveryDate &&
     deliveryAddress.trim();
@@ -311,6 +357,11 @@ export default function OrderModal({ isOpen, onClose, product }) {
       .replace(/([A-Z])/g, " $1")
       .replace(/^./, (str) => str.toUpperCase())
       .trim();
+  };
+
+  // Get measurement description for tooltip
+  const getMeasurementDescription = (measurement) => {
+    return measurementDescriptions[measurement] || "No description available";
   };
 
   // Calculate total price
@@ -520,6 +571,65 @@ export default function OrderModal({ isOpen, onClose, product }) {
                 )}
               </div>
 
+              {/* Sleeve Type Selection for Shirts */}
+              {garmentType === "shirt" && (
+                <div>
+                  <label className="label">
+                    <span className="label-text text-lg font-semibold flex items-center gap-2">
+                      <ScissorsIcon size={20} />
+                      Choose Sleeve Type <RedAsterix />
+                    </span>
+                  </label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setSelectedSleeveType("shortSleeve")}
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.02] ${
+                        selectedSleeveType === "shortSleeve"
+                          ? "border-primary bg-primary/10"
+                          : "border-base-300 hover:border-base-400"
+                      }`}
+                    >
+                      <div className="font-medium flex justify-between items-center">
+                        Short Sleeve
+                        <span className="text-xs text-base-content/60">
+                          Casual
+                        </span>
+                      </div>
+                      <div className="text-sm text-base-content/70 mt-1">
+                        Perfect for casual wear and warm weather
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedSleeveType("longSleeve")}
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.02] ${
+                        selectedSleeveType === "longSleeve"
+                          ? "border-primary bg-primary/10"
+                          : "border-base-300 hover:border-base-400"
+                      }`}
+                    >
+                      <div className="font-medium flex justify-between items-center">
+                        Long Sleeve
+                        <span className="text-xs text-base-content/60">
+                          Formal
+                        </span>
+                      </div>
+                      <div className="text-sm text-base-content/70 mt-1">
+                        Great for formal occasions and cooler weather
+                      </div>
+                    </button>
+                  </div>
+                  {!selectedSleeveType && (
+                    <div className="label">
+                      <span className="label-text-alt text-error">
+                        Please select a sleeve type
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Style Image Upload */}
               <div>
                 <label className="label">
@@ -670,113 +780,160 @@ export default function OrderModal({ isOpen, onClose, product }) {
 
           {activeTab === "measurements" && (
             <div className="space-y-6">
-              <div className="alert alert-info">
-                <InfoIcon size={20} />
-                <div>
-                  <h3 className="font-bold">
-                    Measurements for {formatMeasurementLabel(garmentType)}
-                  </h3>
-                  <div className="text-sm">
-                    {userMeasurements &&
-                    Object.keys(userMeasurements).length > 0
-                      ? "Your saved measurements have been pre-filled. You can modify them if needed."
-                      : "Please enter your measurements in inches."}
+              {garmentType === "shirt" && !selectedSleeveType ? (
+                <div className="alert alert-warning">
+                  <InfoIcon size={20} />
+                  <div>
+                    <h3 className="font-bold">Sleeve Type Required</h3>
+                    <div className="text-sm">
+                      Please go back to the Preferences tab and select either
+                      short sleeve or long sleeve for your shirt before
+                      proceeding to measurements.
+                    </div>
+                    <button
+                      onClick={() => setActiveTab("preferences")}
+                      className="btn btn-sm btn-warning mt-2"
+                    >
+                      Go to Preferences
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              {measurementsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="flex justify-between items-center">
-                      <div className="w-32 h-4 bg-base-300 rounded animate-pulse"></div>
-                      <div className="w-20 h-10 bg-base-300 rounded animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
               ) : (
-                <div>
-                  {console.log("Rendering measurements form:", {
-                    requiredMeasurements: requiredMeasurements,
-                    count: requiredMeasurements.length,
-                    measurementsLoading,
-                  })}
-                  {requiredMeasurements.length === 0 ? (
-                    <div className="alert alert-warning">
-                      <InfoIcon size={20} />
-                      <div>
-                        <h3 className="font-bold">No measurements found</h3>
-                        <div className="text-sm">
-                          No measurement fields are defined for this garment
-                          type: {garmentType}
-                        </div>
+                <>
+                  <div className="alert alert-info">
+                    <InfoIcon size={20} />
+                    <div>
+                      <h3 className="font-bold">
+                        Measurements for {formatMeasurementLabel(garmentType)}
+                      </h3>
+                      <div className="text-sm">
+                        {garmentType === "shirt" && selectedSleeveType && (
+                          <p className="mb-2">
+                            Showing measurements for{" "}
+                            <span className="font-medium">
+                              {selectedSleeveType === "shortSleeve"
+                                ? "short sleeve"
+                                : "long sleeve"}
+                            </span>{" "}
+                            shirt.
+                          </p>
+                        )}
+                        {userMeasurements &&
+                        Object.keys(userMeasurements).length > 0
+                          ? "Your saved measurements have been pre-filled. You can modify them if needed."
+                          : "Please enter your measurements in inches. Hover over the info icon next to each measurement for detailed instructions."}
                       </div>
+                    </div>
+                  </div>
+
+                  {measurementsLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(6)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="flex justify-between items-center"
+                        >
+                          <div className="w-32 h-4 bg-base-300 rounded animate-pulse"></div>
+                          <div className="w-20 h-10 bg-base-300 rounded animate-pulse"></div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <form
-                      onSubmit={handleSubmit(onSubmitOrder)}
-                      className="space-y-4"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {requiredMeasurements.map((measurement) => (
-                          <div key={measurement} className="form-control">
-                            <label className="label">
-                              <span className="label-text font-medium">
-                                {formatMeasurementLabel(measurement)}{" "}
-                              </span>
-                              <span className="label-text-alt">inches</span>
-                              <RedAsterix />
-                            </label>
-                            <input
-                              type="number"
-                              step="0.1"
-                              min="0"
-                              placeholder="0.0"
-                              className={`input input-bordered ${
-                                errors[measurement] ? "input-error" : ""
-                              }`}
-                              {...register(measurement, {
-                                required: `${formatMeasurementLabel(
-                                  measurement
-                                )} is required`,
-                                min: {
-                                  value: 0.1,
-                                  message: "Must be greater than 0",
-                                },
-                              })}
-                            />
-                            {errors[measurement] && (
-                              <label className="label">
-                                <span className="label-text-alt text-error">
-                                  {errors[measurement].message}
-                                </span>
-                              </label>
-                            )}
+                    <div>
+                      {console.log("Rendering measurements form:", {
+                        requiredMeasurements: requiredMeasurements,
+                        count: requiredMeasurements.length,
+                        measurementsLoading,
+                      })}
+                      {requiredMeasurements.length === 0 ? (
+                        <div className="alert alert-warning">
+                          <InfoIcon size={20} />
+                          <div>
+                            <h3 className="font-bold">No measurements found</h3>
+                            <div className="text-sm">
+                              No measurement fields are defined for this garment
+                              type: {garmentType}
+                            </div>
                           </div>
-                        ))}
-                      </div>
-
-                      <div className="divider"></div>
-
-                      <div className="flex justify-end gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setActiveTab("preferences")}
-                          className="btn btn-ghost"
+                        </div>
+                      ) : (
+                        <form
+                          onSubmit={handleSubmit(onSubmitOrder)}
+                          className="space-y-4"
                         >
-                          Back to Preferences
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveTab("summary")}
-                          className="btn btn-primary"
-                        >
-                          Continue to Summary
-                        </button>
-                      </div>
-                    </form>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {requiredMeasurements.map((measurement) => (
+                              <div key={measurement} className="form-control">
+                                <label className="label">
+                                  <span className="label-text font-medium flex items-center gap-2">
+                                    {formatMeasurementLabel(measurement)}
+                                    <div
+                                      className="tooltip tooltip-top"
+                                      data-tip={getMeasurementDescription(
+                                        measurement
+                                      )}
+                                    >
+                                      <InfoIcon
+                                        size={16}
+                                        className="text-base-content/50 hover:text-primary cursor-help"
+                                      />
+                                    </div>
+                                  </span>
+                                  <span className="label-text-alt">inches</span>
+                                  <RedAsterix />
+                                </label>
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="0"
+                                  placeholder="0.0"
+                                  className={`input input-bordered ${
+                                    errors[measurement] ? "input-error" : ""
+                                  }`}
+                                  {...register(measurement, {
+                                    required: `${formatMeasurementLabel(
+                                      measurement
+                                    )} is required`,
+                                    min: {
+                                      value: 0.1,
+                                      message: "Must be greater than 0",
+                                    },
+                                  })}
+                                />
+                                {errors[measurement] && (
+                                  <label className="label">
+                                    <span className="label-text-alt text-error">
+                                      {errors[measurement].message}
+                                    </span>
+                                  </label>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="divider"></div>
+
+                          <div className="flex justify-end gap-4">
+                            <button
+                              type="button"
+                              onClick={() => setActiveTab("preferences")}
+                              className="btn btn-ghost"
+                            >
+                              Back to Preferences
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setActiveTab("summary")}
+                              className="btn btn-primary"
+                            >
+                              Continue to Summary
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           )}
@@ -849,6 +1006,18 @@ export default function OrderModal({ isOpen, onClose, product }) {
                         {formatMeasurementLabel(garmentType)}
                       </span>
                     </div>
+                    {garmentType === "shirt" && selectedSleeveType && (
+                      <div className="flex justify-between">
+                        <span className="text-base-content/70">
+                          Sleeve Type:
+                        </span>
+                        <span className="font-medium">
+                          {selectedSleeveType === "shortSleeve"
+                            ? "Short Sleeve"
+                            : "Long Sleeve"}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-base-content/70">
                         Delivery Date:

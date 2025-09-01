@@ -28,7 +28,36 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Utility function to get badge class based on order status
+  const getStatusBadgeClass = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return "badge-warning";
+      case "processing":
+        return "badge-info";
+      case "shipped":
+        return "badge-primary";
+      case "delivered":
+        return "badge-success";
+      case "cancelled":
+        return "badge-error";
+      case "refunded":
+        return "badge-neutral";
+      default:
+        return "badge-ghost";
+    }
+  };
   const [showFullOrder, setShowFullOrder] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showFullPayment, setShowFullPayment] = useState(false);
+
+  // View full payment details function
+  const viewFullPayment = (payment) => {
+    setSelectedPayment(payment);
+    setShowFullPayment(true);
+    console.log("Viewing full payment details:", payment);
+  };
 
   // Fetch dashboard data
   const { data: dashboardData } = useQuery({
@@ -97,12 +126,25 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
     },
   });
 
-  // Extract data
+  // Extract data with proper structure matching backend
   const stats = dashboardData?.data?.data?.statistics || {};
   const orders = ordersData?.data || [];
-  const notifications = notificationsData?.data?.data?.notifications || [];
-  const unreadCount = notificationsData?.data?.data?.unreadCount || 0;
+  const notifications = notificationsData?.data?.notifications || [];
+  const unreadCount = notificationsData?.data?.unreadCount || 0;
   const paymentHistory = paymentHistoryData?.data || [];
+
+  // Recent orders for dashboard preview (first 3)
+  const recentOrders = orders.slice(0, 3);
+
+  // Debug logging for data structure
+  console.log("Dashboard Data Structure:", {
+    dashboardData: dashboardData?.data,
+    ordersData,
+    paymentHistoryData,
+    stats,
+    orders: orders.length,
+    paymentHistory: paymentHistory.length,
+  });
 
   const viewFullOrder = (order = []) => {
     setSelectedOrder(order);
@@ -142,18 +184,21 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
   ];
 
   const getPaymentStatusBadgeClass = (status) => {
-    switch (status) {
-      case "Completed":
+    const normalizedStatus = status?.toLowerCase();
+    switch (normalizedStatus) {
+      case "completed":
       case "success":
-      case "Successful":
+      case "successful":
         return "badge-success";
-      case "Pending":
+      case "pending":
+      case "processing":
         return "badge-warning";
-      case "Failed":
+      case "failed":
+      case "error":
         return "badge-error";
-      case "Refunded":
+      case "refunded":
         return "badge-info";
-      case "Cancelled":
+      case "cancelled":
         return "badge-neutral";
       default:
         return "badge-neutral";
@@ -255,7 +300,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                         {order.status || "Pending"}
                       </div>
                       <p className="text-xs text-base-content/60 mt-1">
-                        ₦{(order.totalCost || 0).toLocaleString()}
+                        ₦{(order.cost || order.price || 0).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -352,6 +397,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
         {ordersLoading ? (
           <div className="text-center py-8">
             <span className="loading loading-spinner loading-lg"></span>
+            <p className="text-base-content/60 mt-2">Loading your orders...</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-12">
@@ -388,13 +434,18 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                               {order.garment || "Custom Garment"}
                             </h4>
                             <p className="text-sm text-base-content/80">
-                              Order #{order.id} •{"   "}
+                              Order #{order.id} •{" "}
                               {order.orderDate
                                 ? new Date(order.orderDate).toLocaleDateString()
                                 : "Recently"}
                             </p>
                             <p className="text-sm font-medium">
-                              ₦{(order.cost || 0).toLocaleString()}
+                              ₦
+                              {(
+                                order.cost ||
+                                order.price ||
+                                0
+                              ).toLocaleString()}
                             </p>
                           </div>
                         </div>
@@ -454,72 +505,296 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                         </div>
                       </>
                     ) : (
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-lg mb-2">
-                            {selectedOrder.garment || "Custom Garment"} - Full
-                            Details
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <p>
-                                <strong>Order ID:</strong> {selectedOrder.id}
-                              </p>
-                              <p>
-                                <strong>Garment:</strong>{" "}
-                                {selectedOrder.garment}
-                              </p>
-                              <p>
-                                <strong>Color:</strong> {selectedOrder.color}
-                              </p>
-                              <p>
-                                <strong>Fabric:</strong> {selectedOrder.fabric}
-                              </p>
-                              <p>
-                                <strong>Quantity:</strong>{" "}
-                                {selectedOrder.quantity}
-                              </p>
+                      // Enhanced Order Details View
+                      <div className="w-full">
+                        {/* Header with title and close button */}
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
+                          <div className="flex items-center gap-3">
+                            <div className="avatar placeholder">
+                              <div className="bg-primary text-primary-content rounded-full w-12 h-12">
+                                <PackageIcon size={24} />
+                              </div>
                             </div>
                             <div>
-                              <p>
-                                <strong>Cost:</strong> ₦
-                                {(selectedOrder.cost || 0).toLocaleString()}
+                              <h3 className="text-xl font-bold text-base-content">
+                                Order Details
+                              </h3>
+                              <p className="text-sm text-base-content/70">
+                                #{selectedOrder.id || "N/A"}
                               </p>
-                              <p>
-                                <strong>Status:</strong> {selectedOrder.status}
-                              </p>
-                              <p>
-                                <strong>Order Date:</strong>{" "}
-                                {selectedOrder.orderDate
-                                  ? new Date(
-                                      selectedOrder.orderDate
-                                    ).toLocaleDateString()
-                                  : "N/A"}
-                              </p>
-                              <p>
-                                <strong>Delivery Date:</strong>{" "}
-                                {selectedOrder.deliveryDate
-                                  ? new Date(
-                                      selectedOrder.deliveryDate
-                                    ).toLocaleDateString()
-                                  : "N/A"}
-                              </p>
-                              <p>
-                                <strong>Delivery Address:</strong>{" "}
-                                {selectedOrder.deliveryAddress}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedOrder(null);
+                              setShowFullOrder(false);
+                            }}
+                            className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error"
+                          >
+                            <XIcon size={20} />
+                          </button>
+                        </div>
+
+                        {/* Order Status Banner */}
+                        <div
+                          className={`alert mb-6 ${
+                            selectedOrder.status?.toLowerCase() === "delivered"
+                              ? "alert-success"
+                              : selectedOrder.status?.toLowerCase() ===
+                                "shipped"
+                              ? "alert-info"
+                              : selectedOrder.status?.toLowerCase() ===
+                                "processing"
+                              ? "alert-warning"
+                              : selectedOrder.status?.toLowerCase() ===
+                                "cancelled"
+                              ? "alert-error"
+                              : "alert-warning"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {selectedOrder.status?.toLowerCase() ===
+                            "delivered" ? (
+                              <CheckCircleIcon size={24} />
+                            ) : selectedOrder.status?.toLowerCase() ===
+                              "shipped" ? (
+                              <TruckIcon size={24} />
+                            ) : selectedOrder.status?.toLowerCase() ===
+                              "processing" ? (
+                              <ClockIcon size={24} />
+                            ) : (
+                              <ClockIcon size={24} />
+                            )}
+                            <div>
+                              <h4 className="font-semibold">
+                                Status: {selectedOrder.status || "Pending"}
+                              </h4>
+                              <p className="text-sm opacity-80">
+                                {selectedOrder.status?.toLowerCase() ===
+                                "delivered"
+                                  ? "Your order has been delivered successfully!"
+                                  : selectedOrder.status?.toLowerCase() ===
+                                    "shipped"
+                                  ? "Your order is on its way!"
+                                  : selectedOrder.status?.toLowerCase() ===
+                                    "processing"
+                                  ? "Your order is being prepared."
+                                  : "Your order is awaiting confirmation."}
                               </p>
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setSelectedOrder(null);
-                            setShowFullOrder(false);
-                          }}
-                          className="btn btn-ghost btn-sm ml-4"
-                        >
-                          <XIcon size={20} />
-                        </button>
+
+                        {/* Main Details Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Product Information Card */}
+                          <div className="card bg-base-100 shadow-lg border border-base-300">
+                            <div className="card-body">
+                              <h4 className="card-title text-lg flex items-center gap-2">
+                                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                Product Information
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Garment:
+                                  </span>
+                                  <span className="font-semibold">
+                                    {selectedOrder.garment || "Custom Garment"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Color:
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    {selectedOrder.color && (
+                                      <div
+                                        className="w-4 h-4 rounded-full border border-base-300"
+                                        style={{
+                                          backgroundColor:
+                                            selectedOrder.color?.toLowerCase() ||
+                                            "#gray",
+                                        }}
+                                      ></div>
+                                    )}
+                                    <span className="capitalize">
+                                      {selectedOrder.color || "Not specified"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Fabric:
+                                  </span>
+                                  <span className="capitalize">
+                                    {selectedOrder.fabric || "Standard"}
+                                  </span>
+                                </div>
+                                {selectedOrder.sleeveType && (
+                                  <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                    <span className="text-base-content/70 font-medium">
+                                      Sleeve Type:
+                                    </span>
+                                    <span className="capitalize">
+                                      {selectedOrder.sleeveType ===
+                                      "shortSleeve"
+                                        ? "Short Sleeve"
+                                        : selectedOrder.sleeveType ===
+                                          "longSleeve"
+                                        ? "Long Sleeve"
+                                        : selectedOrder.sleeveType}
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="flex justify-between items-center py-2">
+                                  <span className="text-base-content/70 font-medium">
+                                    Quantity:
+                                  </span>
+                                  <div className="badge badge-outline badge-lg">
+                                    {selectedOrder.quantity || 1}{" "}
+                                    {(selectedOrder.quantity || 1) > 1
+                                      ? "pieces"
+                                      : "piece"}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Order Information Card */}
+                          <div className="card bg-base-100 shadow-lg border border-base-300">
+                            <div className="card-body">
+                              <h4 className="card-title text-lg flex items-center gap-2">
+                                <div className="w-2 h-2 bg-accent rounded-full"></div>
+                                Order Information
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Total Cost:
+                                  </span>
+                                  <span className="text-xl font-bold text-primary">
+                                    ₦
+                                    {(
+                                      selectedOrder.cost ||
+                                      selectedOrder.price ||
+                                      0
+                                    ).toLocaleString()}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Order Date:
+                                  </span>
+                                  <span>
+                                    {selectedOrder.orderDate
+                                      ? new Date(
+                                          selectedOrder.orderDate
+                                        ).toLocaleDateString("en-US", {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                        })
+                                      : "N/A"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Expected Delivery:
+                                  </span>
+                                  <span className="text-accent font-medium">
+                                    {selectedOrder.deliveryDate
+                                      ? new Date(
+                                          selectedOrder.deliveryDate
+                                        ).toLocaleDateString("en-US", {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                        })
+                                      : "TBD"}
+                                  </span>
+                                </div>
+                                <div className="py-2">
+                                  <span className="text-base-content/70 font-medium block mb-2">
+                                    Delivery Address:
+                                  </span>
+                                  <div className="bg-base-200 p-3 rounded-lg">
+                                    <p className="text-sm leading-relaxed">
+                                      {selectedOrder.deliveryAddress ||
+                                        "Address will be confirmed"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-3 mt-6 pt-4 border-t border-base-300">
+                          {selectedOrder.status?.toLowerCase() ===
+                            "pending" && (
+                            <button
+                              onClick={() => navigate("/dashboard/payments")}
+                              className="btn btn-primary gap-2"
+                            >
+                              <CurrencyDollarIcon size={20} />
+                              Complete Payment
+                            </button>
+                          )}
+                          <button
+                            onClick={() => navigate("/contact")}
+                            className="btn btn-outline gap-2"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="w-5 h-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                              />
+                            </svg>
+                            Contact Support
+                          </button>
+                          {(selectedOrder.status?.toLowerCase() ===
+                            "delivered" ||
+                            selectedOrder.status?.toLowerCase() ===
+                              "shipped") && (
+                            <button className="btn btn-accent gap-2">
+                              <CheckCircleIcon size={20} />
+                              Leave Review
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              // Add track order functionality
+                              toast.info("Order tracking feature coming soon!");
+                            }}
+                            className="btn btn-outline gap-2"
+                          >
+                            <TruckIcon size={20} />
+                            Track Order
+                          </button>
+                          {selectedOrder.status?.toLowerCase() ===
+                            "pending" && (
+                            <button
+                              onClick={() =>
+                                cancelOrderMutation.mutate(selectedOrder.id)
+                              }
+                              className="btn btn-error btn-outline gap-2"
+                            >
+                              <TrashIcon size={20} />
+                              Cancel Order
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -683,7 +958,11 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
             </h3>
             <div className="space-y-3">
               {orders
-                .filter((order) => order.paymentStatus === "Pending")
+                .filter(
+                  (order) =>
+                    order.paymentStatus === "Pending" ||
+                    (!order.paymentStatus && order.status === "Pending")
+                )
                 .map((order, index) => (
                   <div
                     key={order.id || index}
@@ -707,7 +986,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                               : "Recently"}
                           </p>
                           <p className="text-sm font-medium">
-                            ₦{(order.cost || 0).toLocaleString()}
+                            ₦{(order.cost || order.price || 0).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -759,100 +1038,421 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
               {paymentHistory.map((payment, index) => (
                 <div
                   key={payment.id || index}
-                  className="p-4 border border-base-300 rounded-lg hover:bg-base-50 transition-colors"
+                  className="card bg-base-100 shadow-md border border-base-300 hover:shadow-lg transition-all duration-200"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="avatar placeholder">
+                  <div className="card-body p-4">
+                    {!showFullPayment || selectedPayment?.id !== payment.id ? (
+                      // Minimal Payment Details View
+                      <>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="avatar placeholder">
+                              <div
+                                className={`rounded-lg flex justify-center items-center w-12 h-12 ${
+                                  payment.status === "Completed" ||
+                                  payment.status === "Successful"
+                                    ? "bg-success/10 text-success"
+                                    : payment.status === "Failed"
+                                    ? "bg-error/10 text-error"
+                                    : "bg-warning/10 text-warning"
+                                }`}
+                              >
+                                <CreditCardIcon size={20} />
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-base">
+                                {payment.description ||
+                                  `Payment for Order #${payment.orderId}`}
+                              </h4>
+                              <p className="text-sm text-base-content/60">
+                                {payment.createdAt
+                                  ? new Date(
+                                      payment.createdAt
+                                    ).toLocaleDateString("en-US", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                    })
+                                  : "Date not available"}
+                                {payment.paymentMethod &&
+                                  ` • ${payment.paymentMethod}`}
+                              </p>
+                              <p className="text-lg font-bold text-primary mt-1">
+                                ₦
+                                {((payment.amount || 0) / 100).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`badge badge-lg ${getPaymentStatusBadgeClass(
+                                payment.status
+                              )}`}
+                            >
+                              {payment.status || "Unknown"}
+                            </div>
+                            <div className="dropdown dropdown-end">
+                              <div
+                                tabIndex={0}
+                                role="button"
+                                className="btn btn-ghost btn-sm btn-circle hover:bg-base-200"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  className="w-5 h-5 stroke-current"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 5v.01M12 12v.01M12 19v.01"
+                                  />
+                                </svg>
+                              </div>
+                              <ul className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                <li>
+                                  <button
+                                    className="flex items-center gap-2 btn btn-ghost"
+                                    onClick={() => viewFullPayment(payment)}
+                                  >
+                                    <EyeIcon size={16} />
+                                    View Details
+                                  </button>
+                                </li>
+                                {payment.transactionId && (
+                                  <li>
+                                    <button
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(
+                                          payment.transactionId
+                                        );
+                                        toast.success("Transaction ID copied!");
+                                      }}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-4 h-4"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.031.754-.031 1.127 0C12.484 4.01 13.25 4.973 13.25 6.108V7.5M15.75 18H2.25A2.25 2.25 0 010 15.75V9a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0118 9v6.75A2.25 2.25 0 0115.75 18z"
+                                        />
+                                      </svg>
+                                      Copy Transaction ID
+                                    </button>
+                                  </li>
+                                )}
+                                {payment.status === "Failed" && (
+                                  <li>
+                                    <button className="text-warning flex items-center gap-2">
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-4 h-4"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+                                        />
+                                      </svg>
+                                      Retry Payment
+                                    </button>
+                                  </li>
+                                )}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      // Enhanced Payment Details View
+                      <div className="w-full">
+                        {/* Header with title and close button */}
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
+                          <div className="flex items-center gap-3">
+                            <div className="avatar placeholder">
+                              <div className="bg-primary text-primary-content rounded-full w-12 h-12">
+                                <CreditCardIcon size={24} />
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-base-content">
+                                Payment Details
+                              </h3>
+                              <p className="text-sm text-base-content/70">
+                                Transaction #
+                                {selectedPayment.transactionId ||
+                                  selectedPayment.id ||
+                                  "N/A"}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedPayment(null);
+                              setShowFullPayment(false);
+                            }}
+                            className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error"
+                          >
+                            <XIcon size={20} />
+                          </button>
+                        </div>
+
+                        {/* Payment Status Banner */}
                         <div
-                          className={`rounded-lg flex justify-center items-center w-12 h-12 ${
-                            payment.status === "Completed" ||
-                            payment.status === "Successful"
-                              ? "bg-success/10 text-success"
-                              : payment.status === "Failed"
-                              ? "bg-error/10 text-error"
-                              : "bg-warning/10 text-warning"
+                          className={`alert mb-6 ${
+                            selectedPayment.status === "Completed" ||
+                            selectedPayment.status === "Successful"
+                              ? "alert-success"
+                              : selectedPayment.status === "Failed"
+                              ? "alert-error"
+                              : selectedPayment.status === "Pending"
+                              ? "alert-warning"
+                              : "alert-info"
                           }`}
                         >
-                          <CreditCardIcon size={20} />
+                          <div className="flex items-center gap-3">
+                            {selectedPayment.status === "Completed" ||
+                            selectedPayment.status === "Successful" ? (
+                              <CheckCircleIcon size={24} />
+                            ) : selectedPayment.status === "Failed" ? (
+                              <XIcon size={24} />
+                            ) : (
+                              <ClockIcon size={24} />
+                            )}
+                            <div>
+                              <h4 className="font-semibold">
+                                Payment Status:{" "}
+                                {selectedPayment.status || "Unknown"}
+                              </h4>
+                              <p className="text-sm opacity-80">
+                                {selectedPayment.status === "Completed" ||
+                                selectedPayment.status === "Successful"
+                                  ? "Payment processed successfully!"
+                                  : selectedPayment.status === "Failed"
+                                  ? "Payment failed. Please try again."
+                                  : selectedPayment.status === "Pending"
+                                  ? "Payment is being processed."
+                                  : "Payment status is being verified."}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">
-                          {payment.description ||
-                            `Payment for Order #${payment.orderId}`}
-                        </h4>
-                        <p className="text-sm text-base-content/60">
-                          {payment.transactionId
-                            ? `Txn: ${payment.transactionId}`
-                            : ""}
-                          {payment.paymentMethod &&
-                            ` • ${payment.paymentMethod}`}
-                        </p>
-                        <p className="text-sm text-base-content/60">
-                          {payment.createdAt
-                            ? new Date(payment.createdAt).toLocaleDateString()
-                            : "Date not available"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className={`badge badge-lg ${getPaymentStatusBadgeClass(
-                          payment.status
-                        )} mb-2`}
-                      >
-                        {payment.status || "Unknown"}
-                      </div>
-                      <p className="text-lg font-bold">
-                        ₦{(payment.amount / 100 || 0).toLocaleString()}
-                      </p>
-                      {payment.refundAmount && (
-                        <p className="text-sm text-info">
-                          Refunded: ₦{payment.refundAmount.toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Expandable Details */}
-                  <div className="mt-3 pt-3 border-t border-base-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p>
-                          <strong>Payment ID:</strong> {payment.id || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Order ID:</strong> {payment.orderId || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Method:</strong>{" "}
-                          {payment.paymentMethod || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p>
-                          <strong>Reference:</strong>{" "}
-                          {payment.reference || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Gateway:</strong>{" "}
-                          {payment.gateway || "Paystack"}
-                        </p>
-                        <p>
-                          <strong>Processed:</strong>{" "}
-                          {payment.createdAt
-                            ? new Date(payment.createdAt).toLocaleString()
-                            : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                    {payment.failureReason && (
-                      <div className="mt-2 p-2 bg-error/10 border border-error/20 rounded">
-                        <p className="text-sm text-error">
-                          <strong>Failure Reason:</strong>{" "}
-                          {payment.failureReason}
-                        </p>
+                        {/* Main Details Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Transaction Information Card */}
+                          <div className="card bg-base-100 shadow-lg border border-base-300">
+                            <div className="card-body">
+                              <h4 className="card-title text-lg flex items-center gap-2">
+                                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                Transaction Details
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Amount:
+                                  </span>
+                                  <span className="text-xl font-bold text-primary">
+                                    ₦
+                                    {(
+                                      selectedPayment.amount / 100 || 0
+                                    ).toLocaleString()}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Payment Method:
+                                  </span>
+                                  <span className="capitalize">
+                                    {selectedPayment.paymentMethod ||
+                                      "Not specified"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Gateway:
+                                  </span>
+                                  <span className="capitalize">
+                                    {selectedPayment.gateway || "Paystack"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2">
+                                  <span className="text-base-content/70 font-medium">
+                                    Reference:
+                                  </span>
+                                  <span className="font-mono text-sm">
+                                    {selectedPayment.reference || "N/A"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Order Information Card */}
+                          <div className="card bg-base-100 shadow-lg border border-base-300">
+                            <div className="card-body">
+                              <h4 className="card-title text-lg flex items-center gap-2">
+                                <div className="w-2 h-2 bg-accent rounded-full"></div>
+                                Order Information
+                              </h4>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Order ID:
+                                  </span>
+                                  <span className="font-mono">
+                                    #{selectedPayment.orderId || "N/A"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Payment Date:
+                                  </span>
+                                  <span>
+                                    {selectedPayment.createdAt
+                                      ? new Date(
+                                          selectedPayment.createdAt
+                                        ).toLocaleDateString("en-US", {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })
+                                      : "N/A"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-base-200">
+                                  <span className="text-base-content/70 font-medium">
+                                    Transaction ID:
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono text-sm">
+                                      {selectedPayment.transactionId || "N/A"}
+                                    </span>
+                                    {selectedPayment.transactionId && (
+                                      <button
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(
+                                            selectedPayment.transactionId
+                                          );
+                                          toast.success(
+                                            "Transaction ID copied!"
+                                          );
+                                        }}
+                                        className="btn btn-ghost btn-xs"
+                                      >
+                                        Copy
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                                {selectedPayment.refundAmount && (
+                                  <div className="py-2">
+                                    <span className="text-base-content/70 font-medium block mb-2">
+                                      Refund Information:
+                                    </span>
+                                    <div className="bg-info/10 p-3 rounded-lg">
+                                      <p className="text-sm text-info font-medium">
+                                        Refunded: ₦
+                                        {selectedPayment.refundAmount.toLocaleString()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-3 mt-6 pt-4 border-t border-base-300">
+                          {selectedPayment.status === "Failed" && (
+                            <button className="btn btn-warning gap-2">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="w-5 h-5"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+                                />
+                              </svg>
+                              Retry Payment
+                            </button>
+                          )}
+                          {(selectedPayment.status === "Completed" ||
+                            selectedPayment.status === "Successful") && (
+                            <button
+                              onClick={() => {
+                                // Add download receipt functionality
+                                toast.info(
+                                  "Receipt download feature coming soon!"
+                                );
+                              }}
+                              className="btn btn-primary gap-2"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="w-5 h-5"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                                />
+                              </svg>
+                              Download Receipt
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              // Add support functionality
+                              toast.info("Redirecting to support...");
+                              navigate("/contacts");
+                            }}
+                            className="btn btn-outline gap-2"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="w-5 h-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                              />
+                            </svg>
+                            Contact Support
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
