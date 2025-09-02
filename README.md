@@ -25,7 +25,7 @@ root/
 
 🧪 Installation
 bash
-git clone https://github.com/yourusername/fashionsmith.git
+git clone https://github.com/Uko1995/fashionsmith.git
 cd fashionsmith
 npm install
 
