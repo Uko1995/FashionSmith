@@ -130,7 +130,7 @@ export default function ProductAndService() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`group relative px-4 md:px-6 py-2 md:py-3 rounded-2xl font-semibold transition-all duration-500 text-sm md:text-base overflow-hidden ${
+                className={`group relative px-5 py-3 md:px-6 md:py-3 rounded-2xl font-semibold transition-all duration-500 text-base md:text-base overflow-hidden min-h-[48px] flex items-center ${
                   selectedCategory === category
                     ? "bg-gradient-to-r from-primary to-secondary text-white shadow-xl transform scale-105"
                     : "bg-base-100 text-base-content hover:bg-base-200 shadow-lg hover:shadow-xl hover:scale-105"
@@ -143,10 +143,12 @@ export default function ProductAndService() {
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse"></div>
                 )}
                 <span className="relative z-10 flex items-center gap-2">
-                  {category === "All" && <TrendUpIcon className="w-4 h-4" />}
+                  {category === "All" && (
+                    <TrendUpIcon className="w-5 h-5 md:w-4 md:h-4" />
+                  )}
                   {category}
                   {selectedCategory === category && (
-                    <HeartIcon className="w-4 h-4 animate-bounce" />
+                    <HeartIcon className="w-5 h-5 md:w-4 md:h-4 animate-bounce" />
                   )}
                 </span>
               </button>
@@ -213,13 +215,13 @@ export default function ProductAndService() {
                   return (
                     <div
                       key={product._id}
-                      className="group relative rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-700 overflow-hidden hover:-translate-y-3 bg-base-100"
+                      className="group relative sm:h-full rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-700 overflow-hidden hover:-translate-y-3 bg-base-100"
                       style={{
                         animationDelay: `${index * 150}ms`,
                       }}
                     >
-                      {/* Image Container */}
-                      <div className="relative h-80 md:h-100 overflow-hidden">
+                      {/* Image Container - Much taller on mobile with compact content */}
+                      <div className="relative h-[500px] sm:h-80 md:h-100 overflow-hidden">
                         <img
                           src={imageUrl}
                           alt={product.name}
@@ -229,53 +231,45 @@ export default function ProductAndService() {
                           }}
                         />
 
-                        {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent group-hover:from-black/60 transition-all duration-500"></div>
+                        {/* Gradient Overlay - Stronger at bottom for text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-500"></div>
 
-                        {/* Content Overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 p-3 text-white z-20">
-                          <div className="bg-white/10 backdrop-blur-3xl rounded-2xl p-3 border border-white/20 shadow-2xl">
-                            {/* Badges Section */}
-                            <div className="flex justify-between items-start mb-3">
-                              <div className="flex items-center gap-2">
-                                {/* Category Badge */}
-                                <span className="bg-white/90 backdrop-blur-md text-base-content px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-white/30">
-                                  {product.category}
-                                </span>
-
-                                {/* Featured Badge */}
-                                {product.featured && (
-                                  <div className="bg-gradient-to-r from-primary to-secondary p-1.5 rounded-full shadow-lg">
-                                    <StarIcon className="w-3 h-3 text-white" />
-                                  </div>
-                                )}
+                        {/* Content Overlay - Fixed quarter height on mobile */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[125px] sm:h-auto p-3 sm:p-2 text-white z-20 flex items-end">
+                          <div className="bg-white/15 backdrop-blur-xl rounded-xl p-2.5 sm:p-3 border border-white/30 shadow-2xl w-full">
+                            {/* Compact header with essential info */}
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className="bg-white/90 text-base-content px-2 py-0.5 rounded-full text-xs font-bold">
+                                    {product.category}
+                                  </span>
+                                  {product.featured && (
+                                    <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 p-1 rounded-full">
+                                      <StarIcon className="w-3 h-3 text-white" />
+                                    </div>
+                                  )}
+                                </div>
+                                <h3 className="text-base sm:text-lg font-bold line-clamp-1 group-hover:text-primary-content transition-colors duration-300">
+                                  {product.name}
+                                </h3>
                               </div>
-
-                              {/* Price Badge */}
-                              <div className="bg-gradient-to-r from-primary to-secondary text-white px-3 py-1 rounded-full font-bold shadow-xl text-base backdrop-blur-md">
+                              <div className="bg-gradient-to-r from-primary to-secondary text-white px-2.5 py-1 rounded-full font-bold shadow-xl text-sm ml-2">
                                 ₦{product.basePrice?.toLocaleString() || "N/A"}
                               </div>
                             </div>
 
-                            <h3 className="text-lg md:text-xl font-bold mb-2 group-hover:text-primary-content transition-colors duration-300">
-                              {product.name}
-                            </h3>
-
-                            <p className="text-sm text-white/90 mb-3 line-clamp-2 leading-relaxed">
-                              {product.description}
-                            </p>
-
-                            {/* Action Buttons */}
+                            {/* Compact Action Buttons */}
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleOrderNow(product)}
-                                className="btn btn-primary flex-1 btn-sm hover:btn-secondary transition-all duration-300 shadow-lg"
+                                className="btn btn-primary flex-1 btn-sm hover:btn-secondary transition-all duration-300 shadow-lg text-sm font-semibold min-h-[36px]"
                               >
                                 Order Now
                               </button>
                               <button
                                 onClick={() => handleAddToCart(product)}
-                                className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300"
+                                className="btn btn-outline btn-sm px-3 text-white border-white/50 hover:bg-white hover:text-primary hover:border-white transition-all duration-300 min-h-[36px]"
                               >
                                 <ShoppingCartIcon className="w-4 h-4" />
                               </button>
@@ -311,8 +305,8 @@ export default function ProductAndService() {
                 for you.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center max-w-md mx-auto">
-                <button className="btn btn-outline btn-lg text-white border-white/70 hover:bg-white hover:text-primary hover:border-white transition-all duration-300 shadow-xl backdrop-blur-md">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-3 md:gap-4 justify-center max-w-md mx-auto">
+                <button className="btn btn-outline btn-lg sm:btn-lg text-white border-white/70 hover:bg-white hover:text-primary hover:border-white transition-all duration-300 shadow-xl backdrop-blur-md min-h-[56px] text-base font-semibold">
                   Schedule Consultation
                 </button>
               </div>

@@ -131,13 +131,15 @@ export default function HomePageProducts() {
                 >
                   {/* Product Category & Status */}
                   <div className="flex items-center gap-3">
-                    <span className="bg-gradient-to-r from-primary to-secondary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                    <span className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-full text-sm sm:text-xs font-bold shadow-lg">
                       {product.category}
                     </span>
                     {product.featured && (
                       <div className="flex items-center gap-1 text-yellow-500">
-                        <StarIcon className="w-4 h-4" />
-                        <span className="text-xs font-medium">Featured</span>
+                        <StarIcon className="w-5 h-5 sm:w-4 sm:h-4" />
+                        <span className="text-sm sm:text-xs font-medium">
+                          Featured
+                        </span>
                       </div>
                     )}
                   </div>
@@ -155,20 +157,20 @@ export default function HomePageProducts() {
                   {/* Product Features */}
                   <div className="space-y-2">
                     <h4 className="text-base font-semibold text-base-content flex items-center gap-2">
-                      <CheckCircleIcon className="w-4 h-4 text-success" />
+                      <CheckCircleIcon className="w-5 h-5 sm:w-4 sm:h-4 text-success" />
                       What Makes It Special
                     </h4>
-                    <div className="grid gap-1.5 text-sm text-base-content/70">
+                    <div className="grid gap-2 sm:gap-1.5 text-base sm:text-sm text-base-content/70">
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                        <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-primary rounded-full"></div>
                         <span>Premium handcrafted quality</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-secondary rounded-full"></div>
+                        <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-secondary rounded-full"></div>
                         <span>Custom tailored to perfection</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-accent rounded-full"></div>
+                        <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-accent rounded-full"></div>
                         <span>Traditional meets contemporary design</span>
                       </div>
                     </div>
@@ -176,26 +178,26 @@ export default function HomePageProducts() {
 
                   {/* Price and Actions */}
                   <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-3">
                       <button
                         onClick={() => navigate("/gallery")}
-                        className="btn btn-primary btn-md flex-1 sm:flex-none sm:px-6 group"
+                        className="btn btn-primary btn-lg sm:btn-md flex-1 sm:flex-none sm:px-6 group min-h-[56px] sm:min-h-auto text-base font-semibold"
                       >
                         Order Now
-                        <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                        <ArrowRightIcon className="w-5 h-5 sm:w-4 sm:h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                       </button>
                       <button
-                        className="btn btn-outline btn-md px-6 group"
+                        className="btn btn-outline btn-lg sm:btn-md px-6 group min-h-[56px] sm:min-h-auto text-base font-semibold"
                         onClick={() => handleAddToCart(product)}
                       >
-                        <ShoppingCartIcon className="w-4 h-4 mr-2" />
+                        <ShoppingCartIcon className="w-5 h-5 sm:w-4 sm:h-4 mr-2" />
                         Add to Cart
                       </button>
                     </div>
                   </div>
 
                   {/* Stats */}
-                  <div className="flex gap-6 pt-3 border-t border-base-300">
+                  <div className="flex gap-6 pt-4 sm:pt-3 border-t border-base-300">
                     <div className="text-center">
                       <div className="text-xl font-bold text-primary">4.9</div>
                       <div className="text-xs text-base-content/60">Rating</div>
@@ -258,16 +260,16 @@ export default function HomePageProducts() {
               <h3 className="text-xl md:text-2xl font-bold mb-3">
                 Explore Our Complete Collection
               </h3>
-              <p className="text-base mb-4 opacity-90 max-w-xl mx-auto">
+              <p className="text-base mb-6 sm:mb-4 opacity-90 max-w-xl mx-auto">
                 Discover hundreds of unique designs crafted with passion and
                 precision
               </p>
               <button
                 onClick={() => navigate("/gallery")}
-                className="btn btn-outline btn-md text-white border-white hover:bg-white hover:text-primary"
+                className="btn btn-outline btn-lg sm:btn-md text-white border-white hover:bg-white hover:text-primary min-h-[56px] sm:min-h-auto text-base font-semibold px-8"
               >
                 View All Products
-                <ArrowRightIcon className="w-4 h-4 ml-2" />
+                <ArrowRightIcon className="w-5 h-5 sm:w-4 sm:h-4 ml-2" />
               </button>
             </div>
           </div>

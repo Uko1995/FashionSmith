@@ -41,16 +41,10 @@ export default function Footer() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             {/* Brand Section */}
             <div className="lg:col-span-1 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-xl">
-                  <SparkleIcon size={32} className="text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-base-content">
-                    FashionSmith
-                  </h2>
-                  <p className="text-primary font-medium">Bespoke Tailoring</p>
-                </div>
+              <div className="flex items-center justify-start">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent hover:scale-105 transition-transform duration-300 cursor-default">
+                  FashionSmith
+                </h2>
               </div>
 
               <p className="text-base-content/90 leading-relaxed">

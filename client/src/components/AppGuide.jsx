@@ -28,11 +28,11 @@ export default function AppGuide() {
           <p className="text-xs md:text-sm mb-3 md:mb-4 opacity-90 max-w-md mx-auto">
             Join satisfied customers who trust FashionSmith for bespoke fashion.
           </p>
-          <div className="flex flex-col sm:flex-row gap-2 md:gap-3 justify-center max-w-md mx-auto">
-            <button className="btn btn-outline btn-sm md:btn-md text-white border-white hover:bg-white hover:text-primary flex-1">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-3 justify-center max-w-md mx-auto">
+            <button className="btn btn-outline btn-lg sm:btn-md text-white border-white hover:bg-white hover:text-primary flex-1 min-h-[56px] sm:min-h-auto text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
               Browse Collections
             </button>
-            <button className="btn btn-sm md:btn-md bg-white text-primary hover:bg-base-200 flex-1">
+            <button className="btn btn-lg sm:btn-md bg-white text-primary hover:bg-base-200 flex-1 min-h-[56px] sm:min-h-auto text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
               Get Consultation
             </button>
           </div>

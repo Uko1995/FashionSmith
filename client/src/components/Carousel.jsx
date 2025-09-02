@@ -102,7 +102,7 @@ export default function Carousel() {
   };
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto overflow-hidden">
+    <div className="relative w-full max-w-5xl mx-auto overflow-hidden pb-10 mb-8 md:mb-0">
       {/* Carousel container */}
       <div
         ref={scrollRef}
@@ -167,32 +167,34 @@ export default function Carousel() {
         ))}
       </div>
 
-      {/* Compact Navigation Buttons */}
+      {/* Enhanced Navigation Buttons - Mobile Optimized */}
       <button
         onClick={() => scroll("left")}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-2 rounded-full shadow-lg z-30 transition-all duration-300 hover:scale-110"
+        className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-3 md:p-2 rounded-full shadow-xl z-30 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-gray-200/50 min-h-[48px] min-w-[48px] md:min-h-auto md:min-w-auto flex items-center justify-center"
         aria-label="Previous step"
       >
-        <CaretLeftIcon size={16} className="text-gray-800" />
+        <CaretLeftIcon size={20} className="text-gray-800 md:hidden" />
+        <CaretLeftIcon size={16} className="text-gray-800 hidden md:block" />
       </button>
 
       <button
         onClick={() => scroll("right")}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-2 rounded-full shadow-lg z-30 transition-all duration-300 hover:scale-110"
+        className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white p-3 md:p-2 rounded-full shadow-xl z-30 transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-gray-200/50 min-h-[48px] min-w-[48px] md:min-h-auto md:min-w-auto flex items-center justify-center"
         aria-label="Next step"
       >
-        <CaretRightIcon size={16} className="text-gray-800" />
+        <CaretRightIcon size={20} className="text-gray-800 md:hidden" />
+        <CaretRightIcon size={16} className="text-gray-800 hidden md:block" />
       </button>
 
-      {/* Compact Slide Indicators */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md">
+      {/* Enhanced Slide Indicators - Mobile Optimized */}
+      <div className="absolute bottom-[-23px] z-10 md:bottom-2 left-1/2 transform -translate-x-1/2 flex gap-3 md:gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 my-5 md:px-3 md:py-1.5 rounded-full shadow-lg border border-white/30">
         {guideSteps.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`w-3 h-3 md:w-2 md:h-2 rounded-full transition-all duration-300 min-h-[12px] min-w-[12px] hover:scale-125 ${
               index === currentSlide
-                ? "bg-primary shadow-md scale-125"
+                ? "bg-primary shadow-lg scale-125 md:scale-125"
                 : "bg-gray-300 hover:bg-gray-400"
             }`}
             aria-label={`Go to step ${index + 1}`}

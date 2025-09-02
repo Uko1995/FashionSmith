@@ -4,6 +4,7 @@ import LoginModal from "./Login";
 import RegisterModal from "./Register";
 import Footer from "../components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import FloatingCart from "../components/FloatingCart";
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
           <Outlet />
         </main>
         <Footer />
+        <FloatingCart />
       </div>
     </>
   );

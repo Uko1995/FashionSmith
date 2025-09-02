@@ -10,7 +10,6 @@ import {
   SignOutIcon,
 } from "@phosphor-icons/react";
 import UnderlineNavLink from "./UnderlineNavLink";
-import NavbarCart from "./NavBarCart";
 import FashionSmithLogo from "./FashionSmithLogo";
 import { useUiStore } from "../store/uiStore";
 import useLogoutWithNav from "../hooks/useLogoutWithNav";
@@ -228,9 +227,6 @@ export default function NavBar() {
                 </UnderlineNavLink>
               ))
             )}
-            <div className="flex items-center space-x-2 ml-2">
-              <NavbarCart />
-            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -362,9 +358,6 @@ export default function NavBar() {
                     </NavLink>
                   ))
                 )}
-                <div className="flex items-center justify-center space-x-6 pt-4">
-                  <NavbarCart />
-                </div>
               </div>
             </div>
           </nav>

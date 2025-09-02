@@ -69,7 +69,8 @@ app.use(
       const allowedOrigins = [
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://c2a4caac8e65.ngrok-free.app",
+        "https://9d27643ff55c.ngrok-free.app",
+        "https://c6cedd5f2d33.ngrok-free.app",
         process.env.CLIENT_URL,
       ].filter(Boolean);
 

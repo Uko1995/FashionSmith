@@ -2,7 +2,7 @@ import AppGuide from "./AppGuide";
 import Contacts from "./Contacts";
 import Hero from "./Hero";
 import HomePageProducts from "./HomePageProducts";
-import ProductAndService from "./ProductAndService";
+import Testimonials from "./Testimonials";
 
 export default function Home() {
   return (
@@ -10,6 +10,7 @@ export default function Home() {
       <Hero />
       <AppGuide />
       <HomePageProducts />
+      <Testimonials />
       <Contacts />
     </div>
   );
