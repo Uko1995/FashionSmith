@@ -11,10 +11,13 @@ export const useAuthInit = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // Add debugging for production
-        if (import.meta.env.PROD) {
-          console.log('Auth init starting, API URL:', import.meta.env.VITE_API_URL);
-        }
+        // Add comprehensive debugging for production
+        console.log('=== AUTH INIT DEBUG ===');
+        console.log('Environment:', import.meta.env.MODE);
+        console.log('Is Production:', import.meta.env.PROD);
+        console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+        console.log('Axios baseURL:', apiClient.defaults.baseURL);
+        console.log('=======================');
 
         // Check if we have a JWT token (Google OAuth)
         const authToken = localStorage.getItem("authToken");
@@ -67,16 +70,24 @@ export const useAuthInit = () => {
           // For regular users, check cookies and clear any Google OAuth headers
           delete apiClient.defaults.headers.common["Authorization"];
 
+          // Test basic connectivity first
+          console.log('Testing API connectivity...');
+          
           // Add timeout to prevent infinite hanging
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          const timeoutId = setTimeout(() => {
+            console.log('Auth check timeout after 10 seconds');
+            controller.abort();
+          }, 10000); // 10 second timeout
 
           try {
+            console.log('Making auth-check request to:', `${apiClient.defaults.baseURL}/api/users/auth-check`);
             const response = await apiClient.get("/api/users/auth-check", {
               signal: controller.signal,
               timeout: 10000,
             });
             clearTimeout(timeoutId);
+            console.log('Auth check response:', response.status, response.data);
 
             if (
               response.status === 200 &&
@@ -103,9 +114,12 @@ export const useAuthInit = () => {
           } catch (authError) {
             clearTimeout(timeoutId);
             // Auth check failed - treat as not logged in
-            if (import.meta.env.PROD) {
-              console.log('Auth check failed:', authError.message);
-            }
+            console.error('Auth check failed:', {
+              message: authError.message,
+              status: authError.response?.status,
+              data: authError.response?.data,
+              code: authError.code
+            });
             setIsLoggedIn(false);
             setUser(null);
             setAuthProvider(null);
@@ -114,9 +128,11 @@ export const useAuthInit = () => {
         }
       } catch (error) {
         // Main error handler for the entire function
-        if (import.meta.env.PROD) {
-          console.log('Auth initialization error:', error.message);
-        }
+        console.error('Auth initialization error:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         setIsLoggedIn(false);
         setUser(null);
         setAuthProvider(null);
@@ -124,9 +140,7 @@ export const useAuthInit = () => {
         localStorage.removeItem("authToken");
       } finally {
         // Always set initialization as complete
-        if (import.meta.env.PROD) {
-          console.log('Auth initialization complete');
-        }
+        console.log('Auth initialization complete - setting isAuthInitialized to true');
         setIsAuthInitialized(true);
       }
     };
