@@ -67,10 +67,7 @@ app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://9d27643ff55c.ngrok-free.app",
-        "https://c6cedd5f2d33.ngrok-free.app",
+        "https://fashion-smith.vercel.app",
         process.env.CLIENT_URL,
       ].filter(Boolean);
 
