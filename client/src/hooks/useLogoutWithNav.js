@@ -28,13 +28,14 @@ export default function useLogoutWithNav() {
         toast.success("Logged out successfully!");
       } else {
         console.log("[LOGOUT] Forced logout - skipping server call");
-        toast.error("Session expired. Please log in again.");
+        // Silent forced logout - no toast notification
       }
     } catch (error) {
       console.error("[LOGOUT] Server logout failed:", error);
       if (!forced) {
         toast.error("Logout failed, but clearing local session");
       }
+      // Silent for forced logout - no error toast
     } finally {
       // Always clear local state regardless of server response
       console.log("[LOGOUT] Clearing local authentication state");

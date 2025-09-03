@@ -4,10 +4,6 @@ import { useEffect } from "react";
 import router from "./router/index.jsx";
 import Spinner from "./components/Spinner.jsx";
 import FashionSmithLogo from "./components/FashionSmithLogo.jsx";
-import {
-  usePerformanceMonitoring,
-  useUserTracking,
-} from "./hooks/usePerformanceMonitoring.js";
 import { useTokenRefresh } from "./hooks/useTokenRefresh.js";
 import { useAuthInit } from "./hooks/useAuthInit.js";
 import useLogout from "./hooks/useLogout.js";
@@ -15,10 +11,6 @@ import SVGFallback from "./components/SVGFallBack";
 
 export default function App() {
   const { forceLogout } = useLogout();
-
-  // Initialize performance monitoring and user tracking
-  usePerformanceMonitoring();
-  useUserTracking();
 
   // Initialize automatic token refresh
   useTokenRefresh();
