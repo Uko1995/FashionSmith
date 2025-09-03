@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   ArrowRightIcon,
   PlayIcon,
@@ -50,59 +51,101 @@ export default function Hero() {
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-5 items-center">
             {/* Left Content */}
-            <div className="space-y-4 animate-fade-in-up">
+            <motion.div
+              className="space-y-4"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
               {/* Main Heading */}
               <div className="space-y-2">
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight tracking-tight">
-                  <span className="block animate-slide-in-left">
+                  <motion.span
+                    className="block"
+                    initial={{ opacity: 0, x: -100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
                     CRAFT YOUR
-                  </span>
-                  <span className="block text-accent drop-shadow-2xl animate-slide-in-right animation-delay-300">
+                  </motion.span>
+                  <motion.span
+                    className="block text-accent drop-shadow-2xl"
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                  >
                     PERFECT STYLE
-                  </span>
+                  </motion.span>
                 </h1>
               </div>
 
               {/* Description */}
-              <p className="text-white/90 text-lg lg:text-xl max-w-2xl leading-relaxed font-medium animate-fade-in animation-delay-500">
+              <motion.p
+                className="text-white/90 text-lg lg:text-xl max-w-2xl leading-relaxed font-medium"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
                 Experience bespoke tailoring where traditional Nigerian
                 craftsmanship meets contemporary design.
-              </p>
+              </motion.p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 animate-fade-in animation-delay-900">
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              >
                 {!isLoggedIn && (
-                  <button
+                  <motion.button
                     onClick={handleGetStarted}
-                    className="group btn btn-primary btn-lg text-white font-bold shadow-2xl hover:shadow-primary/25 hover:scale-105 transition-all duration-300"
+                    className="group btn btn-primary btn-lg text-white font-bold shadow-2xl hover:shadow-primary/25 transition-all duration-300"
                     aria-label="Start your bespoke journey"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     <span>Start Your Journey</span>
                     <ArrowRightIcon
                       size={20}
                       className="group-hover:translate-x-1 transition-transform duration-300"
                     />
-                  </button>
+                  </motion.button>
                 )}
 
-                <button
+                <motion.button
                   onClick={handleViewGallery}
                   className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-gray-900 font-bold transition-all duration-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   View Our Gallery
-                </button>
-              </div>
-            </div>
+                </motion.button>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white/50 rounded-full mt-2 animate-scroll" />
-        </div>
-      </div>
+      <motion.div
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.2 }}
+      >
+        <motion.div
+          className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <motion.div
+            className="w-1 h-3 bg-white/50 rounded-full mt-2"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

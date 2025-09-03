@@ -61,5 +61,12 @@ export const garmentSpecificMeasurements = {
     "SleeveLength",
     "SleeveWidth",
   ],
-  trouser: ["TrouserLength", "TrouserWaist", "Hip", "Thigh", "Knee", "Ankle"],
+  trouser: [
+    "TrouserLength",
+    "TrouserWaist",
+    "Hip",
+    "ThighWidth",
+    "KneeWidth",
+    "AnkleWidth",
+  ],
 };

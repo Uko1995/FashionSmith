@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CaretDownIcon,
   CaretUpIcon,
@@ -217,47 +218,92 @@ export default function FAQ() {
   });
 
   return (
-    <main className=" min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-100">
+    <motion.main
+      className=" min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-100"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-secondary text-primary-content py-10">
+      <motion.div
+        className="bg-gradient-to-r from-primary to-secondary text-primary-content py-10"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-white/10 rounded-full backdrop-blur-sm">
+          <motion.div
+            className="flex justify-center mb-6"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              className="p-4 bg-white/10 rounded-full backdrop-blur-sm"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            >
               <QuestionIcon size={48} />
-            </div>
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
+            </motion.div>
+          </motion.div>
+          <motion.h1
+            className="text-5xl md:text-6xl font-bold mb-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
             Frequently Asked Questions
-          </h1>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto">
+          </motion.h1>
+          <motion.p
+            className="text-xl opacity-90 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
             Find answers to common questions about our custom tailoring
             services, measurements, pricing, and more.
-          </p>
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
 
       <div className="container mx-auto px-4 py-16">
         {/* Search and Categories */}
-        <div className="max-w-4xl mx-auto mb-12">
+        <motion.div
+          className="max-w-4xl mx-auto mb-12"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
           {/* Search Bar */}
-          <div className="relative mb-8">
+          <motion.div
+            className="relative mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             <MagnifyingGlassIcon
               size={20}
               className="absolute left-4 top-1/2 transform -translate-y-1/2 text-base-content/60"
             />
-            <input
+            <motion.input
               type="text"
               placeholder="Search FAQs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="input input-bordered w-full pl-12 pr-4 py-3 text-lg rounded-full shadow-lg focus:shadow-xl transition-shadow"
+              whileFocus={{ scale: 1.02 }}
             />
-          </div>
+          </motion.div>
 
           {/* Category Tabs */}
-          <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {categories.map((category) => (
-              <button
+          <motion.div
+            className="flex flex-wrap gap-2 justify-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            {categories.map((category, index) => (
+              <motion.button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
                 className={`btn btn-outline gap-2 rounded-full transition-all duration-300 ${
@@ -265,125 +311,235 @@ export default function FAQ() {
                     ? "btn-primary text-primary-content shadow-lg scale-105"
                     : "hover:btn-primary hover:scale-105"
                 }`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 + index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {category.icon}
                 {category.label}
-              </button>
+              </motion.button>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* FAQ Items */}
-        <div className="max-w-4xl mx-auto space-y-4">
+        <motion.div
+          className="max-w-4xl mx-auto space-y-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
           {filteredFAQs.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">🔍</div>
+            <motion.div
+              className="text-center py-16"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <motion.div
+                className="text-6xl mb-4"
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                🔍
+              </motion.div>
               <h3 className="text-2xl font-semibold text-base-content mb-2">
                 No results found
               </h3>
               <p className="text-base-content/70">
                 Try adjusting your search terms or browse all categories.
               </p>
-            </div>
+            </motion.div>
           ) : (
-            filteredFAQs.map((faq) => (
-              <div
-                key={faq.id}
-                className="bg-base-100 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
-              >
-                <button
-                  onClick={() => toggleItem(faq.id)}
-                  className="w-full p-6 text-left flex items-center justify-between hover:bg-base-200/50 transition-colors"
+            <AnimatePresence>
+              {filteredFAQs.map((faq, index) => (
+                <motion.div
+                  key={faq.id}
+                  className="bg-base-100 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -30 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  layout
                 >
-                  <h3 className="text-lg font-semibold text-base-content pr-4">
-                    {faq.question}
-                  </h3>
-                  <div className="flex-shrink-0">
-                    {openItems.has(faq.id) ? (
-                      <CaretUpIcon size={24} className="text-primary" />
-                    ) : (
-                      <CaretDownIcon
-                        size={24}
-                        className="text-base-content/60"
-                      />
-                    )}
-                  </div>
-                </button>
+                  <motion.button
+                    onClick={() => toggleItem(faq.id)}
+                    className="w-full p-6 text-left flex items-center justify-between hover:bg-base-200/50 transition-colors"
+                    whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+                  >
+                    <h3 className="text-lg font-semibold text-base-content pr-4">
+                      {faq.question}
+                    </h3>
+                    <motion.div
+                      className="flex-shrink-0"
+                      animate={{ rotate: openItems.has(faq.id) ? 180 : 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {openItems.has(faq.id) ? (
+                        <CaretUpIcon size={24} className="text-primary" />
+                      ) : (
+                        <CaretDownIcon
+                          size={24}
+                          className="text-base-content/60"
+                        />
+                      )}
+                    </motion.div>
+                  </motion.button>
 
-                {openItems.has(faq.id) && (
-                  <div className="px-6 pb-6 border-t border-base-300">
-                    <p className="text-base-content/80 leading-relaxed pt-4">
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))
+                  <AnimatePresence>
+                    {openItems.has(faq.id) && (
+                      <motion.div
+                        className="px-6 pb-6 border-t border-base-300"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <motion.p
+                          className="text-base-content/80 leading-relaxed pt-4"
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          {faq.answer}
+                        </motion.p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           )}
-        </div>
+        </motion.div>
 
         {/* Contact CTA */}
-        <div className="max-w-4xl mx-auto mt-16">
-          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 text-center border border-primary/20">
-            <div className="flex justify-center mb-6">
-              <div className="p-4 bg-primary/10 rounded-full">
+        <motion.div
+          className="max-w-4xl mx-auto mt-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div
+            className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 text-center border border-primary/20"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="flex justify-center mb-6"
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <motion.div
+                className="p-4 bg-primary/10 rounded-full"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
                 <ChatCircleIcon size={32} className="text-primary" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-base-content mb-4">
+              </motion.div>
+            </motion.div>
+            <motion.h3
+              className="text-2xl font-bold text-base-content mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
               Still have questions?
-            </h3>
-            <p className="text-base-content/70 mb-6 max-w-2xl mx-auto">
+            </motion.h3>
+            <motion.p
+              className="text-base-content/70 mb-6 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+            >
               Can't find the answer you're looking for? Our friendly support
               team is here to help you with any questions about our services.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
+            </motion.p>
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+            >
+              <motion.a
                 href="/contact"
                 className="btn btn-primary btn-lg gap-2 rounded-full"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <PhoneIcon size={20} />
                 Contact Support
-              </a>
-              <a
+              </motion.a>
+              <motion.a
                 href="https://wa.me/2348071167444"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline btn-lg gap-2 rounded-full"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <ChatCircleIcon size={20} />
                 WhatsApp Chat
-              </a>
-            </div>
-          </div>
-        </div>
+              </motion.a>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Quick Stats */}
-        <div className="max-w-4xl mx-auto mt-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">50+</div>
-              <div className="text-sm text-base-content/60">
-                Happy Customers
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-secondary mb-2">
-                1000+
-              </div>
-              <div className="text-sm text-base-content/60">Custom Pieces</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-accent mb-2">10+</div>
-              <div className="text-sm text-base-content/60">Fabric Options</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-info mb-2">24/7</div>
-              <div className="text-sm text-base-content/60">Support</div>
-            </div>
-          </div>
-        </div>
+        <motion.div
+          className="max-w-4xl mx-auto mt-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            {[
+              { value: "50+", label: "Happy Customers", color: "text-primary" },
+              {
+                value: "1000+",
+                label: "Custom Pieces",
+                color: "text-secondary",
+              },
+              { value: "10+", label: "Fabric Options", color: "text-accent" },
+              { value: "24/7", label: "Support", color: "text-info" },
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                className="text-center"
+                initial={{ opacity: 0, scale: 0 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 + index * 0.1 }}
+                whileHover={{ scale: 1.1 }}
+              >
+                <motion.div
+                  className={`text-3xl font-bold ${stat.color} mb-2`}
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  {stat.value}
+                </motion.div>
+                <div className="text-sm text-base-content/60">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.div>
       </div>
-    </main>
+    </motion.main>
   );
 }

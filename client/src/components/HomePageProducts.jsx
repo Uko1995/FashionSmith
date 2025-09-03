@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import {
   StarIcon,
   ShoppingCartIcon,
@@ -60,12 +61,20 @@ export default function HomePageProducts() {
 
   if (isLoading) {
     return (
-      <section className="py-16 md:py-24 px-4 bg-gradient-to-br from-base-100 to-base-200">
+      <motion.section
+        className="py-16 md:py-24 px-4 bg-gradient-to-br from-base-100 to-base-200"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
         <div className="max-w-7xl mx-auto text-center">
-          <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+          <motion.div
+            className="loading loading-spinner loading-lg text-primary mb-4"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
           <p className="text-base-content/60">Loading featured products...</p>
         </div>
-      </section>
+      </motion.section>
     );
   }
 
@@ -74,23 +83,74 @@ export default function HomePageProducts() {
   }
 
   return (
-    <section className="py-16 md:py-24 px-4 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden">
+    <motion.section
+      className="py-16 md:py-24 px-4 bg-gradient-to-br from-base-100 via-primary/5 to-secondary/10 relative overflow-hidden"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8 }}
+    >
       {/* Background Decorations */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+      <motion.div
+        className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"
+        animate={{
+          scale: [1, 1.1, 1],
+          rotate: [0, 180, 360],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"
+        animate={{
+          scale: [1.1, 1, 1.1],
+          rotate: [360, 180, 0],
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
 
-      <div className="max-w-7xl mx-auto  relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-8 md:mb-12">
+        <motion.div
+          className="text-center mb-8 md:mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-base-content mb-4">
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <motion.span
+              className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               Signature
-            </span>
+            </motion.span>
             <br />
-            <span className="text-base-content">Pieces</span>
+            <motion.span
+              className="text-base-content"
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              Pieces
+            </motion.span>
           </h2>
 
-          <p className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto leading-relaxed">
+          <motion.p
+            className="text-base md:text-lg text-base-content/70 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
             Discover our most sought-after designs that blend
             <span className="text-primary font-semibold">
               {" "}
@@ -101,8 +161,8 @@ export default function HomePageProducts() {
               {" "}
               contemporary sophistication
             </span>
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Products Display */}
         <div className="space-y-8 md:space-y-10">
@@ -114,33 +174,46 @@ export default function HomePageProducts() {
             const isEven = index % 2 === 0;
 
             return (
-              <div
+              <motion.div
                 key={product._id}
                 className={`grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center ${
                   !isEven ? "lg:grid-flow-col-dense" : ""
                 }`}
-                style={{
-                  animationDelay: `${index * 200}ms`,
-                }}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                whileHover={{ scale: 1.02 }}
               >
                 {/* Product Information */}
-                <div
+                <motion.div
                   className={`space-y-3 md:space-y-4 ${
                     !isEven ? "lg:col-start-2" : ""
                   }`}
+                  initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
                 >
                   {/* Product Category & Status */}
                   <div className="flex items-center gap-3">
-                    <span className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-full text-sm sm:text-xs font-bold shadow-lg">
+                    <motion.span
+                      className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 sm:px-3 sm:py-1.5 rounded-full text-sm sm:text-xs font-bold shadow-lg"
+                      whileHover={{ scale: 1.05 }}
+                    >
                       {product.category}
-                    </span>
+                    </motion.span>
                     {product.featured && (
-                      <div className="flex items-center gap-1 text-yellow-500">
+                      <motion.div
+                        className="flex items-center gap-1 text-yellow-500"
+                        initial={{ opacity: 0, scale: 0 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.2 + 0.4 }}
+                      >
                         <StarIcon className="w-5 h-5 sm:w-4 sm:h-4" />
                         <span className="text-sm sm:text-xs font-medium">
                           Featured
                         </span>
-                      </div>
+                      </motion.div>
                     )}
                   </div>
 
@@ -213,7 +286,7 @@ export default function HomePageProducts() {
                       <div className="text-xs text-base-content/60">Days</div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Product Image */}
                 <div
@@ -243,7 +316,7 @@ export default function HomePageProducts() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -275,6 +348,6 @@ export default function HomePageProducts() {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   EnvelopeIcon,
   PhoneIcon,
@@ -85,34 +86,75 @@ export default function Contacts() {
   ];
 
   return (
-    <section className="py-6 md:py-12 w-full lg:py-16 px-4 bg-gradient-to-br from-base-100 to-base-200">
+    <motion.section
+      className="py-6 md:py-12 w-full lg:py-16 px-4 bg-gradient-to-br from-base-100 to-base-200"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8 }}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold text-base-content mb-4"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             Get In Touch
-          </h2>
-          <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            className="text-lg text-base-content/70 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
             Have questions about our services? Want to place a custom order?
             We'd love to hear from you. Send us a message and we'll respond as
             soon as possible.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Contact Information */}
-          <div className="space-y-8">
+          <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             <div>
               <h3 className="text-2xl font-bold text-base-content mb-6">
                 Contact Information
               </h3>
               <div className="grid sm:grid-cols-2 gap-6">
                 {contactInfo.map((item, index) => (
-                  <div
+                  <motion.div
                     key={index}
                     className="bg-base-100 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0 20px 40px -12px rgba(0, 0, 0, 0.15)",
+                    }}
                   >
-                    <div className={`${item.color} mb-3`}>{item.icon}</div>
+                    <motion.div
+                      className={`${item.color} mb-3`}
+                      whileHover={{ scale: 1.1 }}
+                    >
+                      {item.icon}
+                    </motion.div>
                     <h4 className="font-semibold text-base-content mb-2">
                       {item.title}
                     </h4>
@@ -135,38 +177,70 @@ export default function Contacts() {
                         )}
                       </div>
                     ))}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
 
             {/* Map Placeholder */}
-            <div className="bg-base-100 rounded-xl shadow-md overflow-hidden">
+            <motion.div
+              className="bg-base-100 rounded-xl shadow-md overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              whileHover={{ scale: 1.02 }}
+            >
               <div className="h-64 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
                 <div className="text-center">
-                  <MapPinIcon size={48} className="text-primary mx-auto mb-2" />
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <MapPinIcon
+                      size={48}
+                      className="text-primary mx-auto mb-2"
+                    />
+                  </motion.div>
                   <p className="text-base-content/70">
                     Interactive Map Coming Soon
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Contact Form */}
-          <div className="bg-base-100 p-4 md:p-6 lg:p-8 rounded-xl shadow-lg">
-            <h3 className="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6">
+          <motion.div
+            className="bg-base-100 p-4 md:p-6 lg:p-8 rounded-xl shadow-lg"
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            whileHover={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
+          >
+            <motion.h3
+              className="text-xl md:text-2xl font-bold text-base-content mb-4 md:mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+            >
               Send us a Message
-            </h3>
+            </motion.h3>
 
             {/* Success Message */}
             {isSubmitted && (
-              <div className="alert alert-success mb-6">
+              <motion.div
+                className="alert alert-success mb-6"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
                 <CheckCircleIcon size={24} />
                 <span>
                   Message sent successfully! We'll get back to you soon.
                 </span>
-              </div>
+              </motion.div>
             )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -318,10 +392,15 @@ export default function Contacts() {
               </div>
 
               {/* Submit Button */}
-              <button
+              <motion.button
                 type="submit"
                 disabled={isSubmitting}
                 className="btn btn-primary w-full"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
               >
                 {isSubmitting ? (
                   <>
@@ -334,11 +413,11 @@ export default function Contacts() {
                     Send Message
                   </>
                 )}
-              </button>
+              </motion.button>
             </form>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
