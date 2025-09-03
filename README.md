@@ -2,15 +2,13 @@
 
 A fullstack MERN web app for bespoke tailoring. Users can register, enter measurements, and place orders, while admins manage clients and requests from a dashboard.
 
-## 🚀 Live Demo
 
-🔗 https://fashionsmith.vercel.app
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React, TailwindCSS, Axios
-- **Backend**: Node.js, Express, MongoDB (Mongoose)
-- **Other**: JWT, Nodemailer, dotenv
+- **Frontend**: React, TailwindCSS, Axios, DaisyUI
+- **Backend**: Node.js, Express, MongoDB (Atlas)
+- **Other**: JWT, Nodemailer, dotenv etc.
 
 ## ✨ Features
 
@@ -27,7 +25,7 @@ root/
 
 🧪 Installation
 bash
-git clone https://github.com/yourusername/fashionsmith.git
+git clone https://github.com/Uko1995/fashionsmith.git
 cd fashionsmith
 npm install
 
@@ -43,7 +41,7 @@ npm run dev
 
 👨‍💻 Author
 Built by Uko Udeme Uwatt
-📧 your-email@example.com
+📧 uwattuko@gmail.com
 
 📄 License
 Licensed under the MIT License
