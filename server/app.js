@@ -66,12 +66,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = [
-<<<<<<< HEAD
-=======
->>>>>>> 6c1f203 (made production ready improvements)
-        process.env.CLIENT_URL,
-      ].filter(Boolean);
+      const allowedOrigins = [process.env.CLIENT_URL].filter(Boolean);
 
       // Allow requests with no origin (mobile apps, etc.)
       if (!origin) return callback(null, true);
