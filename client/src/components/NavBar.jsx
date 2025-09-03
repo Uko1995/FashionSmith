@@ -41,8 +41,8 @@ export default function NavBar() {
     { to: "/about", text: "ABOUT", icon: null },
     { to: "/contacts", text: "CONTACT", icon: AddressBookIcon },
     { to: "/faq", text: "FAQ", icon: SealQuestionIcon },
-    { to: "/login", text: "SIGN IN", icon: null },
-    { to: "/register", text: "SIGN UP", icon: null },
+    { to: "/login", text: "LOGIN", icon: null },
+    { to: "/register", text: "REGISTER", icon: null },
   ];
 
   const mainLinks = links.slice(0, 3);
