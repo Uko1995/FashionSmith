@@ -63,7 +63,6 @@ export default defineConfig(({ mode }) => ({
   },
   esbuild: {
     // Remove console.log and debugger in production
-    drop:
-      import.meta.env.VITE_MODE === "production" ? ["console", "debugger"] : [],
+    drop: ["console", "debugger"],
   },
 }));
