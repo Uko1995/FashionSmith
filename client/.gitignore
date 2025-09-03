@@ -26,5 +26,8 @@ dist-ssr
 
 *.TODOS.md
 
-*.env.*
+.env
+.env.local
+.env.production
+.env.development
 
