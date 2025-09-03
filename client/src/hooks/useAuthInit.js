@@ -11,6 +11,11 @@ export const useAuthInit = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
+        // Add debugging for production
+        if (import.meta.env.PROD) {
+          console.log('Auth init starting, API URL:', import.meta.env.VITE_API_URL);
+        }
+
         // Check if we have a JWT token (Google OAuth)
         const authToken = localStorage.getItem("authToken");
 
@@ -62,32 +67,56 @@ export const useAuthInit = () => {
           // For regular users, check cookies and clear any Google OAuth headers
           delete apiClient.defaults.headers.common["Authorization"];
 
-          const response = await apiClient.get("/api/users/auth-check");
+          // Add timeout to prevent infinite hanging
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-          if (
-            response.status === 200 &&
-            response.data.message === "Authenticated"
-          ) {
-            setIsLoggedIn(true);
-            setAuthProvider("local");
+          try {
+            const response = await apiClient.get("/api/users/auth-check", {
+              signal: controller.signal,
+              timeout: 10000,
+            });
+            clearTimeout(timeoutId);
 
-            // Get user data from localStorage if available
-            const savedUser = localStorage.getItem("user");
-            if (savedUser) {
-              try {
-                setUser(JSON.parse(savedUser));
-              } catch {
-                // Error parsing saved user data
+            if (
+              response.status === 200 &&
+              response.data.message === "Authenticated"
+            ) {
+              setIsLoggedIn(true);
+              setAuthProvider("local");
+
+              // Get user data from localStorage if available
+              const savedUser = localStorage.getItem("user");
+              if (savedUser) {
+                try {
+                  setUser(JSON.parse(savedUser));
+                } catch {
+                  // Error parsing saved user data
+                }
               }
+            } else {
+              setIsLoggedIn(false);
+              setUser(null);
+              setAuthProvider(null);
+              localStorage.removeItem("user");
             }
-          } else {
+          } catch (authError) {
+            clearTimeout(timeoutId);
+            // Auth check failed - treat as not logged in
+            if (import.meta.env.PROD) {
+              console.log('Auth check failed:', authError.message);
+            }
             setIsLoggedIn(false);
             setUser(null);
             setAuthProvider(null);
             localStorage.removeItem("user");
           }
         }
-      } catch {
+      } catch (error) {
+        // Main error handler for the entire function
+        if (import.meta.env.PROD) {
+          console.log('Auth initialization error:', error.message);
+        }
         setIsLoggedIn(false);
         setUser(null);
         setAuthProvider(null);
@@ -95,6 +124,9 @@ export const useAuthInit = () => {
         localStorage.removeItem("authToken");
       } finally {
         // Always set initialization as complete
+        if (import.meta.env.PROD) {
+          console.log('Auth initialization complete');
+        }
         setIsAuthInitialized(true);
       }
     };

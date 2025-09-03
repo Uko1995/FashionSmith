@@ -1,12 +1,19 @@
 import axios from "axios";
 import { refreshAccessToken } from "../services/tokenService";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+// Get API URL from environment variables with fallback
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+// Validate API URL is set for production
+if (import.meta.env.VITE_PROD && !import.meta.env.VITE_API_URL) {
+  console.error('VITE_API_URL environment variable is not set for production build');
+}
 
 // Create main axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 15000, // 15 second timeout to prevent hanging
 });
 
 let isRefreshing = false;
