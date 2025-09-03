@@ -24,13 +24,11 @@ export const useCart = () => {
   const proceedToCheckout = () => {
     if (!isLoggedIn) {
       // Redirect to login with return URL
-      console.log("Please log in to proceed to checkout");
       navigate("/login?returnUrl=/checkout");
       return false;
     }
 
     if (cartItems.length === 0) {
-      console.log("Your cart is empty");
       return false;
     }
 

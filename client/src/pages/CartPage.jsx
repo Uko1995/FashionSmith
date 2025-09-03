@@ -1,6 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../hooks/useCart";
+import { useNavigate } from "react-router-dom";
 import {
   MinusIcon,
   PlusIcon,
@@ -10,6 +11,7 @@ import {
 import { formatCurrency, parsePrice } from "../utils/currency";
 
 const CartPage = () => {
+  const navigate = useNavigate();
   const {
     cartItems,
     updateCartItemQuantity,
@@ -57,7 +59,7 @@ const CartPage = () => {
             Looks like you haven't added anything to your cart yet.
           </p>
           <motion.a
-            href="/gallery"
+            onClick={() => navigate("/gallery")}
             className="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

@@ -4,11 +4,13 @@ import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     host: true,
-    allowedHosts: ["localhost", "9d27643ff55c.ngrok-free.app"],
+    preview: {
+      port: 4173,
+    },
   },
   plugins: [react(), tailwindcss()],
   build: {
@@ -60,7 +62,8 @@ export default defineConfig({
     ],
   },
   esbuild: {
-    // Remove console.log in production
-    drop: ["console", "debugger"],
+    // Remove console.log and debugger in production
+    drop:
+      import.meta.env.VITE_MODE === "production" ? ["console", "debugger"] : [],
   },
-});
+}));

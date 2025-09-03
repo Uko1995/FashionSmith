@@ -67,22 +67,31 @@ app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
-        "https://fashion-smith.vercel.app",
+<<<<<<< HEAD
+=======
+>>>>>>> 6c1f203 (made production ready improvements)
         process.env.CLIENT_URL,
       ].filter(Boolean);
 
       // Allow requests with no origin (mobile apps, etc.)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
+      // In production, be more strict with origins
+      if (process.env.NODE_ENV === "production") {
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`Origin ${origin} not allowed by CORS`));
+        }
       } else {
-        callback(new Error("Not allowed by CORS"));
+        // In development, be more permissive
+        callback(null, true);
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
+    optionsSuccessStatus: 200, // Support legacy browsers
   })
 );
 

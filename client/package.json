@@ -17,18 +17,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:analyze": "vite build && npx vite-bundle-analyzer dist/assets/*.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview",
-    "type-check": "tsc --noEmit",
-    "optimize-images": "imagemin public/images/* --out-dir=public/images/optimized",
-    "lighthouse": "lighthouse http://localhost:5173 --output=html --output-path=./performance-reports/lighthouse-report.html --chrome-flags='--headless'",
-    "lighthouse:ci": "lighthouse http://localhost:5173 --output=json --output-path=./performance-reports/lighthouse-ci.json --chrome-flags='--headless' --only-categories=performance,accessibility,best-practices,seo,pwa",
-    "perf:audit": "npm run lighthouse && npm run build:analyze",
-    "seo:audit": "node performance-tests/scripts/seo-audit.js",
-    "speed:test": "node performance-tests/scripts/speed-test.js",
-    "test:performance": "npm run speed:test && npm run seo:audit"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

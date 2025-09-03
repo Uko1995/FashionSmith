@@ -1,20 +1,23 @@
-import passport from '../config/passport.js';
-import { generateAccessToken, generateRefreshToken } from '../utils/tokenGenerator.js';
-import { collections } from '../config/db.js';
+import passport from "../config/passport.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/tokenGenerator.js";
+import { collections } from "../config/db.js";
 
-export const googleAuth = passport.authenticate('google', {
-  scope: ['profile', 'email'],
+export const googleAuth = passport.authenticate("google", {
+  scope: ["profile", "email"],
 });
 
 export const googleAuthCallback = (req, res) => {
-  passport.authenticate('google', { session: false }, async (err, user) => {
+  passport.authenticate("google", { session: false }, async (err, user) => {
     if (err) {
-      console.error('Google auth callback error:', err);
-      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=auth_failed`);
+      console.error("Google auth callback error:", err);
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
     }
 
     if (!user) {
-      return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=auth_failed`);
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=auth_failed`);
     }
 
     try {
@@ -29,19 +32,22 @@ export const googleAuthCallback = (req, res) => {
       );
 
       // Set HTTP-only cookies
-      res.cookie('jwt', refreshToken, {
+      res.cookie("jwt", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        domain: process.env.NODE_ENV === "production" ? undefined : undefined, // Let browser set domain
       });
 
       // Redirect to frontend with access token
-      const redirectUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/auth/callback?token=${accessToken}&success=true`;
+      const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&success=true`;
       res.redirect(redirectUrl);
     } catch (error) {
-      console.error('Token generation error:', error);
-      res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=token_generation_failed`);
+      console.error("Token generation error:", error);
+      res.redirect(
+        `${process.env.CLIENT_URL}/login?error=token_generation_failed`
+      );
     }
   })(req, res);
 };
@@ -57,21 +63,22 @@ export const logout = async (req, res) => {
     }
 
     // Clear cookies
-    res.clearCookie('jwt', {
+    res.clearCookie("jwt", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? undefined : undefined,
     });
 
     res.json({
       success: true,
-      message: 'Logged out successfully',
+      message: "Logged out successfully",
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     res.status(500).json({
       success: false,
-      message: 'Logout failed',
+      message: "Logout failed",
       error: error.message,
     });
   }
@@ -94,7 +101,7 @@ export const getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -103,10 +110,10 @@ export const getCurrentUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.error('Get current user error:', error);
+    console.error("Get current user error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get user data',
+      message: "Failed to get user data",
       error: error.message,
     });
   }

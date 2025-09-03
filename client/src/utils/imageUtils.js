@@ -11,19 +11,15 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
  * @returns {string|null} - Full URL to the image or null if no image
  */
 export const getProfileImageUrl = (imagePath) => {
-  console.log("Processing image path:", imagePath, "API_URL:", API_URL); // Debug log
-
   if (!imagePath) return null;
 
   // If it's already a full URL (starts with http), return as is
   if (imagePath.startsWith("http")) {
-    console.log("Returning full URL:", imagePath);
     return imagePath;
   }
 
   // If it's a Cloudinary URL (contains cloudinary.com), return as is
   if (imagePath.includes("cloudinary.com")) {
-    console.log("Returning Cloudinary URL:", imagePath);
     return imagePath;
   }
 
@@ -32,7 +28,6 @@ export const getProfileImageUrl = (imagePath) => {
     ? `${API_URL}${imagePath}`
     : `${API_URL}/${imagePath}`;
 
-  console.log("Converted relative path to:", fullUrl);
   return fullUrl;
 };
 

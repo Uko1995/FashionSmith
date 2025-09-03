@@ -9,9 +9,11 @@ const createTransporter = () => {
   if (!transporter) {
     // Check if required environment variables are set
     if (!process.env.EMAIL || !process.env.EMAIL_PASSWORD) {
-      console.error(
-        "❌ Email configuration missing: EMAIL and EMAIL_PASSWORD environment variables are required"
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.error(
+          "❌ Email configuration missing: EMAIL and EMAIL_PASSWORD environment variables are required"
+        );
+      }
       return null;
     }
 
@@ -30,9 +32,9 @@ const createTransporter = () => {
 
     // Verify transporter once
     transporter.verify((error, success) => {
-      if (error) {
+      if (error && process.env.NODE_ENV === "development") {
         console.error("❌ Email service verification failed:", error.message);
-      } else {
+      } else if (success && process.env.NODE_ENV === "development") {
         console.log("✅ Email service is ready");
       }
     });
@@ -64,7 +66,9 @@ const sendEmail = async (email = "", subject = "", html = "") => {
     };
 
     const info = await emailTransporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully:", info.messageId);
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ Email sent successfully:", info.messageId);
+    }
 
     return {
       success: true,
@@ -72,7 +76,9 @@ const sendEmail = async (email = "", subject = "", html = "") => {
       message: "Email sent successfully",
     };
   } catch (error) {
-    console.error("❌ Error sending email:", error.message);
+    if (process.env.NODE_ENV === "development") {
+      console.error("❌ Error sending email:", error.message);
+    }
 
     return {
       success: false,

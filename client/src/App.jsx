@@ -29,7 +29,6 @@ export default function App() {
   // Listen for forced logout events
   useEffect(() => {
     const handleForceLogout = () => {
-      console.log("[APP] Forced logout event received");
       forceLogout();
     };
 

@@ -25,11 +25,6 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
     navigator.serviceWorker
       .register("/sw.js")
       .then((registration) => {
-        console.log(
-          "Service Worker registered successfully:",
-          registration.scope
-        );
-
         // Listen for updates
         registration.addEventListener("updatefound", () => {
           const newWorker = registration.installing;
@@ -49,15 +44,14 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
           }
         });
       })
-      .catch((error) => {
-        console.error("Service Worker registration failed:", error);
+      .catch(() => {
+        // Service Worker registration failed
       });
 
     // Listen for service worker messages
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data && event.data.type === "CACHE_PERFORMANCE") {
-        // Handle cache performance data
-        console.log("Cache performance:", event.data);
+        // Handle cache performance data silently
       }
     });
   });
@@ -67,7 +61,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      <ReactQueryDevtools initialIaOpen={false} />
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </StrictMode>
 );

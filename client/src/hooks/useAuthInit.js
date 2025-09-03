@@ -9,8 +9,6 @@ export const useAuthInit = () => {
     useUiStore();
 
   useEffect(() => {
-    console.log("[AUTH INIT] Checking authentication status from cookies...");
-
     const checkAuthStatus = async () => {
       try {
         // Check if we have a JWT token (Google OAuth)
@@ -22,24 +20,14 @@ export const useAuthInit = () => {
             "Authorization"
           ] = `Bearer ${authToken}`;
           setAuthProvider("google");
-          console.log(
-            "[AUTH INIT] Google OAuth token found, setting auth provider"
-          );
-
           // Try to get user data from localStorage first
           let userData = null;
           const savedUser = localStorage.getItem("user");
           if (savedUser) {
             try {
               userData = JSON.parse(savedUser);
-              console.log(
-                "[AUTH INIT] Google OAuth user data restored from localStorage"
-              );
-            } catch (error) {
-              console.error(
-                "[AUTH INIT] Error parsing saved user data:",
-                error
-              );
+            } catch {
+              // Error parsing saved user data
             }
           }
 
@@ -60,15 +48,9 @@ export const useAuthInit = () => {
                 };
                 // Save decoded user data to localStorage
                 localStorage.setItem("user", JSON.stringify(userData));
-                console.log(
-                  "[AUTH INIT] Google OAuth user data decoded from JWT"
-                );
               }
-            } catch (decodeError) {
-              console.error(
-                "[AUTH INIT] Error decoding JWT token:",
-                decodeError
-              );
+            } catch {
+              // Error decoding JWT token
             }
           }
 
@@ -86,7 +68,6 @@ export const useAuthInit = () => {
             response.status === 200 &&
             response.data.message === "Authenticated"
           ) {
-            console.log("[AUTH INIT] Regular user is authenticated");
             setIsLoggedIn(true);
             setAuthProvider("local");
 
@@ -95,24 +76,18 @@ export const useAuthInit = () => {
             if (savedUser) {
               try {
                 setUser(JSON.parse(savedUser));
-                console.log("[AUTH INIT] User data restored from localStorage");
-              } catch (error) {
-                console.error(
-                  "[AUTH INIT] Error parsing saved user data:",
-                  error
-                );
+              } catch {
+                // Error parsing saved user data
               }
             }
           } else {
-            console.log("[AUTH INIT] User is not authenticated");
             setIsLoggedIn(false);
             setUser(null);
             setAuthProvider(null);
             localStorage.removeItem("user");
           }
         }
-      } catch (error) {
-        console.error("[AUTH INIT] Auth check failed:", error);
+      } catch {
         setIsLoggedIn(false);
         setUser(null);
         setAuthProvider(null);

@@ -11,9 +11,6 @@ export default function FloatingCart() {
   const [showNotification, setShowNotification] = useState(false);
   const [lastItemCount, setLastItemCount] = useState(0);
 
-  // Debug logging
-  console.log("[FLOATING_CART] Debug:", { itemCount, cartItems, isVisible });
-
   // Show cart when items are added
   useEffect(() => {
     if (itemCount > 0) {

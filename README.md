@@ -17,6 +17,10 @@ A fullstack MERN web app for bespoke tailoring. Users can register, enter measur
 - 📦 Place and manage tailoring orders
 - 🧑‍💼 Admin dashboard to manage all users and orders
 
+## Live URL
+
+https://fashion-smith.vercel.app
+
 ## 📁 Folder Structure
 
 root/
