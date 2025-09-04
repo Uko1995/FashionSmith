@@ -20,42 +20,18 @@ const queryClient = new QueryClient({
 });
 
 // Register Service Worker for PWA functionality
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((registration) => {
-        // Listen for updates
-        registration.addEventListener("updatefound", () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener("statechange", () => {
-              if (
-                newWorker.state === "installed" &&
-                navigator.serviceWorker.controller
-              ) {
-                // New content available, show update notification
-                if (confirm("New version available! Reload to update?")) {
-                  newWorker.postMessage({ type: "SKIP_WAITING" });
-                  window.location.reload();
-                }
-              }
-            });
-          }
-        });
-      })
-      .catch(() => {
-        // Service Worker registration failed
-      });
-
-    // Listen for service worker messages
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data && event.data.type === "CACHE_PERFORMANCE") {
-        // Handle cache performance data silently
-      }
-    });
-  });
-}
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker
+//       .register("/sw.js")
+//       .then((registration) => {
+//         console.log("SW registered: ", registration);
+//       })
+//       .catch((registrationError) => {
+//         console.log("SW registration failed: ", registrationError);
+//       });
+//   });
+// }
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
