@@ -10,6 +10,9 @@ export const useAuthInit = () => {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
+      // Set a maximum timeout for the entire auth initialization
+      let authInitTimeout;
+
       try {
         // Add comprehensive debugging for production
         console.log("=== AUTH INIT DEBUG ===");
@@ -18,6 +21,14 @@ export const useAuthInit = () => {
         console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
         console.log("Axios baseURL:", apiClient.defaults.baseURL);
         console.log("=======================");
+
+        // Set a maximum timeout for the entire auth initialization
+        authInitTimeout = setTimeout(() => {
+          console.error(
+            "AUTH INIT: Maximum timeout reached (20 seconds) - forcing initialization completion"
+          );
+          setIsAuthInitialized(true);
+        }, 20000);
 
         // Check if we have a JWT token (Google OAuth)
         const authToken = localStorage.getItem("authToken");
@@ -76,9 +87,11 @@ export const useAuthInit = () => {
           // Add timeout to prevent infinite hanging
           const controller = new AbortController();
           const timeoutId = setTimeout(() => {
-            console.log("Auth check timeout after 10 seconds");
+            console.log(
+              "Auth check timeout after 5 seconds - continuing without auth"
+            );
             controller.abort();
-          }, 10000); // 10 second timeout
+          }, 5000); // Reduced to 5 second timeout
 
           try {
             console.log(
@@ -87,7 +100,7 @@ export const useAuthInit = () => {
             );
             const response = await apiClient.get("/api/users/auth-check", {
               signal: controller.signal,
-              timeout: 10000,
+              timeout: 5000, // Reduced timeout
             });
             clearTimeout(timeoutId);
             console.log("Auth check response:", response.status, response.data);
@@ -146,6 +159,9 @@ export const useAuthInit = () => {
         console.log(
           "Auth initialization complete - setting isAuthInitialized to true"
         );
+        if (authInitTimeout) {
+          clearTimeout(authInitTimeout); // Clear the failsafe timeout
+        }
         setIsAuthInitialized(true);
       }
     };
