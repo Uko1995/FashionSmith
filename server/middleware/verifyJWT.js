@@ -6,6 +6,15 @@ const verifyJWT = async (req, res, next) => {
   try {
     let accessToken;
 
+    // Add debugging for cookies and headers
+    console.log("[JWT MIDDLEWARE] === Authentication Debug ===");
+    console.log("[JWT MIDDLEWARE] Cookies received:", req.cookies);
+    console.log(
+      "[JWT MIDDLEWARE] Authorization header:",
+      req.headers.authorization
+    );
+    console.log("[JWT MIDDLEWARE] Request URL:", req.url);
+
     // Check for JWT token in Authorization header (Google OAuth)
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -16,10 +25,14 @@ const verifyJWT = async (req, res, next) => {
     } else {
       // Check for JWT token in cookies (regular users)
       accessToken = req.cookies.accessToken;
-      console.log("[JWT MIDDLEWARE] Using token from cookies");
+      console.log(
+        "[JWT MIDDLEWARE] Using token from cookies:",
+        accessToken ? "Found" : "Not found"
+      );
     }
 
     if (!accessToken) {
+      console.log("[JWT MIDDLEWARE] No access token found - returning 401");
       return res.status(401).json({
         success: false,
         message: "Access token required",

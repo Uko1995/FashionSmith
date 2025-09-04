@@ -66,7 +66,10 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = [process.env.CLIENT_URL].filter(Boolean);
+      const allowedOrigins = [
+        process.env.CLIENT_URL,
+        "http://localhost:5173",
+      ].filter(Boolean);
 
       // Allow requests with no origin (mobile apps, etc.)
       if (!origin) return callback(null, true);
@@ -100,13 +103,14 @@ app.use(
 );
 
 // Session middleware for Passport
+const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your-session-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: isProduction,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },

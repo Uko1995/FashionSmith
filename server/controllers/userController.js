@@ -96,8 +96,9 @@ const signUp = async (req, res) => {
         _id: newUser.insertedId,
       });
       if (!insertedUser) {
-        return res.status(404).json({
-          message: "User not found after registration",
+        // Internal server error - user should have been created
+        return res.status(500).json({
+          message: "Registration failed - please try again",
         });
       }
 
@@ -222,8 +223,9 @@ const getUser = async (req, res) => {
 
     if (!user) {
       console.log("[GET USER] User not found for:", req.user);
-      return res.status(404).json({
-        message: "User not found",
+      // Token is valid but user doesn't exist - should not happen
+      return res.status(401).json({
+        message: "User authentication invalid",
       });
     }
 
@@ -346,8 +348,9 @@ const login = async (req, res) => {
   try {
     const user = await userCollection.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
+      // Don't reveal if user exists - use 401 for security
+      return res.status(401).json({
+        message: "Invalid email or password",
       });
     }
 
@@ -365,29 +368,68 @@ const login = async (req, res) => {
     // NEW: Check if user has an existing refresh token
     if (user.refreshToken !== null) {
       console.log(
-        "[LOGIN] User has existing refresh token, returning already logged in response"
+        "[LOGIN] User has existing refresh token, but setting cookies anyway for browser auth"
       );
-      return res.status(200).json({
-        message: "User already logged in",
-        code: "ALREADY_LOGGED_IN",
-        redirectTo: "/",
-        user: {
-          _id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          role: user.role,
-          isVerified: user.isVerified,
-          profileImage: user.profileImage,
-          authProvider: user.authProvider || "local",
-        },
-      });
+
+      // Generate new tokens and set cookies
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      // Update refresh token in database
+      await userCollection.updateOne(
+        { _id: user._id },
+        { $set: { refreshToken: refreshToken } }
+      );
+
+      // Determine environment for cookie settings
+      const isProduction = process.env.NODE_ENV === "production";
+
+      console.log(
+        "[LOGIN] Setting cookies for existing user with environment:",
+        {
+          isProduction,
+          NODE_ENV: process.env.NODE_ENV,
+          sameSite: isProduction ? "None" : "Lax",
+          secure: isProduction,
+        }
+      );
+
+      return res
+        .cookie("accessToken", accessToken, {
+          httpOnly: true,
+          sameSite: isProduction ? "None" : "Lax",
+          secure: isProduction,
+          maxAge: 1000 * 60 * 15, // 15 minutes
+        })
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          sameSite: isProduction ? "None" : "Lax",
+          secure: isProduction,
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        })
+        .json({
+          success: true,
+          message: "User already logged in",
+          code: "ALREADY_LOGGED_IN",
+          redirectTo: "/",
+          user: {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            isVerified: user.isVerified,
+            profileImage: user.profileImage,
+            authProvider: user.authProvider || "local",
+          },
+        });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({
-        message: "incorrect password",
+      // Use same message as "user not found" for security
+      return res.status(401).json({
+        message: "Invalid email or password",
       });
     }
 
@@ -399,17 +441,27 @@ const login = async (req, res) => {
       { $set: { refreshToken: user.refreshToken } }
     );
 
+    // Determine environment for cookie settings
+    const isProduction = process.env.NODE_ENV === "production";
+
+    console.log("[LOGIN] Setting cookies with environment:", {
+      isProduction,
+      NODE_ENV: process.env.NODE_ENV,
+      sameSite: isProduction ? "None" : "Lax",
+      secure: isProduction,
+    });
+
     return res
       .cookie("accessToken", accessToken, {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        secure: process.env.NODE_ENV === "production",
+        sameSite: isProduction ? "None" : "Lax",
+        secure: isProduction,
         maxAge: 1000 * 60 * 15, // 15 minutes
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        secure: process.env.NODE_ENV === "production",
+        sameSite: isProduction ? "None" : "Lax",
+        secure: isProduction,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       })
       .json({

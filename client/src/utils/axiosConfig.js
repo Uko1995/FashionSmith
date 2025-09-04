@@ -2,13 +2,19 @@ import axios from "axios";
 import { refreshAccessToken } from "../services/tokenService";
 
 // Get API URL from environment variables with production fallback
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://fashionsmith.onrender.com' : 'http://localhost:3000');
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.VITE_PROD
+    ? "https://fashionsmith.onrender.com"
+    : "http://localhost:3000");
 
-// Validate API URL is set for production
-if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-  console.warn('VITE_API_URL environment variable is not set, using fallback URL');
-}
+// Add debugging
+console.log("=== AXIOS CONFIG DEBUG ===");
+console.log("Environment Mode:", import.meta.env.VITE_MODE);
+console.log("Is Production:", import.meta.env.VITE_PROD);
+console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
+console.log("Final API_BASE_URL:", API_BASE_URL);
+console.log("==========================");
 
 // Create main axios instance
 const apiClient = axios.create({

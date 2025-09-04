@@ -32,12 +32,13 @@ export const googleAuthCallback = (req, res) => {
       );
 
       // Set HTTP-only cookies
+      const isProduction = process.env.NODE_ENV === "production";
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        domain: process.env.NODE_ENV === "production" ? undefined : undefined, // Let browser set domain
+        domain: isProduction ? undefined : undefined, // Let browser set domain
       });
 
       // Redirect to frontend with access token
@@ -63,11 +64,12 @@ export const logout = async (req, res) => {
     }
 
     // Clear cookies
+    const isProduction = process.env.NODE_ENV === "production";
     res.clearCookie("jwt", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      domain: process.env.NODE_ENV === "production" ? undefined : undefined,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      domain: isProduction ? undefined : undefined,
     });
 
     res.json({
