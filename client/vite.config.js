@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
     // Enable minification
     minify: "terser",
     // Generate source maps for debugging
-    sourcemap: false,
+    sourcemap: true,
     // Optimize chunk splitting
     rollupOptions: {
       output: {
@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => ({
     ],
   },
   esbuild: {
-    // Remove console.log and debugger in production
-    drop: ["console", "debugger"],
+    // Keep console.log in production for debugging
+    // drop: ["debugger"], // Only remove debugger statements
   },
 }));
