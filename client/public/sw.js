@@ -105,6 +105,15 @@ self.addEventListener("fetch", (event) => {
 // Cache-first strategy (for static assets and images)
 async function cacheFirstStrategy(request, cacheName = STATIC_CACHE) {
   try {
+    // Skip caching for chrome-extension URLs and unsupported schemes
+    if (
+      request.url.startsWith("chrome-extension:") ||
+      request.url.startsWith("moz-extension:") ||
+      request.url.startsWith("safari-extension:")
+    ) {
+      return fetch(request);
+    }
+
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
@@ -113,7 +122,10 @@ async function cacheFirstStrategy(request, cacheName = STATIC_CACHE) {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
+      // Only cache HTTP/HTTPS requests
+      if (request.url.startsWith("http")) {
+        cache.put(request, networkResponse.clone());
+      }
     }
     return networkResponse;
   } catch (error) {
@@ -125,10 +137,22 @@ async function cacheFirstStrategy(request, cacheName = STATIC_CACHE) {
 // Network-first strategy (for API calls and dynamic content)
 async function networkFirstStrategy(request, cacheName = DYNAMIC_CACHE) {
   try {
+    // Skip caching for chrome-extension URLs and unsupported schemes
+    if (
+      request.url.startsWith("chrome-extension:") ||
+      request.url.startsWith("moz-extension:") ||
+      request.url.startsWith("safari-extension:")
+    ) {
+      return fetch(request);
+    }
+
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
+      // Only cache HTTP/HTTPS requests
+      if (request.url.startsWith("http")) {
+        cache.put(request, networkResponse.clone());
+      }
     }
     return networkResponse;
   } catch (error) {
