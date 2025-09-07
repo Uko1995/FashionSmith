@@ -732,398 +732,167 @@ export default function DashboardMeasurements() {
   const activeCategory_ = measurementCategories[activeCategory];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200 p-4 md:p-6">
       <SEO
         title="My Measurements - FashionSmith"
         description="Manage your body measurements for perfect custom tailoring and bespoke clothing."
       />
 
       <div className="max-w-7xl mx-auto">
-        {/* Measurements Overview Grid */}
-        {measurements && (
-          <div className="card bg-base-100 shadow-xl border border-base-300/50 mb-8">
-            <div className="card-body p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold flex items-center gap-3">
-                  <ClipboardIcon className="w-6 h-6 text-primary" />
-                  Measurements
-                </h2>
-                <div className="badge badge-primary badge-lg">
-                  {measurements.unit || "inches"}
+        {/* Mobile-first: Stacked layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Column: Categories */}
+          <div className="lg:col-span-1">
+            <div className="card bg-base-100 shadow-xl border border-base-300/50">
+              <div className="card-body p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold">Categories</h2>
+                  <button
+                    onClick={() => setShowGuide(true)}
+                    className="btn btn-outline btn-xs gap-1"
+                  >
+                    <BookOpenIcon className="w-3 h-3" />
+                    Guide
+                  </button>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-                {Object.entries(measurementCategories).map(
-                  ([categoryKey, category]) => {
-                    const categoryMeasurements = category.fields.filter(
-                      (field) =>
-                        measurements[field.name] &&
-                        measurements[field.name] !== 0 &&
-                        measurements[field.name] !== null
-                    );
-
-                    if (categoryMeasurements.length === 0) return null;
-
-                    return (
-                      <div
-                        key={categoryKey}
-                        className="border border-base-300 rounded-lg p-4"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <category.icon
-                            className={`w-5 h-5 text-${category.color}`}
-                          />
-                          <h3 className="font-medium text-sm">
-                            {category.title}
-                          </h3>
-                        </div>
-                        <div className="space-y-2">
-                          {categoryMeasurements.map((field) => (
-                            <div
-                              key={field.name}
-                              className="flex justify-between items-center"
-                            >
-                              <span className="text-sm text-base-content/70">
-                                {field.label}:
-                              </span>
-                              <span className="font-medium text-sm">
-                                {measurements[field.name]}{" "}
-                                {measurements.unit || "inches"}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-
-                {/* Summary Stats */}
-                <div className="border border-primary/20 bg-primary/5 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CheckCircleIcon className="w-5 h-5 text-primary" />
-                    <h3 className="font-medium text-sm">Summary</h3>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-base-content/70">
-                        Total Fields:
-                      </span>
-                      <span className="font-medium text-sm">
-                        {
-                          Object.values(measurementCategories)
-                            .flatMap((cat) => cat.fields)
-                            .filter(
-                              (field) =>
-                                measurements[field.name] &&
-                                measurements[field.name] !== 0
-                            ).length
-                        }
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-base-content/70">
-                        Last Updated:
-                      </span>
-                      <span className="font-medium text-sm">
-                        {measurements.updatedAt
-                          ? new Date(
-                              measurements.updatedAt
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-base-content/70">
-                        Unit:
-                      </span>
-                      <span className="font-medium text-sm">
-                        {measurements.unit || "inches"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-base-300">
-                <div className="flex gap-2">
+                <div className="space-y-2">
                   {Object.entries(measurementCategories).map(
-                    ([categoryKey, category]) => (
-                      <button
-                        key={categoryKey}
-                        onClick={() => setActiveCategory(categoryKey)}
-                        className={`btn btn-sm gap-2 ${
-                          activeCategory === categoryKey
-                            ? "btn-primary"
-                            : "btn-outline"
-                        }`}
-                      >
-                        <category.icon className="w-4 h-4" />
-                        {category.title}
-                      </button>
+                    ([key, category]) => (
+                      <CategoryCard
+                        key={key}
+                        categoryKey={key}
+                        category={category}
+                        isActive={activeCategory === key}
+                      />
                     )
                   )}
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Empty State for No Measurements */}
-        {!measurements && !measurementsLoading && (
-          <div className="card bg-base-100/50 shadow-lg border border-base-300/50 mb-8">
-            <div className="card-body text-center p-8">
-              <RulerIcon className="w-16 h-16 text-base-content/30 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">
-                No Measurements Yet
-              </h2>
-              <p className="text-base-content/70 mb-4">
-                Start by adding your essential measurements to get perfectly
-                fitted garments.
-              </p>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="btn btn-primary gap-2"
-              >
-                <PencilIcon className="w-5 h-5" />
-                Add Your First Measurements
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+          {/* Right Column: Main Content */}
+          <div className="lg:col-span-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Header and Actions */}
+              <div className="card bg-base-100 shadow-xl border border-base-300/50">
+                <div className="card-body p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`p-2 bg-${activeCategory_.color}/20 rounded-xl`}
+                      >
+                        <activeCategory_.icon
+                          className={`w-5 h-5 text-${activeCategory_.color}`}
+                        />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold">
+                          {activeCategory_.title}
+                        </h2>
+                        <p className="text-sm text-base-content/70">
+                          {activeCategory_.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="form-control">
+                        <label className="label cursor-pointer gap-2 p-0">
+                          <span className="label-text text-xs">Inches</span>
+                          <input
+                            type="checkbox"
+                            className="toggle toggle-xs toggle-primary"
+                            checked={currentUnit === "cm"}
+                            onChange={(e) => {
+                              const newUnit = e.target.checked
+                                ? "cm"
+                                : "inches";
+                              updateUnitMutation.mutate(newUnit);
+                            }}
+                          />
+                          <span className="label-text text-xs">CM</span>
+                        </label>
+                      </div>
+                      {!isEditing ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                          className="btn btn-primary btn-sm gap-2"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                          {measurements ? "Edit" : "Add"}
+                        </button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button
+                            type="submit"
+                            className="btn btn-success btn-sm gap-2"
+                            disabled={saveMeasurementsMutation.isPending}
+                          >
+                            <CheckIcon className="w-4 h-4" />
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="btn btn-ghost btn-sm"
+                          >
+                            <XIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-      {/* Progress Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="card bg-gradient-to-br from-primary/10 to-primary/5 shadow-xl border border-primary/20">
-          <div className="card-body p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-primary/20 rounded-xl">
-                <CheckCircleIcon className="w-6 h-6 text-primary" />
+              {/* Measurement Fields */}
+              <div className="card bg-base-100 shadow-xl border border-base-300/50">
+                <div className="card-body p-4 md:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {activeCategory_.fields.map((field) => (
+                      <MeasurementInput key={field.name} field={field} />
+                    ))}
+                  </div>
+                  {activeCategory_.fields.length === 0 && (
+                    <div className="text-center py-8">
+                      <RulerIcon className="w-12 h-12 text-base-content/30 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold">
+                        No Fields Available
+                      </h3>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold">{progress.percentage}%</h3>
-                <p className="text-sm text-base-content/70">Complete</p>
-              </div>
-            </div>
+            </form>
           </div>
         </div>
 
-        <div className="card bg-gradient-to-br from-accent/10 to-accent/5 shadow-xl border border-accent/20">
-          <div className="card-body p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-accent/20 rounded-xl">
-                <RulerIcon className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold">
-                  {progress.completed}/{progress.total}
-                </h3>
-                <p className="text-sm text-base-content/70">Measurements</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Measurement Guide Modal */}
+        {showGuide && <MeasurementGuide />}
 
-        <div className="card bg-gradient-to-br from-success/10 to-success/5 shadow-xl border border-success/20">
-          <div className="card-body p-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-success/20 rounded-xl">
-                <CheckIcon className="w-6 h-6 text-success" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold">
-                  {progress.requiredPercentage}%
-                </h3>
-                <p className="text-sm text-base-content/70">Required</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Category Navigation */}
-        <div className="lg:col-span-1">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Categories</h2>
+        {/* Help Section */}
+        <div className="mt-8 card bg-info/10 shadow-lg border border-info/20">
+          <div className="card-body p-6 text-center">
+            <InfoIcon className="w-6 h-6 text-info mx-auto mb-2" />
+            <h3 className="text-lg font-bold">Need Help?</h3>
+            <p className="text-sm text-base-content/70 my-2 max-w-md mx-auto">
+              Accurate measurements are key. If unsure, view our guide or
+              contact support.
+            </p>
+            <div className="flex gap-2 justify-center">
               <button
                 onClick={() => setShowGuide(true)}
-                className="btn btn-outline btn-sm gap-2"
+                className="btn btn-info btn-sm gap-2"
               >
                 <BookOpenIcon className="w-4 h-4" />
                 Guide
               </button>
+              <button className="btn btn-outline btn-sm gap-2">
+                <UserIcon className="w-4 h-4" />
+                Support
+              </button>
             </div>
-
-            {Object.entries(measurementCategories).map(([key, category]) => (
-              <CategoryCard
-                key={key}
-                categoryKey={key}
-                category={category}
-                isActive={activeCategory === key}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-3">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* Active Category Header */}
-            <div className="card bg-gradient-to-br from-base-100 to-base-50 shadow-xl border border-base-300/50">
-              <div className="card-body p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`p-3 bg-${activeCategory_.color}/20 rounded-xl`}
-                    >
-                      <activeCategory_.icon
-                        className={`w-6 h-6 text-${activeCategory_.color}`}
-                      />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold">
-                        {activeCategory_.title}
-                      </h2>
-                      <p className="text-base-content/70">
-                        {activeCategory_.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    {/* Unit Toggle */}
-                    <div className="form-control">
-                      <label className="label cursor-pointer gap-2">
-                        <span className="label-text">Inches</span>
-                        <input
-                          type="checkbox"
-                          className="toggle toggle-primary"
-                          checked={currentUnit === "cm"}
-                          onChange={(e) => {
-                            const newUnit = e.target.checked ? "cm" : "inches";
-                            updateUnitMutation.mutate(newUnit);
-                          }}
-                        />
-                        <span className="label-text">CM</span>
-                      </label>
-                    </div>
-
-                    {/* Action Buttons */}
-                    {!isEditing ? (
-                      <div className="flex flex-col gap-3">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            console.log("Edit Measurements button clicked");
-                            console.log("Event:", e);
-                            e.preventDefault(); // Prevent any default behavior
-                            e.stopPropagation(); // Stop event bubbling
-                            setIsEditing(true);
-                          }}
-                          className="btn btn-primary gap-2"
-                        >
-                          <PencilIcon className="w-5 h-5" />
-                          {measurements ? "Edit" : "Add"} Measurements
-                        </button>
-                        {measurements && (
-                          <button
-                            type="button"
-                            onClick={handleDelete}
-                            className="btn btn-sm btn-error btn-outline gap-2"
-                            disabled={deleteMeasurementsMutation.isPending}
-                          >
-                            <XIcon className="w-5 h-5" />
-                            Delete All
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-3">
-                        <button
-                          type="submit"
-                          className="btn btn-success gap-2"
-                          disabled={saveMeasurementsMutation.isPending}
-                        >
-                          {saveMeasurementsMutation.isPending ? (
-                            <span className="loading loading-spinner loading-sm"></span>
-                          ) : (
-                            <CheckIcon className="w-5 h-5" />
-                          )}
-                          Save Changes
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCancel}
-                          className="btn btn-outline gap-2"
-                        >
-                          <XIcon className="w-5 h-5" />
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Measurement Fields */}
-            <div className="card bg-gradient-to-br from-base-100 to-base-50 shadow-xl border border-base-300/50">
-              <div className="card-body p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {activeCategory_.fields.map((field) => (
-                    <MeasurementInput key={field.name} field={field} />
-                  ))}
-                </div>
-
-                {activeCategory_.fields.length === 0 && (
-                  <div className="text-center py-12">
-                    <RulerIcon className="w-16 h-16 text-base-content/30 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">
-                      No Fields Available
-                    </h3>
-                    <p className="text-base-content/70">
-                      This category doesn't have any measurement fields yet.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Measurement Guide Modal */}
-      {showGuide && <MeasurementGuide />}
-
-      {/* Help Section */}
-      <div className="mt-12 card bg-gradient-to-br from-info/10 to-info/5 shadow-xl border border-info/20">
-        <div className="card-body p-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <InfoIcon className="w-8 h-8 text-info" />
-            <h3 className="text-2xl font-bold">Need Help?</h3>
-          </div>
-          <p className="text-base-content/70 mb-6 max-w-2xl mx-auto">
-            Accurate measurements are crucial for perfect fit. If you're unsure
-            about any measurement, consider visiting a professional tailor or
-            contact our support team.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => setShowGuide(true)}
-              className="btn btn-info gap-2"
-            >
-              <BookOpenIcon className="w-5 h-5" />
-              View Measurement Guide
-            </button>
-            <button className="btn btn-outline gap-2">
-              <UserIcon className="w-5 h-5" />
-              Contact Support
-            </button>
           </div>
         </div>
       </div>

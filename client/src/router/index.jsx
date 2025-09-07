@@ -91,7 +91,9 @@ const router = createBrowserRouter([
       },
       {
         path: "payment-success",
-        Component: (await import("../pages/PaymentSuccess")).default,
+        lazy: async () => ({
+          Component: (await import("../pages/PaymentSuccess")).default,
+        }),
         errorElement: <ErrorElement />,
       },
 

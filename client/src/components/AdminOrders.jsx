@@ -7,7 +7,38 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
+  ArrowPathIcon,
 } from "@phosphor-icons/react";
+
+const getStatusBadge = (status) => {
+  switch (status) {
+    case "pending":
+      return "badge-warning";
+    case "in-progress":
+      return "badge-info";
+    case "completed":
+      return "badge-success";
+    case "cancelled":
+      return "badge-error";
+    default:
+      return "badge-ghost";
+  }
+};
+
+const getStatusIcon = (status) => {
+  switch (status) {
+    case "pending":
+      return <ClockIcon className="h-5 w-5 text-warning" />;
+    case "in-progress":
+      return <ArrowPathIcon className="h-5 w-5 text-info" />;
+    case "completed":
+      return <CheckCircleIcon className="h-5 w-5 text-success" />;
+    case "cancelled":
+      return <XCircleIcon className="h-5 w-5 text-error" />;
+    default:
+      return null;
+  }
+};
 
 const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,30 +68,6 @@ const AdminOrders = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
-      case "cancelled":
-        return <XCircleIcon className="h-5 w-5 text-red-500" />;
-      default:
-        return <ClockIcon className="h-5 w-5 text-yellow-500" />;
-    }
-  };
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "completed":
-        return "badge-success";
-      case "cancelled":
-        return "badge-error";
-      case "in-progress":
-        return "badge-info";
-      default:
-        return "badge-warning";
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -78,12 +85,14 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-base-content">Orders</h1>
-          <p className="text-base-content/60 mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-base-content">
+            Orders
+          </h1>
+          <p className="text-base-content/60 mt-1 sm:mt-2">
             Manage all customer orders ({allOrders.length} total)
           </p>
         </div>
@@ -109,7 +118,7 @@ const AdminOrders = () => {
 
         {/* Status Filter */}
         <select
-          className="select select-bordered w-full max-w-xs"
+          className="select select-bordered w-full sm:max-w-xs"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -121,8 +130,49 @@ const AdminOrders = () => {
         </select>
       </div>
 
-      {/* Orders Table */}
-      <div className="card bg-base-100 shadow-lg">
+      {/* Orders List for Mobile */}
+      <div className="sm:hidden space-y-4">
+        {filteredOrders?.length > 0 ? (
+          filteredOrders.map((order) => (
+            <div key={order._id} className="card bg-base-100 shadow-md">
+              <div className="card-body p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-mono text-xs text-base-content/60">
+                      #{order.orderId.slice(-8)}
+                    </div>
+                    <div className="font-bold">
+                      {order.user?.username || "Unknown"}
+                    </div>
+                    <div className="text-sm text-base-content/70">
+                      {order.garment || "Unknown Product"}
+                    </div>
+                  </div>
+                  <div className={`badge ${getStatusBadge(order.status)}`}>
+                    {order.status}
+                  </div>
+                </div>
+                <div className="flex justify-between items-end mt-2">
+                  <div className="text-lg font-semibold">
+                    ₦{order.totalCost?.toLocaleString() || "0"}
+                  </div>
+                  <div className="text-xs text-base-content/60">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <ShoppingBagIcon className="h-12 w-12 mx-auto text-base-content/40 mb-2" />
+            <p className="text-base-content/60">No orders found</p>
+          </div>
+        )}
+      </div>
+
+      {/* Orders Table for Desktop */}
+      <div className="hidden sm:block card bg-base-100 shadow-lg">
         <div className="card-body">
           <div className="overflow-x-auto">
             <table className="table table-zebra">
@@ -264,26 +314,28 @@ const AdminOrders = () => {
       </div>
 
       {/* Order Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="stat bg-base-100 shadow-lg rounded-lg">
-          <div className="stat-title">Total Orders</div>
-          <div className="stat-value text-primary">{allOrders.length}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="stat bg-base-100 shadow-lg rounded-lg p-4">
+          <div className="stat-title text-xs sm:text-sm">Total Orders</div>
+          <div className="stat-value text-primary text-xl sm:text-2xl">
+            {allOrders.length}
+          </div>
         </div>
-        <div className="stat bg-base-100 shadow-lg rounded-lg">
-          <div className="stat-title">Pending</div>
-          <div className="stat-value text-warning">
+        <div className="stat bg-base-100 shadow-lg rounded-lg p-4">
+          <div className="stat-title text-xs sm:text-sm">Pending</div>
+          <div className="stat-value text-warning text-xl sm:text-2xl">
             {allOrders.filter((order) => order.status === "pending").length}
           </div>
         </div>
-        <div className="stat bg-base-100 shadow-lg rounded-lg">
-          <div className="stat-title">Completed</div>
-          <div className="stat-value text-success">
+        <div className="stat bg-base-100 shadow-lg rounded-lg p-4">
+          <div className="stat-title text-xs sm:text-sm">Completed</div>
+          <div className="stat-value text-success text-xl sm:text-2xl">
             {allOrders.filter((order) => order.status === "completed").length}
           </div>
         </div>
-        <div className="stat bg-base-100 shadow-lg rounded-lg">
-          <div className="stat-title">Total Revenue</div>
-          <div className="stat-value text-info">
+        <div className="stat bg-base-100 shadow-lg rounded-lg p-4">
+          <div className="stat-title text-xs sm:text-sm">Total Revenue</div>
+          <div className="stat-value text-info text-xl sm:text-2xl">
             ₦
             {allOrders
               .filter((order) => order.status === "completed")

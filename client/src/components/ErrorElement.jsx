@@ -22,7 +22,7 @@ export default function ErrorElement() {
     },
     {
       icon: <ShoppingBagIcon size={20} />,
-      label: "Shop",
+      label: "Gallery",
       description: "Browse our collections",
       action: () => navigate("/gallery"),
       color: "btn-secondary",

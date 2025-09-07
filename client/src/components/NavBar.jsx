@@ -326,8 +326,18 @@ export default function NavBar() {
                         }`
                       }
                     >
-                      <UserCircleIcon size={18} />
-                      Profile ({user ? user.firstName : "User"})
+                      {user?.profileImage ? (
+                        <div>
+                          <img
+                            src={user?.profileImage}
+                            alt="Profile"
+                            className="w-8 h-8 rounded-full"
+                          />
+                        </div>
+                      ) : (
+                        <UserCircleIcon size={24} />
+                      )}
+                      {user ? user.firstName : "User"}
                     </NavLink>
                     <button
                       onClick={(e) => {

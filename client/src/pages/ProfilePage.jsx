@@ -473,19 +473,20 @@ export default function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="tabs tabs-boxed bg-base-200/80 backdrop-blur-sm mb-8 p-2 shadow-lg">
+        <div className="tabs tabs-boxed bg-base-200/80 backdrop-blur-sm mb-8 p-2 shadow-lg overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
-                className={`tab tab-lg flex-1 gap-2 ${
+                className={`tab tab-lg flex-grow sm:flex-1 gap-2 ${
                   activeTab === tab.id ? "tab-active" : ""
                 }`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 <Icon className="w-5 h-5" />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label}</span>
               </button>
             );
           })}
@@ -493,17 +494,17 @@ export default function ProfilePage() {
 
         {/* Tab Content */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Personal Information */}
             <div className="lg:col-span-2">
               <div className="card bg-base-100 shadow-xl border border-base-300/50">
-                <div className="card-body p-6">
-                  <div className="flex items-center gap-3 mb-8">
+                <div className="card-body p-4 md:p-6">
+                  <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-primary/10 rounded-xl">
                       <UserIcon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="card-title text-xl">
+                      <h3 className="card-title text-lg md:text-xl">
                         Personal Information
                       </h3>
                       <p className="text-sm text-base-content/60">
@@ -514,7 +515,7 @@ export default function ProfilePage() {
 
                   <form
                     onSubmit={handleSubmit(onSubmitProfile)}
-                    className="space-y-6"
+                    className="space-y-4"
                   >
                     {/* Name Fields - Side by side on larger screens */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -536,7 +537,7 @@ export default function ProfilePage() {
                             },
                           })}
                           type="text"
-                          className={`input input-bordered focus:input-primary transition-all duration-200 ${
+                          className={`input input-bordered w-full focus:input-primary transition-all duration-200 ${
                             errors.firstName ? "input-error" : ""
                           } ${
                             !isEditing
@@ -574,7 +575,7 @@ export default function ProfilePage() {
                             },
                           })}
                           type="text"
-                          className={`input input-bordered focus:input-primary transition-all text-base-content duration-200 ${
+                          className={`input input-bordered w-full focus:input-primary transition-all text-base-content duration-200 ${
                             errors.lastName ? "input-error" : ""
                           } ${
                             !isEditing
@@ -596,7 +597,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Email */}
-                    <div className="form-control flex flex-col">
+                    <div className="form-control">
                       <label className="label">
                         <span className="label-text font-semibold text-base-content flex items-center gap-2">
                           <EnvelopeIcon className="w-4 h-4" />
@@ -613,7 +614,7 @@ export default function ProfilePage() {
                           },
                         })}
                         type="email"
-                        className={`input input-bordered focus:input-primary transition-all duration-200 ${
+                        className={`input input-bordered w-full focus:input-primary transition-all duration-200 ${
                           errors.email ? "input-error" : ""
                         } ${
                           !isEditing
@@ -634,7 +635,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Phone Number */}
-                    <div className="form-control flex flex-col">
+                    <div className="form-control">
                       <label className="label">
                         <span className="label-text font-semibold text-base-content flex items-center gap-2">
                           <PhoneIcon className="w-4 h-4" />
@@ -645,7 +646,7 @@ export default function ProfilePage() {
                       <input
                         {...register("phoneNumber")}
                         type="tel"
-                        className={`input input-bordered focus:input-primary transition-all duration-200 ${
+                        className={`input input-bordered w-full focus:input-primary transition-all duration-200 ${
                           !isEditing
                             ? "input-disabled bg-base-200/50"
                             : "bg-white"
@@ -664,7 +665,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Street Address */}
-                    <div className="form-control flex flex-col">
+                    <div className="form-control">
                       <label className="label">
                         <span className="label-text font-semibold text-base-content">
                           Street Address
@@ -674,7 +675,7 @@ export default function ProfilePage() {
                       <input
                         {...register("address.street")}
                         type="text"
-                        className={`input input-bordered focus:input-primary transition-all duration-200 ${
+                        className={`input input-bordered w-full focus:input-primary transition-all duration-200 ${
                           !isEditing
                             ? "input-disabled bg-base-200/50"
                             : "bg-white"
@@ -685,7 +686,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="form-control flex flex-col">
+                      <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold text-base-content">
                             State
@@ -695,7 +696,7 @@ export default function ProfilePage() {
                         <input
                           {...register("address.state")}
                           type="text"
-                          className={`input input-bordered focus:input-primary transition-all duration-200 ${
+                          className={`input input-bordered w-full focus:input-primary transition-all duration-200 ${
                             !isEditing
                               ? "input-disabled bg-base-200/50"
                               : "bg-white"
@@ -705,7 +706,7 @@ export default function ProfilePage() {
                         />
                       </div>
 
-                      <div className="form-control flex flex-col">
+                      <div className="form-control">
                         <label className="label">
                           <span className="label-text font-semibold text-base-content">
                             Country
@@ -715,7 +716,7 @@ export default function ProfilePage() {
                         <input
                           {...register("address.country")}
                           type="text"
-                          className={`input input-bordered focus:input-primary transition-all duration-200 ${
+                          className={`input input-bordered w-full focus:input-primary transition-all duration-200 ${
                             !isEditing
                               ? "input-disabled bg-base-200/50"
                               : "bg-white"
@@ -731,23 +732,25 @@ export default function ProfilePage() {
             </div>
 
             {/* Security Settings */}
-            <div className="space-y-6">
+            <div className="space-y-6 lg:space-y-8">
               {/* Account Security */}
               <div className="card bg-base-100 shadow-xl border border-base-300/50">
-                <div className="card-body p-6">
-                  <div className="flex items-center gap-3 mb-6">
+                <div className="card-body p-4 md:p-6">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-secondary/10 rounded-xl">
                       <LockIcon className="w-6 h-6 text-secondary" />
                     </div>
                     <div>
-                      <h3 className="card-title text-xl">Security</h3>
+                      <h3 className="card-title text-lg md:text-xl">
+                        Security
+                      </h3>
                       <p className="text-sm text-base-content/60">
                         Manage your account security
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     <div className="p-4 bg-base-200/50 rounded-xl">
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -770,7 +773,7 @@ export default function ProfilePage() {
 
                     <div className="p-4 bg-base-200/50 rounded-xl">
                       {user?.isVerified ? (
-                        <div className="alert alert-success">
+                        <div className="alert alert-success p-2 md:p-4">
                           <ShieldCheckIcon className="w-5 h-5" />
                           <div>
                             <div className="font-semibold">Email Verified</div>
@@ -780,7 +783,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="alert alert-warning">
+                        <div className="alert alert-warning p-2 md:p-4">
                           <SparkleIcon className="w-5 h-5" />
                           <div>
                             <div className="font-semibold">
@@ -799,13 +802,15 @@ export default function ProfilePage() {
 
               {/* Account Stats */}
               <div className="card bg-base-100 shadow-xl border border-base-300/50">
-                <div className="card-body p-6">
-                  <div className="flex items-center gap-3 mb-6">
+                <div className="card-body p-4 md:p-6">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-accent/10 rounded-xl">
                       <GearIcon className="w-6 h-6 text-accent" />
                     </div>
                     <div>
-                      <h3 className="card-title text-xl">Quick Actions</h3>
+                      <h3 className="card-title text-lg md:text-xl">
+                        Quick Actions
+                      </h3>
                       <p className="text-sm text-base-content/60">
                         Navigate to different sections
                       </p>

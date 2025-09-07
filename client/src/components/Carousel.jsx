@@ -30,7 +30,7 @@ const guideSteps = [
   },
   {
     step: 3,
-    image: "/customize.png",
+    image: "/customize.webp",
     caption: "Customize & Order",
     title: "Customize Your Design",
     description:
@@ -40,7 +40,7 @@ const guideSteps = [
   },
   {
     step: 4,
-    image: "/secure.png",
+    image: "/secure.webp",
     caption: "Secure Payments",
     title: "Secure Make Payments",
     description:
@@ -50,7 +50,7 @@ const guideSteps = [
   },
   {
     step: 5,
-    image: "/delivery.jpg",
+    image: "/delivery.webp",
     caption: "Track & Receive",
     title: "Track & Receive Your Order",
     description:

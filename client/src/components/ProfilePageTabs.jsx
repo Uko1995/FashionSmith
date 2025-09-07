@@ -427,7 +427,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                 >
                   <div className="flex items-center justify-between">
                     {!isExpanded ? (
-                      <>
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-5">
                         <div className="flex items-center gap-4">
                           <div>
                             <h4 className="font-semibold">
@@ -503,18 +503,13 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                             </ul>
                           </div>
                         </div>
-                      </>
+                      </div>
                     ) : (
                       // Enhanced Order Details View
                       <div className="w-full">
                         {/* Header with title and close button */}
                         <div className="flex items-center justify-between mb-6 pb-4 border-b border-base-300">
                           <div className="flex items-center gap-3">
-                            <div className="avatar placeholder">
-                              <div className="bg-primary text-primary-content rounded-full w-12 h-12">
-                                <PackageIcon size={24} />
-                              </div>
-                            </div>
                             <div>
                               <h3 className="text-xl font-bold text-base-content">
                                 Order Details
@@ -1044,23 +1039,9 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                     {!showFullPayment || selectedPayment?.id !== payment.id ? (
                       // Minimal Payment Details View
                       <>
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col md:flex-row items-center sm:justify-start justify-between">
                           <div className="flex items-center gap-4">
-                            <div className="avatar placeholder">
-                              <div
-                                className={`rounded-lg flex justify-center items-center w-12 h-12 ${
-                                  payment.status === "Completed" ||
-                                  payment.status === "Successful"
-                                    ? "bg-success/10 text-success"
-                                    : payment.status === "Failed"
-                                    ? "bg-error/10 text-error"
-                                    : "bg-warning/10 text-warning"
-                                }`}
-                              >
-                                <CreditCardIcon size={20} />
-                              </div>
-                            </div>
-                            <div className="flex-1">
+                            <div>
                               <h4 className="font-semibold text-base">
                                 {payment.description ||
                                   `Payment for Order #${payment.orderId}`}
@@ -1084,7 +1065,7 @@ export default function ProfilePageTabs({ activeTab, onTabChange }) {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="flex sm:justify-between items-center gap-10 mt-4 md:mt-0">
                             <div
                               className={`badge badge-lg ${getPaymentStatusBadgeClass(
                                 payment.status

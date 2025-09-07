@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import compression from "compression";
 import cors from "cors";
 import session from "express-session";
 import passport from "./config/passport.js";
@@ -58,6 +59,7 @@ const authLimiter = rateLimit({
 app.use(limiter);
 
 // Body parsing middleware
+app.use(compression());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());

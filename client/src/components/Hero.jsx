@@ -39,7 +39,7 @@ export default function Hero() {
         className={`absolute inset-0 bg-cover md:bg-contain bg-black bg-center bg-no-repeat transition-opacity duration-1000 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
-        style={{ backgroundImage: "url('/FashionSmith.png')" }}
+        style={{ backgroundImage: "url('/FashionSmith.webp')" }}
         aria-hidden="true"
       />
 

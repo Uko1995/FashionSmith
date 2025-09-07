@@ -8,9 +8,9 @@ import FloatingCart from "../components/FloatingCart";
 
 export default function HomePage() {
   return (
-    <>
+    <div className="overflow-x-hidden">
       <ScrollToTop />
-      <div className="flex flex-col mt-15 min-h-screen ">
+      <div className="flex flex-col mt-15 min-h-screen">
         <NavBar />
         <main className="flex-1">
           <Outlet />
@@ -18,6 +18,6 @@ export default function HomePage() {
         <Footer />
         <FloatingCart />
       </div>
-    </>
+    </div>
   );
 }
