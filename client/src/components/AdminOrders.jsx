@@ -7,7 +7,7 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ArrowPathIcon,
+  ArrowClockwiseIcon,
 } from "@phosphor-icons/react";
 
 const getStatusBadge = (status) => {
@@ -30,7 +30,7 @@ const getStatusIcon = (status) => {
     case "pending":
       return <ClockIcon className="h-5 w-5 text-warning" />;
     case "in-progress":
-      return <ArrowPathIcon className="h-5 w-5 text-info" />;
+      return <ArrowClockwiseIcon className="h-5 w-5 text-info" />;
     case "completed":
       return <CheckCircleIcon className="h-5 w-5 text-success" />;
     case "cancelled":
