@@ -29,7 +29,7 @@ export default function Hero() {
   useEffect(() => {
     const img = new Image();
     img.onload = () => setIsLoaded(true);
-    img.src = "/FashionSmith.png";
+    img.src = "/FashionSmith.webp";
   }, []);
 
   return (
