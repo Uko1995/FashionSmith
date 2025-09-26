@@ -8,6 +8,7 @@ import { useTokenRefresh } from "./hooks/useTokenRefresh.js";
 import { useAuthInit } from "./hooks/useAuthInit.js";
 import useLogout from "./hooks/useLogout.js";
 import SVGFallback from "./components/SVGFallBack";
+import { startKeepAlive, stopKeepAlive } from "./utils/keepAlive.js";
 
 export default function App() {
   const { forceLogout } = useLogout();
@@ -30,6 +31,15 @@ export default function App() {
       window.removeEventListener("auth:forceLogout", handleForceLogout);
     };
   }, [forceLogout]);
+
+  // Start keep-alive pinging to prevent server sleep
+  useEffect(() => {
+    startKeepAlive();
+
+    return () => {
+      stopKeepAlive();
+    };
+  }, []);
 
   return (
     <>

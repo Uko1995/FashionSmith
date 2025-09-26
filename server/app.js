@@ -11,6 +11,7 @@ import productRoutes from "./routes/productRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import paystackRoutes from "./routes/paystackRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import pingRoutes from "./routes/pingRoutes.js";
 import compression from "compression";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -71,6 +72,7 @@ app.use(
       const allowedOrigins = [
         process.env.CLIENT_URL,
         "http://localhost:5173",
+        process.env.API_URL,
       ].filter(Boolean);
 
       // Allow requests with no origin (mobile apps, etc.)
@@ -147,6 +149,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/payments", paystackRoutes);
 app.use("/api/notifications", authLimiter, notificationRoutes);
+app.use("/api", pingRoutes);
 
 // Root API endpoint
 app.get("/api", (req, res) => {
