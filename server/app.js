@@ -12,7 +12,6 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import paystackRoutes from "./routes/paystackRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import pingRoutes from "./routes/pingRoutes.js";
-import compression from "compression";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
