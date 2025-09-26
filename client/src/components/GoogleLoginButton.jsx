@@ -11,7 +11,7 @@ const GoogleLoginButton = ({ onError, className = "" }) => {
       // Redirect to Google OAuth
       window.location.href = `${
         import.meta.env.VITE_API_URL || "http://localhost:3000"
-      }/api/auth/google`;
+      }/api/auth/google/callback`;
     } catch (error) {
       console.error("Google login error:", error);
       toast.error("Failed to initiate Google login");
