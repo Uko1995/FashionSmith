@@ -12,6 +12,7 @@ passport.use(
       callbackURL:
         process.env.GOOGLE_REDIRECT_URL ||
         `${process.env.API_URL}/api/auth/google/callback`,
+      scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
